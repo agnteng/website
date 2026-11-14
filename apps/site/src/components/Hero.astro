@@ -21,7 +21,7 @@ const shots = [
 // always cover (the photo may stop short of it). Beside the copy on desktop, the frame's
 // left side dissolves; under the copy on a phone, its top does.
 const DESK = { at: [0.67, 0.36], clear: [0.11, 0] };
-const PHONE = { at: [0.5, 0.5], clear: [0, 0.1] };
+const PHONE = { at: [0.5, 0.5], clear: [0, 0] };
 const place = (p: (typeof shots)[number], { at: [tx, ty], clear: [cx, cy] }: typeof DESK) => {
   const [fx, fy] = p.head, a = p.img.width / p.img.height;
   // The photo's width is the larger of two candidates: enough of the frame's width, and
@@ -36,6 +36,9 @@ const photos = shots.map((p, i) => {
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
 const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } as const;
+// Blue cells that hide the photos, and the navy ones that rise from the bottom edge.
+const cover = { animation: 'drift', color: '#1E2BE6', edge: '#1E2BE6', cell: 10, gap: 0, density: 2, motion: 30, shape: 'square', style: fill } as const;
+const rise = { animation: 'aurora', color: '#05071E', edge: '#B5A6FF', cell: 8, gap: 0, density: 0.7, motion: 60, fade: 'down', dissolve: [0.78, 1.02], shape: 'square', style: fill } as const;
 ---
 <section class="relative isolate overflow-hidden bg-electric-blue text-white">
   <!-- Shadows to navy, mid-tones to the block's blue, highlights to soft white. -->
@@ -63,34 +66,41 @@ const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } a
 
   <!-- The photos' frame: under the copy on a phone, the block's right side on desktop.
        Photos and cells appear together, once the cells have painted. -->
-  <div class="dither-stage relative h-96 w-full overflow-hidden [container-type:size] md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
+  <div class="dither-stage relative isolate h-96 w-full overflow-hidden [container-type:size] md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
+    <!-- `sizes` is the photos' own width: they are larger than their frame. -->
     {photos.map((p, i) => (
-      <Image src={p.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 64vw, 100vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
+      <Image src={p.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 110vw, 150vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
     ))}
     <!-- Blue cells cover the frame's leading edge and thin out to nothing: the photo breaks
-         up into the block. They start outside the frame, so its own edge is always under
-         solid cells. -->
-    <div class="absolute inset-y-0 -left-[15%] right-0 max-md:hidden">
-      <Animation client:load animation="drift" color="#1E2BE6" edge="#1E2BE6" cell={10} gap={0} density={2} motion={30} fade="left" dissolve={[0.42, 0.62]} shape="square" style={fill} />
+         up into the block. Their canvas is larger than the frame, so the frame's own edges
+         are always under solid cells. Above the photo that is fading in. -->
+    <div class="absolute -inset-y-3 -left-[15%] right-0 z-2 max-md:hidden">
+      <Animation client:load {...cover} fade="left" dissolve={[0.42, 0.62]} />
     </div>
-    <div class="absolute inset-x-0 -top-[15%] bottom-0 md:hidden">
-      <Animation client:load animation="drift" color="#1E2BE6" edge="#1E2BE6" cell={10} gap={0} density={2} motion={30} fade="up" dissolve={[0.5, 0.7]} shape="square" style={fill} />
-      <Animation client:load animation="aurora" color="#05071E" edge="#B5A6FF" cell={8} gap={0} density={0.7} motion={60} fade="down" dissolve={[0.8, 1.05]} shape="square" style={fill} />
+    <div class="absolute -inset-x-3 -top-[15%] bottom-0 z-2 md:hidden">
+      <Animation client:load {...cover} fade="up" dissolve={[0.5, 0.7]} />
+      <Animation client:load {...rise} />
     </div>
   </div>
 
   <!-- Cells rise from the bottom edge, over block and photos alike (on a phone, over the photos only). -->
   <div class="dither-stage pointer-events-none absolute inset-0 max-md:hidden">
-    <Animation client:load animation="aurora" color="#05071E" edge="#B5A6FF" cell={8} gap={0} density={0.7} motion={60} fade="down" dissolve={[0.78, 1.02]} shape="square" style={fill} />
+    <Animation client:load {...rise} />
   </div>
 </section>
 <style>
-  /* Six seconds each, cross-fading. Without motion, the first photo stays. */
+  /* Six seconds each. A photo fades in over the one before, which stays whole until the
+     new one covers it. Without motion, the first photo stays. */
   .hero-turn { opacity: 0; }
   .hero-turn:first-child { opacity: 1; }
   @media (prefers-reduced-motion: no-preference) {
-    .hero-turn { animation: hero-turn 36s linear infinite backwards; animation-delay: calc(var(--n) * 6s - 1.08s); }
-    .hero-turn:first-child { opacity: 0; }
-    @keyframes hero-turn { 0% { opacity: 0; } 3% { opacity: 1; } 16.67% { opacity: 1; } 19.67% { opacity: 0; } 100% { opacity: 0; } }
+    .hero-turn { animation: hero-turn 36s linear infinite; animation-delay: calc(var(--n) * 6s - 1.08s); }
+    @keyframes hero-turn {
+      0% { opacity: 0; z-index: 1; }
+      3% { opacity: 1; z-index: 1; }
+      3.01% { z-index: 0; }
+      19.67% { opacity: 1; }
+      19.68%, 100% { opacity: 0; }
+    }
   }
 </style>
