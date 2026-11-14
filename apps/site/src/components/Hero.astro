@@ -1,0 +1,96 @@
+---
+// The home page's hero: an electric-blue block. Photos of the meetups take its blue and
+// break up into it cell by cell; more cells rise from its bottom edge.
+import { Image } from 'astro:assets';
+import Animation from '@agnteng/brand/components/Animation.tsx';
+import Button from '@agnteng/brand/components/Button.astro';
+import { nextEvent, register, galleryPhoto, shortDate, startTime } from '../lib/data';
+
+// Talks, questions and the audience take turns. `head` is where the subject's head is in
+// the photo (fractions of its width and height); every head goes to the same point of
+// the frame, whatever the frame's shape. `zoom` enlarges past that.
+const shots = [
+  { ...galleryPhoto('2026-08-26', '18.jpg'), head: [0.33, 0.38], zoom: 1 },
+  { ...galleryPhoto('2026-05-27', '06.jpg'), head: [0.63, 0.41], zoom: 1.1 },
+  { ...galleryPhoto('2026-08-26', '04.jpg'), head: [0.47, 0.56], zoom: 1 },
+  { ...galleryPhoto('2026-11-11', '25.jpg'), head: [0.4, 0.48], zoom: 1 },
+  { ...galleryPhoto('2026-08-26', '10.jpg'), head: [0.57, 0.5], zoom: 1.15 },
+  { ...galleryPhoto('2026-11-11', '20.jpg'), head: [0.37, 0.47], zoom: 1 },
+];
+// Where a head goes in the frame, and how much of the frame's leading edge the cells
+// always cover (the photo may stop short of it). Beside the copy on desktop, the frame's
+// left side dissolves; under the copy on a phone, its top does.
+const DESK = { at: [0.67, 0.36], clear: [0.11, 0] };
+const PHONE = { at: [0.5, 0.5], clear: [0, 0.1] };
+const place = (p: (typeof shots)[number], { at: [tx, ty], clear: [cx, cy] }: typeof DESK) => {
+  const [fx, fy] = p.head, a = p.img.width / p.img.height;
+  // The photo's width is the larger of two candidates: enough of the frame's width, and
+  // enough of its height, to cover the frame with the head on the point.
+  const w = Math.max(1, (tx - cx) / fx, (1 - tx) / (1 - fx)) * p.zoom * 100;
+  const h = Math.max(1, (ty - cy) / fy, (1 - ty) / (1 - fy)) * a * p.zoom * 100;
+  const wide = `max(${w.toFixed(1)}cqw, ${h.toFixed(1)}cqh)`;
+  return [wide, `calc(${tx * 100}cqw - ${fx} * ${wide})`, `calc(${ty * 100}cqh - ${(fy / a).toFixed(4)} * ${wide})`];
+};
+const photos = shots.map((p, i) => {
+  const [w, l, t] = place(p, PHONE), [wd, ld, td] = place(p, DESK);
+  return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
+});
+const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } as const;
+---
+<section class="relative isolate overflow-hidden bg-electric-blue text-white">
+  <!-- Shadows to navy, mid-tones to the block's blue, highlights to soft white. -->
+  <svg width="0" height="0" class="absolute" aria-hidden="true"><filter id="blue-tone" color-interpolation-filters="sRGB">
+    <feColorMatrix type="saturate" values="0" />
+    <feComponentTransfer><feFuncR type="table" tableValues="0.02 0.12 0.96" /><feFuncG type="table" tableValues="0.03 0.17 0.96" /><feFuncB type="table" tableValues="0.12 0.90 1" /></feComponentTransfer>
+  </filter></svg>
+
+  <!-- The skip link lands here. -->
+  <div id="main" class="relative z-10 mx-auto grid max-w-7xl items-center px-4 pt-14 pb-10 md:min-h-[72dvh] md:grid-cols-12 md:px-8 md:pt-20 md:pb-40">
+    <div class="md:col-span-6">
+      <h1 class="rise max-w-[11ch] font-sans text-5xl font-extrabold leading-[1.02] tracking-tight text-balance md:text-6xl xl:text-7xl" style="--i:0">A meetup for engineers building with AI agents.</h1>
+      <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Engineers show what they’ve shipped with AI agents: three ten-minute talks, then open questions. In {nextEvent?.city ?? 'Lisbon'}, in English.</p>
+      {nextEvent && (
+        <div data-next-event class="rise mt-10 flex flex-wrap items-center gap-x-6 gap-y-4" style="--i:2">
+          <Button variant="secondary" href={register} class="js-register">{nextEvent.free ? 'Register – Free' : 'Register'}</Button>
+          <p class="font-sans leading-tight">
+            <span class="block text-lg font-extrabold">Next: {nextEvent.city}</span>
+            <span class="block font-mono text-sm text-white/80">{[shortDate(nextEvent.date), startTime(nextEvent)].filter(Boolean).join(' · ')}</span>
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- The photos' frame: under the copy on a phone, the block's right side on desktop.
+       Photos and cells appear together, once the cells have painted. -->
+  <div class="dither-stage relative h-96 w-full overflow-hidden [container-type:size] md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
+    {photos.map((p, i) => (
+      <Image src={p.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 64vw, 100vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
+    ))}
+    <!-- Blue cells cover the frame's leading edge and thin out to nothing: the photo breaks
+         up into the block. They start outside the frame, so its own edge is always under
+         solid cells. -->
+    <div class="absolute inset-y-0 -left-[15%] right-0 max-md:hidden">
+      <Animation client:load animation="drift" color="#1E2BE6" edge="#1E2BE6" cell={10} gap={0} density={2} motion={30} fade="left" dissolve={[0.42, 0.62]} shape="square" style={fill} />
+    </div>
+    <div class="absolute inset-x-0 -top-[15%] bottom-0 md:hidden">
+      <Animation client:load animation="drift" color="#1E2BE6" edge="#1E2BE6" cell={10} gap={0} density={2} motion={30} fade="up" dissolve={[0.5, 0.7]} shape="square" style={fill} />
+      <Animation client:load animation="aurora" color="#05071E" edge="#B5A6FF" cell={8} gap={0} density={0.7} motion={60} fade="down" dissolve={[0.8, 1.05]} shape="square" style={fill} />
+    </div>
+  </div>
+
+  <!-- Cells rise from the bottom edge, over block and photos alike (on a phone, over the photos only). -->
+  <div class="dither-stage pointer-events-none absolute inset-0 max-md:hidden">
+    <Animation client:load animation="aurora" color="#05071E" edge="#B5A6FF" cell={8} gap={0} density={0.7} motion={60} fade="down" dissolve={[0.78, 1.02]} shape="square" style={fill} />
+  </div>
+</section>
+<style>
+  /* Six seconds each, cross-fading. Without motion, the first photo stays. */
+  .hero-turn { opacity: 0; }
+  .hero-turn:first-child { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-turn { animation: hero-turn 36s linear infinite backwards; animation-delay: calc(var(--n) * 6s - 1.08s); }
+    .hero-turn:first-child { opacity: 0; }
+    @keyframes hero-turn { 0% { opacity: 0; } 3% { opacity: 1; } 16.67% { opacity: 1; } 19.67% { opacity: 0; } 100% { opacity: 0; } }
+  }
+</style>

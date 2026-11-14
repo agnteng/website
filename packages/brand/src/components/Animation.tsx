@@ -139,6 +139,11 @@ interface Props {
   bg?: string;
   density?: number;
   fade?: 'none' | 'left' | 'right' | 'up' | 'down' | 'radial';
+  // With a fade, on a pattern field: between these two fade values the cells
+  // drop out at random along a ragged edge and dim as they go, instead of
+  // thinning evenly across the whole field. Below the first there are none;
+  // above the second the field is whole.
+  dissolve?: [number, number];
   gap?: number;
   cell?: number;
   motion?: number;
@@ -159,6 +164,7 @@ export default function Animation({
   bg = '#05071E',
   density = 0.55,
   fade = 'none',
+  dissolve,
   gap = 1,
   cell = 10,
   motion = 70,
@@ -343,6 +349,7 @@ export default function Animation({
       const t = reduce ? 0 : (now - start - pausedAccum) / 1000 + phase;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
+      ctx.globalAlpha = 1;
       const c = Math.max(2, cell);
       const sq = Math.max(1, c - gap);
       const offx = Math.floor((w - cols * c) / 2);
@@ -394,7 +401,17 @@ export default function Animation({
               }
             } else {
               // pattern field — density drives coverage
-              const cov = density * fadeFactor(fade, fx, fy) + delta * ampD;
+              let cov = density * fadeFactor(fade, fx, fy) + delta * ampD;
+              if (dissolve) {
+                // Each 4×4 block shifts the ramp, which makes the edge ragged;
+                // within it a cell survives with the ramp's probability.
+                const noise = (a: number, b: number) => { const n = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return n - Math.floor(n); };
+                const at = fadeFactor(fade, fx, fy) + (noise(i >> 2, j >> 2) - 0.5) * 0.3;
+                const k = clamp((at - dissolve[0]) / (dissolve[1] - dissolve[0]), 0, 1);
+                if (noise(i, j) >= k * k * (3 - 2 * k)) continue;
+                ctx.globalAlpha = 0.3 + 0.7 * k;
+                cov = density + delta * ampD;
+              }
               if (shape === 'halftone') {
                 const r = (c / 2) * Math.sqrt(clamp(cov, 0, 1));
                 if (r > 0.35) {
@@ -429,7 +446,7 @@ export default function Animation({
       ro.disconnect();
       io.disconnect();
     };
-  }, [animation, density, fade, color, edge, bg, gap, cell, motion, shape, imgSrc, imgContrast, imgEdgeGlow, imgTone, imgPos]);
+  }, [animation, density, fade, dissolve?.[0], dissolve?.[1], color, edge, bg, gap, cell, motion, shape, imgSrc, imgContrast, imgEdgeGlow, imgTone, imgPos]);
 
   return <canvas ref={ref} className={className} style={style} aria-hidden="true" />;
 }
