@@ -1,12 +1,12 @@
 ---
-import { getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 import Shell from '../../layouts/Shell.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import TalkTile from '../../components/TalkTile.astro';
 import Gallery from '../../components/Gallery.astro';
-import Animation from '@agnteng/brand/components/Animation.tsx';
-import DuotoneField from '@agnteng/brand/components/DuotoneField.tsx';
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
+import BlueTone from '../../components/BlueTone.astro';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import { events, talksAt, questionsAt, photosAt, coverAt, longDate, eventSlug, eventName, links, type Event } from '../../lib/data';
@@ -19,26 +19,25 @@ const talks = talksAt(e);
 const questions = questionsAt(e);
 const photos = photosAt(e);
 const cover = coverAt(e);
-const header = cover && (await getImage({ src: cover.img, width: 1600, format: 'webp' })).src;
+// The cells that hide the cover's leading edge; each night has its own pattern.
+const cells = { color: '#1E2BE6', seed: e.number * 101 + e.city.length, cell: 10, animate: true } as const;
 ---
 <Shell title={`${eventName(e)}, ${longDate(e.date)} | Agentic Engineering`} description={`Agentic Engineering ${eventName(e)}: ${talks.map((t) => t.title).join(', ')}.`} class="bg-soft-white text-panel-navy">
-  <section class="relative isolate overflow-hidden bg-deep-navy text-soft-white">
-    {cover
-      ? <div class="dither-stage absolute inset-0">
-          <img src={header} alt="" fetchpriority="high" crossorigin="anonymous" class="absolute inset-0 size-full object-cover" />
-          <div class="absolute inset-0 [mask-image:linear-gradient(to_right,black_25%,transparent_75%)]">
-            <DuotoneField client:load src={header} animation="aurora" color="#1E2BE6" edge="#B5A6FF" bg="#05071E" cell={4} density={0.7} motion={40} contrast={1.25} edgeGlow={1} tone={0.7} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
-          </div>
-        </div>
-      : <Animation client:load animation="aurora" color="#1E2BE6" edge="#ED4BA0" bg="#05071E" cell={6} density={0.6} motion={60} fade="left" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />}
-    <!-- Text side darker, so the date reads over the dither. -->
-    <div class="pointer-events-none absolute inset-0 bg-gradient-to-r from-deep-navy/80 via-deep-navy/40 to-transparent"></div>
-    <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-deep-navy/70 via-transparent to-deep-navy/60"></div>
-    <SiteNav overlay />
-    <div class="relative mx-auto max-w-7xl px-4 pt-32 pb-16 md:px-8 md:pt-40 md:pb-24">
+  <BlueTone />
+  <!-- The home hero's treatment: a blue block, the night's cover in its blue, breaking up into it. -->
+  <section class="relative isolate overflow-hidden bg-electric-blue text-white">
+    <SiteNav onHero />
+    <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
       <h1 class="rise font-sans text-5xl font-extrabold tracking-tight md:text-7xl">{eventName(e)}</h1>
-      <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium text-soft-white" style="--i:1"><Icon name="Calendar" size={16} class="text-periwinkle" />{longDate(e.date)}</p>
+      <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium" style="--i:1"><Icon name="Calendar" size={16} class="text-periwinkle" />{longDate(e.date)}</p>
     </div>
+    {cover && (
+      <div class="dither-stage relative h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
+        <Image src={cover.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
+        <div class="absolute inset-0 max-md:hidden"><Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.12, reach: 0.5 }]} /></div>
+        <div class="absolute inset-0 md:hidden"><Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45 }]} /></div>
+      </div>
+    )}
   </section>
 
   <main id="main" class="mx-auto max-w-7xl px-4 md:px-8">

@@ -1,14 +1,14 @@
 ---
-// `overlay` sits on the hero's dither; otherwise the bar is deep navy.
+// `onHero` puts the bar on a hero's own background; otherwise it is deep navy.
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import { register, nextEvent, links } from '../lib/data';
-interface Props { overlay?: boolean }
-const { overlay = false } = Astro.props;
+interface Props { onHero?: boolean }
+const { onHero = false } = Astro.props;
 const starts = nextEvent && (nextEvent.luma?.startAt ?? `${nextEvent.date}T23:59:00Z`);
 const luma = links.luma;
 ---
-<header class:list={['z-20 w-full', overlay ? 'absolute inset-x-0 top-0' : 'border-b border-white/10 bg-deep-navy']}>
+<header class:list={['relative z-20 w-full', !onHero && 'border-b border-white/10 bg-deep-navy']}>
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 md:grid-cols-[1fr_minmax(0,28rem)_1fr] md:gap-8 md:px-8">
     <a href="/" class="flex items-center gap-2.5 justify-self-start">
       <img src="/assets/logo/ae-mark-white.svg" alt="" class="h-7 w-auto" />
@@ -24,7 +24,7 @@ const luma = links.luma;
         <svg aria-hidden="true" viewBox="0 0 12 12" class="size-2.5"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
       </button>
     </form>
-    <Button variant="primary" href={register} class="js-register justify-self-end !px-5 !py-3 !text-sm md:!py-2.5">Register</Button>
+    <Button variant={onHero ? 'secondary' : 'primary'} href={register} class="js-register justify-self-end !px-5 !py-3 !text-sm md:!py-2.5">Register</Button>
   </div>
 </header>
 <script is:inline>
