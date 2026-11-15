@@ -200,13 +200,23 @@ const cover = (name: string, w: number, h: number, scale: number): Preset => ({
     ],
   },
 });
-// three square photos in a row, name and role under each
-const trio = (): Layer[] =>
-  [0.045, 0.3593, 0.6736].flatMap((x, i) => [
-    photo({ x, y: 0.32, w: 0.2813, h: 0.5, radius: 0.04, label: `Speaker ${i + 1}` }),
-    text({ text: 'Speaker name', x, y: 0.863, size: 0.0425, align: 'left' }),
-    text({ text: 'Role, company', x, y: 0.912, size: 0.036, weight: 500, align: 'left' }),
-  ]);
+// Square photos side by side, name and role under each, the logo and a date above.
+// Layer order is part of the presets' contract with scripts: scrim, logo, date, then
+// photo, name and role for each speaker.
+const COL = 0.2813, GAP = 0.033;
+const lineup = (n: number): Layer[] => {
+  const left = (1 - n * COL - (n - 1) * GAP) / 2;
+  return [
+    { ...LAYER_DEFAULTS.scrim, id: newId(), shape: 'bottom', opacity: 0.9 },
+    logo({ anchor: 'top-left', scale: COL, dx: left - 0.045 }),
+    text({ text: 'Lisbon · 24 Jun', x: 1 - left, y: 0.13, size: 0.049, align: 'right', upper: true }),
+    ...Array.from({ length: n }, (_, i) => left + i * (COL + GAP)).flatMap((x, i) => [
+      photo({ x, y: 0.32, w: COL, h: 0.5, radius: 0.04, label: `Speaker ${i + 1}` }),
+      text({ text: 'Speaker name', x, y: 0.863, size: 0.0425, align: 'left' }),
+      text({ text: 'Role, company', x, y: 0.912, size: 0.036, weight: 500, align: 'left' }),
+    ]),
+  ];
+};
 
 // A preset sets the frame and the layers. The brand's leave the background alone, so a
 // field or photo you have set up survives a change of format; a saved one brings its own.
@@ -227,23 +237,22 @@ export const PRESETS: Preset[] = [
   cover('Luma event cover', 1000, 1000, 0.7),
   cover('Title slide', 1920, 1080, 0.62),
   {
+    // Layer order, for scripts: photo, box, date, name, role, logo.
     name: 'Speaker card', group: 'Speakers',
     scene: {
-      frame: { w: 1080, h: 1350 }, layers: [
+      frame: { w: 1080, h: 1350 },
+      layers: [
         photo({ x: 0, y: 0, w: 1, h: 0.68, radius: 0, label: 'Photo' }),
         { ...LAYER_DEFAULTS.rect, id: newId(), y: 0.68, h: 0.32 },
-        text({ text: 'Speaker name', x: 0.08, y: 0.808, size: 0.05, align: 'left' }),
-        text({ text: 'Role, company', x: 0.08, y: 0.856, size: 0.032, weight: 500, color: '#B5A6FF', align: 'left' }),
+        text({ ...mono, text: 'Lisbon · 24 Jun', x: 0.08, y: 0.745, size: 0.026, color: '#B5A6FF', align: 'left', spacing: 0.12 }),
+        text({ text: 'Speaker name', x: 0.08, y: 0.815, size: 0.056, align: 'left' }),
+        text({ text: 'Role, company', x: 0.08, y: 0.872, size: 0.032, weight: 500, align: 'left' }),
         logo({ form: 'mark', anchor: 'bottom-right', scale: 0.1, dx: -0.03, dy: -0.04 }),
       ],
     },
   },
-  {
-    name: 'Speaker trio', group: 'Speakers',
-    scene: {
-      frame: { w: 1920, h: 1080 }, layers: [logo({ anchor: 'top-left', scale: 0.2813 }), text({ text: 'Lisbon · 24 Jun', x: 0.955, y: 0.13, size: 0.049, align: 'right', upper: true }), ...trio()],
-    },
-  },
+  { name: 'Speaker pair', group: 'Speakers', scene: { frame: { w: 1920, h: 1080 }, layers: lineup(2) } },
+  { name: 'Speaker trio', group: 'Speakers', scene: { frame: { w: 1920, h: 1080 }, layers: lineup(3) } },
   {
     name: 'Sponsor banner', group: 'Sponsors',
     scene: {

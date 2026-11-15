@@ -1,31 +1,16 @@
 ---
 name: brand-image
-description: Make a speaker announcement (JPG, GIF and MP4 for one to three speakers) or another brand image (event cover, social or sponsor banner, photo with artifacts) from the animation builder. Use when the user asks for speaker cards, an announcement image or video, a cover, a banner or other branded graphic.
+description: Render a brand image or short animation from the animation builder's presets (speaker card, pair or trio, event cover, social or sponsor banner, photo with artifacts) as PNG, JPG, GIF or MP4. Use when the user asks for a branded graphic, cover, banner or announcement that is not an event's speaker announcement.
 ---
 
 # Brand images
 
-## A speaker announcement
+A speaker announcement for an event is production's job: its `speaker-cards`
+skill reads the event's speakers and calls this script. Use this skill for
+everything else, or for speakers that are not in an `event.json`.
 
-One command, for one to three speakers. It writes a JPG, a GIF and an MP4:
-
-```sh
-python3 scripts/speaker_cards.py --date "Lisbon · 27 Jan" \
-  --speaker "Anna Lima|Staff Engineer, Acme|/path/to/anna.jpg" \
-  --speaker "Rui Costa|Founder, Beta|/path/to/rui.jpg" \
-  --out "$AGNTENG_MEDIA/<date>/speakers"
-```
-
-Or pass a JSON file: `{"date": "…", "speakers": [{"name", "title", "photo"}]}`.
-Photos are files or URLs; a square crop of the face works best. Look at the
-JPG before handing the set over: a face cropped by its slot, a long title
-running into the next column. Done when all three files exist and the JPG
-reads well. Needs Chrome, ffmpeg and the network.
-
-## Anything else
-
-`scripts/render_scene.py` draws a scene from the animation builder and writes a
-PNG. Run it from this repository's root. It needs Chrome and the network.
+`scripts/render_scene.py` draws a scene from the animation builder and writes
+stills (.png, .jpg) or the moving picture (.gif, .mp4, with ffmpeg). Run it from this repository's root. It needs Chrome and the network.
 
 1. **List the presets**: `python3 scripts/render_scene.py --presets`. Each
    line under a preset is one layer and its path (`layers.2  text  Speaker name`).

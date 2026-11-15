@@ -23,17 +23,19 @@ export default function RenderScene() {
   // as JSON for the script to collect.
   const box = useRef<HTMLDivElement>(null);
   const [pictures, setPictures] = useState<Record<string, HTMLImageElement | null>>({});
-  const [waited, setWaited] = useState(false); // a picture that fails to load must not hold the render for ever
+  const [waited, setWaited] = useState(false); // long enough for any picture that is going to load
   useEffect(() => { const id = setTimeout(() => setWaited(true), 6000); return () => clearTimeout(id); }, []);
   const done = useRef(false);
   useEffect(() => {
     const html = document.documentElement;
     if (error) { html.dataset.render = error; return; }
-    if (!scene || !fontsReady || done.current) return;
-    if (!waited && scene.layers.some((l) => l.type === 'photo' && l.src && !l.hidden && !pictures[l.id])) return;
+    if (!scene || !fontsReady || !assets.mark || done.current) return;
+    const missing = scene.layers.find((l) => l.type === 'photo' && l.src && !l.hidden && !pictures[l.id]);
+    if (missing && !waited) return;
     done.current = true;
+    if (missing?.type === 'photo') { html.dataset.render = `A picture did not load: ${missing.src}`; return; }
     const q = new URLSearchParams(location.search);
-    const frames = Number(q.get('frames')) || 0, fps = Number(q.get('fps')) || 15;
+    const frames = Number(q.get('frames')) || 0, fps = Number(q.get('fps'));
     if (!frames) { html.dataset.render = 'ok'; return; }
     (async () => {
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -54,7 +56,7 @@ export default function RenderScene() {
       document.body.appendChild(Object.assign(document.createElement('script'), { id: 'frames', type: 'application/json', textContent: JSON.stringify(out) }));
       html.dataset.render = 'ok';
     })().catch((e) => { html.dataset.render = `The frames could not be read (a photo from a site that forbids it?): ${e.message}`; });
-  }, [error, scene, fontsReady, pictures, waited]);
+  }, [error, scene, fontsReady, assets.mark, pictures, waited]);
   if (error) return <p style={{ font: '16px system-ui', padding: 24, color: '#fff' }}>{error}</p>;
   if (!scene) return null;
   // Cells are sized for the builder's stage; here the frame is drawn at its own size.

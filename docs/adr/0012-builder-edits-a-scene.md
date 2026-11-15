@@ -24,7 +24,7 @@ and every value stays editable.
 The same JSON is the interface for scripts and agents: the branding site's
 `/render` page draws a scene with nothing around it, `/api/presets.json` lists
 the presets, and `scripts/render_scene.py` photographs `/render` in headless
-Chrome to make a PNG.
+Chrome to make a still or a short clip.
 
 ## Consequences
 A new format is a preset, not code. The old per-template drawing functions for
@@ -36,7 +36,9 @@ code directly.
 `scripts/render_scene.py` is the second script here, after `fitness.py`
 (0006 moved the rest to production). It stays because it is a client of this
 repository's builder and of the brand, not of an event: it has no event
-data, and production can call it like any other tool. In 0011, "the builder's
+data, and production calls it like any other tool: an event's speaker
+announcement is production's script, which reads `event.json` and fills a
+speaker preset. In 0011, "the builder's
 Artifacts treatment" is now the photo background.
 
 Rendering needs a browser, because the picture is the builder's own canvas
