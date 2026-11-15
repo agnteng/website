@@ -292,6 +292,7 @@ function LayerEditor({ l, set }: { l: Layer; set: (p: Partial<Layer>) => void })
       <Pair label="Solid" a={<Tagged tag="W" value={l.w} min={0} max={1.5} step={0.005} onChange={(w) => set({ w })} />} b={<Tagged tag="H" value={l.h} min={0} max={1.5} step={0.005} onChange={(h) => set({ h })} />} />
       <Range label="Reach" value={l.reach} min={0} max={0.4} step={0.002} onChange={(reach) => set({ reach })} />
       <Range label="Turn" value={l.turn} min={-15} max={15} step={0.5} onChange={(turn) => set({ turn })} />
+      <Range label="Roundness" value={l.radius} min={0} max={0.3} step={0.005} onChange={(radius) => set({ radius })} />
       <Colour label="Colour" value={l.color} onChange={(color) => set({ color })} />
       <Rule />
       <Range label="Cell size" value={l.cell} min={0.004} max={0.08} step={0.001} onChange={(cell) => set({ cell })} />
