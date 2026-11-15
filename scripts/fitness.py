@@ -285,7 +285,7 @@ def check_photos() -> None:
             fail("photos", f"{where}: over {PHOTO_MAX_BYTES // 1000} KB or {PHOTO_MAX_EDGE}px; run photos.py")
         elif any(m in data for m in PHOTO_METADATA):
             fail("photos", f"{where}: still has EXIF, XMP or IPTC metadata; run photos.py optimize")
-    # Speaker masks from production's speaker_masks.py, one per headshot (org ADR 0010).
+    # Speaker masks from production's speaker_masks.py, one per headshot (org ADRs 0010, 0017).
     masks = public / "speaker-masks"
     sources = json.loads((masks / "sources.json").read_text()) if (masks / "sources.json").exists() else {}
     for photo in sorted(public.glob("speakers/*.jpg")):
