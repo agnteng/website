@@ -141,7 +141,8 @@ const headshots: Record<string, HeadshotSource> = JSON.parse(
 export const headshot = (photo: string) => {
   const name = photo.match(/^\/assets\/speakers\/([^/]+)\.jpg$/)?.[1];
   const s = name ? headshots[`${name}.jpg`] : undefined;
-  return s && { mask: `/assets/speaker-masks/${name}.png`, size: s.size, face: s.face };
+  // ?v: the CDN caches a mask by its address; raise it when the masks' format changes.
+  return s && { mask: `/assets/speaker-masks/${name}.png?v=2`, size: s.size, face: s.face };
 };
 // One gallery photo by file name. Re-publishing a gallery renumbers its files,
 // so a pick that is no longer there fails the build instead of showing another photo.
