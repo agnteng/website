@@ -20,21 +20,20 @@ const questions = questionsAt(e);
 const photos = photosAt(e);
 const cover = coverAt(e);
 // The cells that hide the cover's leading edge; each night has its own pattern.
-const cells = { color: '#1E2BE6', seed: e.number * 101 + e.city.length, cell: 10, animate: true } as const;
+const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell: 10, animate: true } as const;
 ---
 <Shell title={`${eventName(e)}, ${longDate(e.date)} | Agentic Engineering`} description={`Agentic Engineering ${eventName(e)}: ${talks.map((t) => t.title).join(', ')}.`} class="bg-soft-white text-panel-navy">
   <BlueTone />
-  <!-- The home hero's treatment: a blue block, the night's cover in its blue, breaking up into it. -->
   <section class="relative isolate overflow-hidden bg-electric-blue text-white">
     <SiteNav onHero />
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
-      <h1 class="rise font-sans text-5xl font-extrabold tracking-tight md:text-7xl">{eventName(e)}</h1>
+      <h1 class="rise font-sans text-5xl font-extrabold tracking-tight md:max-w-[40%] md:text-6xl">{eventName(e)}</h1>
       <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium" style="--i:1"><Icon name="Calendar" size={16} class="text-periwinkle" />{longDate(e.date)}</p>
     </div>
     {cover && (
       <div class="dither-stage relative h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
         <Image src={cover.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
-        <div class="absolute inset-0 max-md:hidden"><Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.12, reach: 0.5 }]} /></div>
+        <div class="absolute inset-0 max-md:hidden"><Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.2, reach: 0.52 }]} /></div>
         <div class="absolute inset-0 md:hidden"><Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45 }]} /></div>
       </div>
     )}

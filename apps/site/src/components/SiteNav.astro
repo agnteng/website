@@ -1,5 +1,6 @@
 ---
-// `onHero` puts the bar on a hero's own background; otherwise it is deep navy.
+// `onHero` puts the bar on a hero's own blue, with a white search field and button;
+// otherwise it is deep navy. Inside a section it still is the page's banner, hence the role.
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import { register, nextEvent, links } from '../lib/data';
@@ -8,7 +9,7 @@ const { onHero = false } = Astro.props;
 const starts = nextEvent && (nextEvent.luma?.startAt ?? `${nextEvent.date}T23:59:00Z`);
 const luma = links.luma;
 ---
-<header class:list={['relative z-20 w-full', !onHero && 'border-b border-white/10 bg-deep-navy']}>
+<header role="banner" class:list={['relative z-20', !onHero && 'border-b border-white/10 bg-deep-navy']}>
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 md:grid-cols-[1fr_minmax(0,28rem)_1fr] md:gap-8 md:px-8">
     <a href="/" class="flex items-center gap-2.5 justify-self-start">
       <img src="/assets/logo/ae-mark-white.svg" alt="" class="h-7 w-auto" />
@@ -17,14 +18,14 @@ const luma = links.luma;
     <!-- One search box on every page. On /talks it searches in place; elsewhere it carries the search there. -->
     <form action="/talks" role="search" data-search-form class="relative w-full">
       <label for="search" class="sr-only">Search the talks</label>
-      <span aria-hidden="true" class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-soft-white/70"><Icon name="Search" size={16} /></span>
-      <input id="search" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search talks" aria-keyshortcuts="Meta+K Control+K /" class="peer h-10 w-full rounded-full border border-white/15 bg-white/10 pl-10 pr-10 font-sans text-base text-soft-white outline-none backdrop-blur transition placeholder:text-soft-white/55 focus:border-periwinkle focus:bg-deep-navy/80 md:pr-14 md:text-sm" />
-      <kbd aria-hidden="true" data-kbd class="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-white/20 px-1.5 py-0.5 font-mono text-[10px] text-soft-white/60 peer-focus:hidden peer-[:not(:placeholder-shown)]:hidden md:block">⌘K</kbd>
-      <button type="button" data-search-clear aria-label="Clear the search" class="absolute right-2 top-1/2 hidden size-6 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-soft-white transition hover:bg-white/25 peer-[:not(:placeholder-shown)]:grid">
+      <span aria-hidden="true" class:list={['pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2', onHero ? 'text-panel-navy/55' : 'text-soft-white/70']}><Icon name="Search" size={16} /></span>
+      <input id="search" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search talks" aria-keyshortcuts="Meta+K Control+K /" class:list={['peer h-10 w-full rounded-full border pl-10 pr-10 font-sans text-base outline-none transition md:pr-14 md:text-sm', onHero ? 'border-transparent bg-white text-panel-navy placeholder:text-panel-navy/50 focus:border-deep-navy' : 'border-white/15 bg-white/10 text-soft-white backdrop-blur placeholder:text-soft-white/55 focus:border-periwinkle focus:bg-deep-navy/80']} />
+      <kbd aria-hidden="true" data-kbd class:list={['pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border px-1.5 py-0.5 font-mono text-[10px] peer-focus:hidden peer-[:not(:placeholder-shown)]:hidden md:block', onHero ? 'border-panel-navy/20 text-panel-navy/55' : 'border-white/20 text-soft-white/60']}>⌘K</kbd>
+      <button type="button" data-search-clear aria-label="Clear the search" class:list={['absolute right-2 top-1/2 hidden size-6 -translate-y-1/2 place-items-center rounded-full transition peer-[:not(:placeholder-shown)]:grid', onHero ? 'bg-panel-navy/10 text-panel-navy hover:bg-panel-navy/20' : 'bg-white/15 text-soft-white hover:bg-white/25']}>
         <svg aria-hidden="true" viewBox="0 0 12 12" class="size-2.5"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
       </button>
     </form>
-    <Button variant={onHero ? 'secondary' : 'primary'} href={register} class="js-register justify-self-end !px-5 !py-3 !text-sm md:!py-2.5">Register</Button>
+    <Button variant="primary" href={register} class={`js-register justify-self-end !px-5 !py-3 !text-sm md:!py-2.5 ${onHero ? '!bg-white !text-electric-blue hover:!bg-soft-white hover:!brightness-100' : ''}`}>Register</Button>
   </div>
 </header>
 <script is:inline>
