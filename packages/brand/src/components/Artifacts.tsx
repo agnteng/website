@@ -26,6 +26,7 @@ interface Props {
   color?: string;
   seed?: number;
   cell?: number; // cell size in px
+  pixelRatio?: number; // canvas pixels per layout pixel; the screen's (up to 2) unless given
   rough?: number; // how ragged the edge is (0 = a straight fade)
   animate?: boolean; // a few cells along the edge blink in and out, slowly
   paused?: boolean; // hold the animation on its current frame
@@ -64,6 +65,7 @@ export default function Artifacts({
   color = '#1E2BE6',
   seed = 1,
   cell = 10,
+  pixelRatio,
   rough = 0.3,
   animate = false,
   paused = false,
@@ -155,7 +157,7 @@ export default function Artifacts({
       // The layout size, not the on-screen one: a zoomed or scaled parent keeps its cells.
       w = canvas.clientWidth;
       h = canvas.clientHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = pixelRatio ?? Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       // Enough cells to overhang the frame, centred: its edges are always inside the grid.
@@ -231,7 +233,7 @@ export default function Artifacts({
       ro.disconnect();
       io.disconnect();
     };
-  }, [shape, color, seed, cell, rough, animate, img, position, tint]);
+  }, [shape, color, seed, cell, pixelRatio, rough, animate, img, position, tint]);
 
   return <canvas ref={ref} style={{ display: 'block', width: '100%', height: '100%', ...style }} />;
 }
