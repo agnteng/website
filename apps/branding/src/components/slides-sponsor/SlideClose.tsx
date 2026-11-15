@@ -16,8 +16,12 @@ import { CLOSE } from './content';
 // all six.
 // ─────────────────────────────────────────────────────────────────────────
 
+// The Telegram group is for people who have been to a meetup, so it is on the
+// meetup deck's last slide and not on this one, which anyone can open.
+const CHANNELS = LINKS.filter((l) => l.name !== 'Telegram');
+
 const GAP = 32;
-const PANEL_W = (1920 - PAD * 2 - GAP * (LINKS.length - 1)) / LINKS.length;
+const PANEL_W = (1920 - PAD * 2 - GAP * (CHANNELS.length - 1)) / CHANNELS.length;
 const QR = 168;
 
 export function Background({ active }: SlideProps) {
@@ -59,7 +63,7 @@ export function Content({ active }: SlideProps) {
       </a>
 
       <div style={{ display: 'flex', gap: GAP, marginTop: 'auto' }}>
-        {LINKS.map((l) => (
+        {CHANNELS.map((l) => (
           <Channel key={l.name} {...l} active={active} />
         ))}
       </div>
