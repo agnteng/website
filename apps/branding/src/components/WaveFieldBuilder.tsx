@@ -27,7 +27,7 @@ function jsx(b: Background): string {
   if (b.kind === 'solid') return `<div style={{ background: '${b.color}' }} />`;
   if (b.kind === 'photo') {
     return [
-      '<Artifacts', `  src="${src(b.src)}"`, `  position="${b.position}"`, `  color="${b.color}"`, ...(b.tint ? ['  tint'] : []),
+      '<Artifacts', `  src="${src(b.src)}"`, `  position="${b.position}"`, `  color="${b.color}"`, ...(b.edge ? [`  edge="${b.edge}"`] : []), ...(b.tint ? [b.tintOpacity < 1 ? `  tint={${b.tintOpacity}}` : '  tint'] : []),
       `  cell={${b.cell}}`, `  rough={${b.rough}}`, `  seed={${b.seed}}`, ...(b.animate ? ['  animate'] : []),
       '  artifacts={[', ...b.artifacts.map((a) => `    { at: '${a.at}', solid: ${a.solid}, reach: ${a.reach} },`), '  ]}', '/>',
     ].join('\n');

@@ -93,7 +93,7 @@ export default function SceneView({ scene, assets, fontsReady, scale = 1, pixelR
         </Animation>
       ) : b.kind === 'photo' ? (
         <Artifacts
-          src={b.src} position={b.position} color={b.color} tint={b.tint} cell={px(b.cell)} pixelRatio={pixelRatio} rough={b.rough}
+          src={b.src} position={b.position} color={b.color} edge={b.edge} tint={b.tint && b.tintOpacity} cell={px(b.cell)} pixelRatio={pixelRatio} rough={b.rough}
           seed={b.seed} animate={b.animate} paused={paused} artifacts={b.artifacts} canvasRef={canvasRef} onStatus={onStatus} style={fill}
         />
       ) : (

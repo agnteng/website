@@ -38,7 +38,9 @@ export interface PhotoBg {
   src: string;
   position: Anchor;
   color: string;
+  edge: string; // a second colour for a few of the ragged cells; '' for none
   tint: boolean;
+  tintOpacity: number; // how strongly the tint replaces the photo's own colours, 0–1
   cell: number;
   rough: number;
   seed: number;
@@ -152,7 +154,7 @@ export const FIELD: FieldBg = {
 };
 export const FIELD_IMAGE = { src: '', position: 'center' as Anchor, contrast: 1.25, edgeGlow: 1, tone: 0.8 };
 export const PHOTO: PhotoBg = {
-  kind: 'photo', src: '', position: 'center', color: '#1E2BE6', tint: true,
+  kind: 'photo', src: '', position: 'center', color: '#1E2BE6', edge: '', tint: true, tintOpacity: 1,
   cell: 10, rough: 0.3, seed: 4821, animate: true, artifacts: [{ at: 'left', solid: 0.2, reach: 0.5 }],
 };
 export const SOLID: SolidBg = { kind: 'solid', color: '#1E2BE6' };

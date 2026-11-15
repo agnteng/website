@@ -9,7 +9,8 @@ import { anchorFactors, type Anchor } from './anchor';
 //     artifacts={[{ at: 'left', solid: 0.2, reach: 0.5 }]} />
 //
 // The canvas fills its parent. With `src` it draws the photo too (cover-cropped,
-// and recoloured into `color` when `tint` is set). Without it the canvas is
+// and recoloured into `color` when `tint` is set; `tint={0.5}` goes half way).
+// `edge` is a second colour that a few of the ragged cells take. Without `src` the canvas is
 // transparent and only draws the cells: lay it over images of your own.
 //
 // The seed fixes the pattern for a given frame size and cell size: cells sit on
@@ -32,7 +33,8 @@ interface Props {
   paused?: boolean; // hold the animation on its current frame
   src?: string;
   position?: Anchor; // the photo's cover crop
-  tint?: boolean; // recolour the photo: shadows navy, mid-tones `color`, highlights near white
+  edge?: string; // a second colour: a few of the ragged cells take it, more of them further out
+  tint?: boolean | number; // recolour the photo: shadows navy, mid-tones `color`, highlights near white. A number (0–1) is how strongly
   onStatus?: (s: 'ok' | 'cors' | 'error') => void;
   style?: React.CSSProperties;
   canvasRef?: React.RefObject<HTMLCanvasElement | null>; // expose the canvas for export
@@ -72,6 +74,7 @@ export default function Artifacts({
   src = '',
   position = 'center',
   tint = false,
+  edge = '',
   onStatus,
   style,
   canvasRef,
@@ -136,15 +139,17 @@ export default function Artifacts({
       try {
         // Reading the pixels is also the test for a photo the browser won't let out.
         const px = pctx.getImageData(0, 0, photo.width, photo.height);
-        if (tint) {
+        const amount = tint === true ? 1 : Math.max(0, Math.min(1, Number(tint) || 0));
+        if (amount > 0) {
           const c2 = rgb(color);
           const dark = mix(rgb('#05071E'), c2, 0.08), light = mix(rgb('#F4F5FF'), c2, 0.04);
           for (let i = 0; i < px.data.length; i += 4) {
             const l = (0.2126 * px.data[i] + 0.7152 * px.data[i + 1] + 0.0722 * px.data[i + 2]) / 255;
             const [from, to, t] = l < 0.5 ? [dark, c2, l * 2] : [c2, light, l * 2 - 1];
-            px.data[i] = from[0] + (to[0] - from[0]) * t;
-            px.data[i + 1] = from[1] + (to[1] - from[1]) * t;
-            px.data[i + 2] = from[2] + (to[2] - from[2]) * t;
+            for (let ch = 0; ch < 3; ch++) {
+              const toned = from[ch] + (to[ch] - from[ch]) * t;
+              px.data[i + ch] += (toned - px.data[i + ch]) * amount; // part way from the photo's own colour
+            }
           }
           pctx.putImageData(px, 0, 0);
         }
@@ -200,6 +205,8 @@ export default function Artifacts({
             if (!still) p += 0.16 * Math.sin(t * (0.5 + rnd(i, j, seed + 3) * 1.2) + 6.283 * rnd(i, j, seed + 5));
             if (rnd(i, j, seed) >= p) continue;
           }
+          // Only ragged cells take the second colour, and few of them: an accent, not a second field.
+          ctx.fillStyle = edge && k < 1 && rnd(i, j, seed + 7) < 0.04 + 0.18 * (1 - k) ? edge : color;
           ctx.globalAlpha = 0.3 + 0.7 * k;
           ctx.fillRect(offx + i * c, offy + j * c, c, c);
         }
@@ -235,7 +242,7 @@ export default function Artifacts({
       ro.disconnect();
       io.disconnect();
     };
-  }, [shape, color, seed, cell, pixelRatio, rough, animate, img, position, tint]);
+  }, [shape, color, seed, cell, pixelRatio, rough, animate, img, position, tint, edge]);
 
   return <canvas ref={ref} style={{ display: 'block', width: '100%', height: '100%', ...style }} />;
 }
