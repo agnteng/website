@@ -30,7 +30,7 @@ p, li { text-wrap: pretty; }
   .dither-stage:has(canvas[data-painted]) { transition: none; }
 }
 
-/* One tint for every photo: a little less colour, pulled towards the brand's blue. */
+/* The default tint: a little less colour, pulled towards the brand's blue. */
 .photo-tint { filter: saturate(0.7) contrast(1.05); }
 .photo-tint-wash { background: linear-gradient(160deg, rgb(30 43 230 / 0.28), rgb(5 7 30 / 0.25)); mix-blend-mode: soft-light; }
 /* Or a light wash of one brand colour (--tint): the photo keeps its own colours underneath. */

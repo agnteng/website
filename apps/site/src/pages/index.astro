@@ -16,7 +16,7 @@ import { latestPosts } from '../lib/newsletter';
 
 const posts = await latestPosts();
 const recent = talks.slice(0, 3);
-// The brand colours photos are washed in, taken in turn.
+// Brand colours for photo washes.
 const TINTS = ['#1E2BE6', '#7C4DF5', '#1FC6E6', '#ED4BA0', '#16D9A6', '#FF6E4D'];
 const night = [
   { title: 'Connect with others', body: 'Meet founders and engineers who are building with AI agents.', photo: galleryPhoto('2026-08-26', '04.jpg') },
@@ -58,7 +58,6 @@ const night = [
     <ol class="mt-10 grid gap-8 md:mt-14 md:grid-cols-3 md:gap-6">
       {night.map((n, i) => (
         <li class:list={['reveal', i === 1 && 'md:mt-16', i === 2 && 'md:mt-32']}>
-          <!-- A light wash of one brand colour, and cells of it eating two opposite corners. -->
           <TintedPhoto src={n.photo.img} alt={n.photo.alt} sizes="33vw" tint={TINTS[i]} class="aspect-[4/5] w-full rounded-2xl max-md:hidden">
             <div class="dither-stage absolute inset-0" aria-hidden="true">
               <Artifacts client:visible color={TINTS[i]} seed={i + 11} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.1, reach: 0.48 }, { at: 'top-right', solid: 0.1, reach: 0.48 }]} />
