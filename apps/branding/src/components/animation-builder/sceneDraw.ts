@@ -96,9 +96,13 @@ function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
   // Pixels past the box, positive outside and negative inside, rounded at the corners
   // it shows: on the sides it grows from it runs on, so those corners never round.
   const r = Math.max(0, Math.min(l.radius * m, bw / 2, bh / 2));
+  // Its open sides swell in and out along their length, measured from the side it grows from.
+  const amp = l.wave * m, k = (2 * Math.PI) / Math.max(c, l.waveLength * m), ph = 2 * Math.PI * l.waveShift;
+  const ax = sx === -1 ? W : 0, ay = sy === -1 ? 0 : H;
+  const swell = (along: number) => amp * Math.sin(along * k + ph);
   const past = (x: number, y: number) => {
-    const qx = (sx ? sx * (x - cx) : Math.abs(x - cx)) - bw / 2 + r;
-    const qy = (sy ? sy * (cy - y) : Math.abs(y - cy)) - bh / 2 + r;
+    const qx = (sx ? sx * (x - cx) : Math.abs(x - cx)) - bw / 2 + r - swell(Math.abs(y - ay));
+    const qy = (sy ? sy * (cy - y) : Math.abs(y - cy)) - bh / 2 + r - swell(Math.abs(x - ax));
     return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
   };
   const reach = Math.max(c, l.reach * m), far = reach * 1.8;
