@@ -286,6 +286,26 @@ function LayerEditor({ l, set }: { l: Layer; set: (p: Partial<Layer>) => void })
       <Range label="Radius" value={l.radius} min={0} max={0.5} onChange={(radius) => set({ radius })} />
     </>
   );
+  if (l.type === 'artifact') return (
+    <>
+      <Row label="Grows from"><AlignPad value={l.at} onChange={(at) => set({ at })} /></Row>
+      <Pair label="Solid" a={<Tagged tag="W" value={l.w} min={0} max={1.5} step={0.005} onChange={(w) => set({ w })} />} b={<Tagged tag="H" value={l.h} min={0} max={1.5} step={0.005} onChange={(h) => set({ h })} />} />
+      <Range label="Reach" value={l.reach} min={0} max={0.4} step={0.002} onChange={(reach) => set({ reach })} />
+      <Range label="Turn" value={l.turn} min={-15} max={15} step={0.5} onChange={(turn) => set({ turn })} />
+      <Colour label="Colour" value={l.color} onChange={(color) => set({ color })} />
+      <Rule />
+      <Range label="Cell size" value={l.cell} min={0.004} max={0.08} step={0.001} onChange={(cell) => set({ cell })} />
+      <Range label="Roughness" value={l.rough} min={0} max={4} step={0.1} onChange={(rough) => set({ rough })} />
+      <Range label="Strays" value={l.stray} min={0} max={0.6} step={0.01} onChange={(stray) => set({ stray })} />
+      <Row label="Seed">
+        <div className="flex gap-1.5">
+          <Num value={l.seed} min={0} onChange={(seed) => set({ seed })} />
+          <button type="button" onClick={() => set({ seed: 1000 + rand(9000) })} className={btn}>New</button>
+        </div>
+      </Row>
+      <p className={note}>Solid is the box at its corner or edge; reach is how far past it the cells thin out.</p>
+    </>
+  );
   if (l.type === 'scrim') return (
     <>
       <Row label="Dark toward"><Select label="Dark toward" options={SCRIMS} value={l.shape} onChange={(shape) => set({ shape })} /></Row>

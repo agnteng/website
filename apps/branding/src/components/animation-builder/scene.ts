@@ -106,6 +106,22 @@ export interface ScrimLayer extends Base {
   color: string;
   opacity: number;
 }
+// A box of the brand's artifact cells, for a lower third: solid over (w, h) from its
+// corner or edge, breaking up over `reach`. Sizes are shares of the frame; reach and
+// cell are shares of its shorter side.
+export interface ArtifactLayer extends Base {
+  type: 'artifact';
+  at: Anchor; // the corner or edge it grows from
+  w: number;
+  h: number;
+  reach: number; // how far past it the cells thin out to nothing
+  turn: number; // degrees, about its own middle
+  cell: number;
+  rough: number; // how ragged its edge is, in cells
+  stray: number; // the chance of a lone cell just past the edge
+  seed: number;
+  color: string;
+}
 // A dashed outline of where a platform crops: shown in the builder, never exported.
 export interface GuideLayer extends Base {
   type: 'guide';
@@ -115,7 +131,7 @@ export interface GuideLayer extends Base {
   w: number;
   h: number;
 }
-export type Layer = LogoLayer | TextLayer | PhotoLayer | RectLayer | ScrimLayer | GuideLayer;
+export type Layer = LogoLayer | TextLayer | PhotoLayer | RectLayer | ScrimLayer | ArtifactLayer | GuideLayer;
 export type Mockup = 'x' | 'linkedin' | 'substack' | 'luma';
 
 export interface Scene {
@@ -147,10 +163,11 @@ export const LAYER_DEFAULTS: { [K in Layer['type']]: Omit<Extract<Layer, { type:
   photo: { type: 'photo', src: '', x: 0.3, y: 0.25, w: 0.4, h: 0.5, fit: 'cover', radius: 0.04, label: 'Photo' },
   rect: { type: 'rect', x: 0, y: 0.7, w: 1, h: 0.3, color: '#0B0E2A', opacity: 1, radius: 0 },
   scrim: { type: 'scrim', shape: 'bottom', color: '#05071E', opacity: 0.9 },
+  artifact: { type: 'artifact', at: 'bottom-left', w: 0.3, h: 0.18, reach: 0.067, turn: -3, cell: 0.022, rough: 1.6, stray: 0.22, seed: 4821, color: '#1E2BE6' },
   guide: { type: 'guide', shape: 'rect', x: 0.5, y: 0.5, w: 0.6, h: 0.3 },
 };
 export const LAYER_NAMES: Record<Layer['type'], string> = {
-  logo: 'Logo', text: 'Text', photo: 'Photo', rect: 'Box', scrim: 'Scrim', guide: 'Guide',
+  logo: 'Logo', text: 'Text', photo: 'Photo', rect: 'Box', scrim: 'Scrim', artifact: 'Artifact', guide: 'Guide',
 };
 
 // The colour around the artboard and behind an export.
@@ -253,6 +270,28 @@ export const PRESETS: Preset[] = [
   },
   { name: 'Speaker pair', group: 'Speakers', scene: { frame: { w: 1920, h: 1080 }, layers: lineup(2) } },
   { name: 'Speaker trio', group: 'Speakers', scene: { frame: { w: 1920, h: 1080 }, layers: lineup(3) } },
+  // Talk-video lower thirds: judge them against a frame of the talk as the photo background.
+  {
+    name: 'Lower third', group: 'Video',
+    scene: {
+      frame: { w: 1920, h: 1080 },
+      layers: [
+        { ...LAYER_DEFAULTS.artifact, id: newId() },
+        text({ text: 'Speaker name', x: 0.0333, y: 0.885, size: 0.0593, align: 'left' }),
+        text({ ...mono, text: 'Role, company', x: 0.0333, y: 0.94, size: 0.024, weight: 500, align: 'left', spacing: 0.12 }),
+      ],
+    },
+  },
+  {
+    name: 'Coming up', group: 'Video',
+    scene: {
+      frame: { w: 1920, h: 1080 },
+      layers: [
+        { ...LAYER_DEFAULTS.artifact, id: newId(), at: 'bottom-right', w: 0.27, h: 0.15, turn: 3 },
+        text({ text: 'Coming up…', x: 0.9667, y: 0.918, size: 0.0667, align: 'right' }),
+      ],
+    },
+  },
   {
     name: 'Sponsor banner', group: 'Sponsors',
     scene: {

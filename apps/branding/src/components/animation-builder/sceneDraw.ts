@@ -4,7 +4,8 @@
 
 import { anchorFactors } from '@agnteng/brand/components/anchor.ts';
 import { drawImageContain, drawImageCover, drawLogo, drawSlotPlaceholder, roundRect, type OverlayAssets } from './overlay';
-import type { Layer, LogoLayer, PhotoLayer, ScrimLayer, TextLayer } from './scene';
+import { rnd } from '@agnteng/brand/components/Artifacts.tsx';
+import type { ArtifactLayer, Layer, LogoLayer, PhotoLayer, ScrimLayer, TextLayer } from './scene';
 
 type Ctx = CanvasRenderingContext2D;
 type Spacing = Ctx & { letterSpacing?: string };
@@ -82,6 +83,60 @@ function scrim(ctx: Ctx, W: number, H: number, l: ScrimLayer) {
   ctx.fillRect(0, 0, W, H);
 }
 
+// Drawn in the box's turned frame; a cell's distance past the box decides whether and
+// how strongly it shows.
+function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
+  // Whole pixels: a fractional cell leaves hairlines between cells.
+  const m = Math.min(W, H), c = Math.max(2, Math.round(l.cell * m)), bw = l.w * W, bh = l.h * H;
+  const { fx, fy } = anchorFactors(l.at);
+  // which way the box opens: +1 from the left or bottom, -1 from the right or top, 0 centred
+  const sx = fx === 0 ? 1 : fx === 1 ? -1 : 0, sy = fy === 1 ? 1 : fy === 0 ? -1 : 0;
+  const cx = sx === 1 ? bw / 2 : sx === -1 ? W - bw / 2 : W / 2;
+  const cy = sy === 1 ? H - bh / 2 : sy === -1 ? bh / 2 : H / 2;
+  // pixels past the box: positive outside, negative inside
+  const past = (x: number, y: number) => Math.max(
+    sx ? sx * (x - cx) - bw / 2 : Math.abs(x - cx) - bw / 2,
+    sy ? sy * (cy - y) - bh / 2 : Math.abs(y - cy) - bh / 2,
+  );
+  const reach = Math.max(c, l.reach * m), far = reach * 1.8;
+  const th = (l.turn * Math.PI) / 180, cos = Math.cos(th), sin = Math.sin(th);
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(th);
+  ctx.translate(-cx, -cy);
+  ctx.fillStyle = l.color;
+  // The grid's lines fall on the box's open sides; it spans the frame as seen from
+  // the turned box, and no further.
+  const ox = Math.round(sx === -1 ? cx - bw / 2 : cx + bw / 2), oy = Math.round(sy === -1 ? cy + bh / 2 : cy - bh / 2);
+  const seen = [[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => [
+    cx + (x - cx) * cos + (y - cy) * sin, cy - (x - cx) * sin + (y - cy) * cos,
+  ]);
+  const xs = seen.map((q) => q[0]), ys = seen.map((q) => q[1]);
+  const i0 = Math.floor((Math.min(...xs) - ox) / c) - 1, i1 = Math.ceil((Math.max(...xs) - ox) / c) + 1;
+  const j0 = Math.floor((Math.min(...ys) - oy) / c) - 1, j1 = Math.ceil((Math.max(...ys) - oy) / c) + 1;
+  for (let j = j0; j < j1; j++) {
+    for (let i = i0; i < i1; i++) {
+      const x = ox + i * c, y = oy + j * c;
+      const d = past(x + c / 2, y + c / 2) + (rnd(i >> 1, j >> 1, l.seed + 101) - 0.5) * l.rough * c;
+      if (d > far) continue;
+      if (d > reach) {
+        // past the edge, a few strays, thinning out
+        if (rnd(i, j, l.seed + 7) >= l.stray * (1 - (d - reach) / (far - reach))) continue;
+        ctx.globalAlpha = 0.45;
+      } else if (d > 0) {
+        const k = 1 - d / reach;
+        if (rnd(i, j, l.seed) >= k * k * (3 - 2 * k)) continue;
+        ctx.globalAlpha = 0.4 + 0.6 * k * k;
+      } else ctx.globalAlpha = 1;
+      // Turned, solid cells overlap by a hair so no seam shows; see-through ones don't,
+      // or the overlaps would show darker.
+      const o = th && ctx.globalAlpha === 1 ? 0.6 : 0;
+      ctx.fillRect(x - o / 2, y - o / 2, c + o, c + o);
+    }
+  }
+  ctx.restore();
+}
+
 // `images` holds each photo layer's loaded picture, by layer id. `preview` adds
 // what only the builder shows: guides, and the dashed slot of a photo with no picture.
 export function drawLayers(
@@ -101,6 +156,7 @@ export function drawLayers(
     else if (l.type === 'text') { if (fontsReady) text(ctx, W, H, l); }
     else if (l.type === 'photo') photo(ctx, W, H, l, images[l.id], preview);
     else if (l.type === 'scrim') scrim(ctx, W, H, l);
+    else if (l.type === 'artifact') artifact(ctx, W, H, l);
     else if (l.type === 'rect') {
       ctx.save();
       ctx.globalAlpha = l.opacity;
