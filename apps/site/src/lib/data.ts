@@ -65,7 +65,7 @@ export const links = {
   luma: 'https://luma.com/agnteng',
   youtube: 'https://www.youtube.com/@agnteng',
   substack: 'https://agnteng.substack.com',
-  telegram: 'https://t.me/agntacc',
+  partners: 'mailto:partners@agnteng.com',
   sponsors: 'https://sponsors.agnteng.com',
 };
 export const register = nextEvent?.luma?.url ?? links.luma;

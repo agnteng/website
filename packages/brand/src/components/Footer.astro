@@ -3,7 +3,7 @@ interface Props {
   socials?: string[];
   class?: string;
 }
-const { socials = ['substack', 'youtube', 'x', 'telegram'], class: cls } = Astro.props;
+const { socials = ['luma', 'substack', 'youtube', 'x'], class: cls } = Astro.props;
 ---
 
 <footer class={`w-full border-t border-white/10 bg-deep-navy ${cls ?? ''}`}>

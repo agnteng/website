@@ -117,6 +117,26 @@ def check_media() -> None:
             fail("media", f"{path} is over {MAX_BYTES // 1_000_000} MB")
 
 
+# ── the Telegram group is for people who have been to a meetup ──
+
+TELEGRAM = "t.me/" + "agntacc"
+# The meetup deck shows it in the room; nothing else does.
+TELEGRAM_OK = ("apps/branding/src/components/slides/deck.ts", "tests/snapshots/slides_")
+
+
+def check_telegram() -> None:
+    for path in tracked():
+        p = ROOT / path
+        if path.startswith(TELEGRAM_OK) or not p.is_file() or p.stat().st_size > MAX_BYTES:
+            continue
+        try:
+            text = p.read_text()
+        except UnicodeDecodeError:
+            continue
+        if TELEGRAM in text:
+            fail("telegram", f"{path} shows the Telegram group: only the meetup deck may")
+
+
 # ── event.json shape (docs/adr/0001) ──
 
 def check_events() -> None:
@@ -461,7 +481,7 @@ def main() -> None:
         checks = [("internal-names", check_internal_names), ("media", check_media),
                   ("events", check_events), ("talks", check_talks),
                   ("photos", check_photos), ("search", check_search),
-                  ("dither", check_dither)]
+                  ("dither", check_dither), ("telegram", check_telegram)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()
