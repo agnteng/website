@@ -1,12 +1,16 @@
 ---
 name: brand-image
-description: Render a brand image (speaker card or trio, event cover, social or sponsor banner, photo with artifacts) to a PNG from the animation builder's presets. Use when the user asks for a speaker card, announcement image, cover, banner or other branded graphic.
+description: Render a brand image or short animation from the animation builder's presets (speaker card, pair or trio, event cover, social or sponsor banner, photo with artifacts) as PNG, JPG, GIF or MP4. Use when the user asks for a branded graphic, cover, banner or announcement that is not an event's speaker announcement.
 ---
 
 # Brand images
 
-`scripts/render_scene.py` draws a scene from the animation builder and writes a
-PNG. Run it from this repository's root. It needs Chrome and the network.
+A speaker announcement for an event is production's job: its `speaker-cards`
+skill reads the event's speakers and calls this script. Use this skill for
+everything else, or for speakers that are not in an `event.json`.
+
+`scripts/render_scene.py` draws a scene from the animation builder and writes
+stills (.png, .jpg) or the moving picture (.gif, .mp4, with ffmpeg). Run it from this repository's root. It needs Chrome and the network.
 
 1. **List the presets**: `python3 scripts/render_scene.py --presets`. Each
    line under a preset is one layer and its path (`layers.2  text  Speaker name`).
