@@ -16,6 +16,8 @@ import { latestPosts } from '../lib/newsletter';
 
 const posts = await latestPosts();
 const recent = talks.slice(0, 3);
+// Brand colours for photo washes.
+const TINTS = ['#1E2BE6', '#7C4DF5', '#1FC6E6', '#ED4BA0', '#16D9A6', '#FF6E4D'];
 const night = [
   { title: 'Connect with others', body: 'Meet founders and engineers who are building with AI agents.', photo: galleryPhoto('2026-08-26', '04.jpg') },
   { title: 'Learn from experts', body: 'Three technical talks, ten minutes each, from engineers showing what they built.', photo: galleryPhoto('2026-11-11', '13.jpg') },
@@ -56,11 +58,9 @@ const night = [
     <ol class="mt-10 grid gap-8 md:mt-14 md:grid-cols-3 md:gap-6">
       {night.map((n, i) => (
         <li class:list={['reveal', i === 1 && 'md:mt-16', i === 2 && 'md:mt-32']}>
-          <!-- The hero's treatment: the photo in the brand blues, with blue cells eating
-               two opposite corners. -->
-          <TintedPhoto src={n.photo.img} alt={n.photo.alt} sizes="33vw" blue class="aspect-[4/5] w-full rounded-2xl max-md:hidden">
+          <TintedPhoto src={n.photo.img} alt={n.photo.alt} sizes="33vw" tint={TINTS[i]} class="aspect-[4/5] w-full rounded-2xl max-md:hidden">
             <div class="dither-stage absolute inset-0" aria-hidden="true">
-              <Artifacts client:visible color="#1E2BE6" seed={i + 11} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.2, reach: 0.62 }, { at: 'top-right', solid: 0.2, reach: 0.62 }]} />
+              <Artifacts client:visible color={TINTS[i]} seed={i + 11} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.1, reach: 0.48 }, { at: 'top-right', solid: 0.1, reach: 0.48 }]} />
             </div>
           </TintedPhoto>
           <p class="font-sans text-2xl font-extrabold md:mt-5">{n.title}</p>
@@ -73,14 +73,14 @@ const night = [
   <section id="events" class="mx-auto max-w-7xl border-t border-panel-navy/[0.08] px-4 py-24 md:px-8 md:py-32">
     <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-5xl">Previous meetups</h2>
     <ul class="mt-12 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
-      {past.map((e) => {
+      {past.map((e, i) => {
         const n = talksAt(e).length;
         const cover = coverAt(e);
         return (
           <li class="reveal">
             <a href={n ? `/events/${eventSlug(e)}` : e.luma?.url ?? links.luma} class="group block">
               {cover
-                ? <TintedPhoto src={cover.img} alt={cover.alt} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" zoom class="aspect-[4/3] rounded-2xl" />
+                ? <TintedPhoto src={cover.img} alt={cover.alt} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" zoom tint={TINTS[i % TINTS.length]} class="aspect-[4/3] rounded-2xl" />
                 : <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-deep-navy"><Animation client:visible paused color="#1E2BE6" edge="#B5A6FF" cell={8} density={0.6} fade="radial" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} /></div>}
               <p class="mt-3 font-sans font-bold group-hover:text-electric-blue">{eventName(e)}</p>
               <p class="mt-0.5 text-sm text-panel-navy/60">{shortDate(e.date)}</p>
