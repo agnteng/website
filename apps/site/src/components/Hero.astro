@@ -1,8 +1,8 @@
 ---
 // The home page's hero: an electric-blue block. Photos of the meetups take its blue and
-// break up into it cell by cell; more cells rise from its bottom edge.
+// break up into it cell by cell. The page includes <BlueTone /> for the photos' colour.
 import { Image } from 'astro:assets';
-import Animation from '@agnteng/brand/components/Animation.tsx';
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import { nextEvent, register, galleryPhoto, shortDate, startTime } from '../lib/data';
 
@@ -20,7 +20,7 @@ const shots = [
 // Where a head goes in the frame, and how much of the frame's leading edge the cells
 // always cover (the photo may stop short of it). Beside the copy on desktop, the frame's
 // left side dissolves; under the copy on a phone, its top does.
-const DESK = { at: [0.67, 0.36], clear: [0.11, 0] };
+const DESK = { at: [0.67, 0.36], clear: [0.2, 0] };
 const PHONE = { at: [0.5, 0.5], clear: [0, 0] };
 const place = (p: (typeof shots)[number], { at: [tx, ty], clear: [cx, cy] }: typeof DESK) => {
   const [fx, fy] = p.head, a = p.img.width / p.img.height;
@@ -35,18 +35,11 @@ const photos = shots.map((p, i) => {
   const [w, l, t] = place(p, PHONE), [wd, ld, td] = place(p, DESK);
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
-const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } as const;
-// Blue cells that hide the photos, and the navy ones that rise from the bottom edge.
-const cover = { animation: 'drift', color: '#1E2BE6', edge: '#1E2BE6', cell: 10, gap: 0, density: 2, motion: 30, shape: 'square', style: fill } as const;
-const rise = { animation: 'aurora', color: '#05071E', edge: '#B5A6FF', cell: 8, gap: 0, density: 0.7, motion: 60, fade: 'down', dissolve: [0.78, 1.02], shape: 'square', style: fill } as const;
+// The cells that hide the photos' leading edge. Whole across `solid`, which is at
+// least the edge the photos may stop short of.
+const cells = { color: '#1E2BE6', seed: 2027, cell: 10, animate: true } as const;
 ---
 <section class="relative isolate overflow-hidden bg-electric-blue text-white">
-  <!-- Shadows to navy, mid-tones to the block's blue, highlights to soft white. -->
-  <svg width="0" height="0" class="absolute" aria-hidden="true"><filter id="blue-tone" color-interpolation-filters="sRGB">
-    <feColorMatrix type="saturate" values="0" />
-    <feComponentTransfer><feFuncR type="table" tableValues="0.02 0.12 0.96" /><feFuncG type="table" tableValues="0.03 0.17 0.96" /><feFuncB type="table" tableValues="0.12 0.90 1" /></feComponentTransfer>
-  </filter></svg>
-
   <!-- The skip link lands here. -->
   <div id="main" class="relative z-10 mx-auto grid max-w-7xl items-center px-4 pt-14 pb-10 md:min-h-[72dvh] md:grid-cols-12 md:px-8 md:pt-20 md:pb-40">
     <div class="md:col-span-6">
@@ -72,20 +65,13 @@ const rise = { animation: 'aurora', color: '#05071E', edge: '#B5A6FF', cell: 8, 
       <Image src={p.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 110vw, 150vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
     ))}
     <!-- Blue cells cover the frame's leading edge and thin out to nothing: the photo breaks
-         up into the block. Their canvas is larger than the frame, so the frame's own edges
-         are always under solid cells. Above the photo that is fading in. -->
-    <div class="absolute -inset-y-3 -left-[15%] right-0 z-2 max-md:hidden">
-      <Animation client:load {...cover} fade="left" dissolve={[0.42, 0.62]} />
+         up into the block. Above the photo that is fading in. -->
+    <div class="absolute inset-0 z-2 max-md:hidden">
+      <Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.22, reach: 0.52 }]} />
     </div>
-    <div class="absolute -inset-x-3 -top-[15%] bottom-0 z-2 md:hidden">
-      <Animation client:load {...cover} fade="up" dissolve={[0.5, 0.7]} />
-      <Animation client:load {...rise} />
+    <div class="absolute inset-0 z-2 md:hidden">
+      <Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45 }]} />
     </div>
-  </div>
-
-  <!-- Cells rise from the bottom edge, over block and photos alike (on a phone, over the photos only). -->
-  <div class="dither-stage pointer-events-none absolute inset-0 max-md:hidden">
-    <Animation client:load {...rise} />
   </div>
 </section>
 <style>

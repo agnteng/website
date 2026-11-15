@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import BrandColorPicker, { BRAND_COLORS } from './BrandColorPicker';
 import Animation, { ANIMATIONS, type AnimName } from '@agnteng/brand/components/Animation.tsx';
 import AnimImage, { type ImagePosition } from '@agnteng/brand/components/Image.tsx';
+import Artifacts, { type Artifact } from '@agnteng/brand/components/Artifacts.tsx';
 import { Row, Slider, Seg } from './animation-builder/Controls';
 import CollapsibleSection from './animation-builder/CollapsibleSection';
 import CanvasStage from './animation-builder/CanvasStage';
@@ -76,7 +77,31 @@ function pick<T>(arr: T[], seed: number): T {
   return arr[Math.floor((Math.sin(seed * 99.13) * 0.5 + 0.5) * arr.length) % arr.length];
 }
 
-type SectionId = 'presets' | 'template' | 'animation' | 'colors' | 'field' | 'frame' | 'image' | 'export';
+type SectionId = 'presets' | 'template' | 'animation' | 'colors' | 'field' | 'frame' | 'image' | 'artifacts' | 'export';
+
+// What a loaded photo becomes: the dither's duotone field, or the photo itself
+// with artifacts (cells in one colour that eat into it from an edge or corner).
+type Treatment = 'dither' | 'artifacts';
+const TREATMENTS: Treatment[] = ['dither', 'artifacts'];
+interface ArtParams {
+  color: string;
+  tint: boolean;
+  cell: number;
+  rough: number;
+  animate: boolean;
+  seed: number;
+  items: Artifact[];
+}
+const ART_DEFAULTS: ArtParams = {
+  color: '#1E2BE6',
+  tint: true,
+  cell: 10,
+  rough: 0.3,
+  animate: true,
+  seed: 4821,
+  items: [{ at: 'left', solid: 0.2, reach: 0.5 }],
+};
+const newSeed = () => Math.floor(Math.random() * 9000) + 1000;
 
 // ── builder ────────────────────────────────────────────────────────────────
 export default function WaveFieldBuilder() {
@@ -85,6 +110,8 @@ export default function WaveFieldBuilder() {
   const [seed, setSeed] = useState(1);
   const [src, setSrc] = useState('');
   const [imgPos, setImgPos] = useState<ImagePosition>('center');
+  const [treatment, setTreatment] = useState<Treatment>('artifacts');
+  const [art, setArt] = useState<ArtParams>(ART_DEFAULTS);
   const [urlDraft, setUrlDraft] = useState('');
   const [imgStatus, setImgStatus] = useState<'ok' | 'cors' | 'error' | null>(null);
   const [paused, setPaused] = useState(false);
@@ -111,6 +138,7 @@ export default function WaveFieldBuilder() {
     field: true,
     frame: false,
     image: false,
+    artifacts: true,
     export: false,
   });
   const blobRef = useRef<string | null>(null);
@@ -127,6 +155,11 @@ export default function WaveFieldBuilder() {
   const set = <K extends keyof Params>(k: K, v: Params[K]) => setP((s) => ({ ...s, [k]: v }));
   const setLogoK = <K extends keyof TemplateLogo>(k: K, v: TemplateLogo[K]) => setLogo((l) => ({ ...l, [k]: v }));
   const apply = (patch: Partial<Params>) => setP((s) => ({ ...s, ...patch }));
+  const setArtK = <K extends keyof ArtParams>(k: K, v: ArtParams[K]) => setArt((a) => ({ ...a, [k]: v }));
+  const setItem = (i: number, patch: Partial<Artifact>) =>
+    setArt((a) => ({ ...a, items: a.items.map((it, j) => (j === i ? { ...it, ...patch } : it)) }));
+  // Artifacts replace the dither only while a photo is loaded.
+  const artMode = !!src && treatment === 'artifacts';
   const toggle = (id: SectionId) => setOpen((o) => ({ ...o, [id]: !o[id] }));
 
   // selecting a template adopts its default logo placement/scale
@@ -159,11 +192,27 @@ export default function WaveFieldBuilder() {
   const animBlock = src
     ? `<Animation\n${animProps}\n>\n  <Image src="${imgSrcOut}" contrast={${p.contrast}} edgeGlow={${p.edgeGlow}} tone={${p.tone}} position="${imgPos}" />\n</Animation>`
     : `<Animation\n${animProps}\n/>`;
-  let code = animBlock;
+  const artBlock = [
+    '<Artifacts',
+    `  src="${imgSrcOut}"`,
+    `  position="${imgPos}"`,
+    `  color="${art.color}"`,
+    ...(art.tint ? ['  tint'] : []),
+    `  cell={${art.cell}}`,
+    `  rough={${art.rough}}`,
+    `  seed={${art.seed}}`,
+    ...(art.animate ? ['  animate'] : []),
+    '  artifacts={[',
+    ...art.items.map((it) => `    { at: '${it.at}', solid: ${it.solid}, reach: ${it.reach} },`),
+    '  ]}',
+    '/>',
+  ].join('\n');
+  const block = artMode ? artBlock : animBlock;
+  let code = block;
   if (tpl && (tpl.group === 'speaker' || tpl.group === 'sponsor')) {
     code = `/* ${tpl.name} has no JSX embed — names, photos and logos live in this\n   session's form state, so export it as an image (JPG/GIF/MP4) instead. */`;
   } else if (tpl) {
-    const inner = animBlock.split('\n').map((l) => '  ' + l).join('\n');
+    const inner = block.split('\n').map((l) => '  ' + l).join('\n');
     const openTag =
       tpl.group === 'banner'
         ? `<Template platform="${tpl.id.replace('banner-', '')}" logoAnchor="${logo.anchor}" logoMark={${logo.mark}} logoScale={${logo.scale}} logoVariant="${logo.variant}">`
@@ -210,8 +259,9 @@ export default function WaveFieldBuilder() {
         ? (ctx: CanvasRenderingContext2D, W: number, H: number) =>
             drawOverlay(ctx, W, H, tpl.build(text, logo, extra), assets, fontsReady, false)
         : undefined;
-      const target = { source: canvas, out, bg: p.bg, overlay };
-      const name = tpl ? `agentic-${tpl.id}-${out.w}x${out.h}` : `agentic-${p.animation}${src ? '-image' : ''}`;
+      // A photo is scaled smoothly; the dither's cells are kept hard.
+      const target = { source: canvas, out, bg: artMode ? art.color : p.bg, overlay, smooth: artMode };
+      const name = tpl ? `agentic-${tpl.id}-${out.w}x${out.h}` : artMode ? `agentic-artifacts-${art.seed}` : `agentic-${p.animation}${src ? '-image' : ''}`;
       if (kind === 'jpg') await exportJpg(target, name);
       else if (kind === 'mp4') await exportVideo(target, secs, name);
       else await exportGif(target, secs, name, 12, setProg);
@@ -235,7 +285,23 @@ export default function WaveFieldBuilder() {
       active ? 'border-electric-blue bg-electric-blue text-white' : 'border-black/10 text-deep-navy/70 hover:border-electric-blue hover:text-deep-navy'
     }`;
 
-  const fieldEl = (
+  const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } as const;
+  const fieldEl = artMode ? (
+    <Artifacts
+      src={src}
+      position={imgPos}
+      color={art.color}
+      tint={art.tint}
+      cell={art.cell}
+      rough={art.rough}
+      seed={art.seed}
+      animate={art.animate}
+      paused={paused}
+      artifacts={art.items}
+      canvasRef={canvasRef}
+      onStatus={setImgStatus}
+    />
+  ) : (
     <Animation
       animation={p.animation}
       color={p.color}
@@ -250,7 +316,7 @@ export default function WaveFieldBuilder() {
       paused={paused}
       canvasRef={canvasRef}
       onStatus={setImgStatus}
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      style={fill}
     >
       {src && <AnimImage src={src} contrast={p.contrast} edgeGlow={p.edgeGlow} tone={p.tone} position={imgPos} />}
     </Animation>
@@ -263,7 +329,7 @@ export default function WaveFieldBuilder() {
       {/* canvas column — stage fills, code drawer sits below it */}
       <div className="flex min-h-0 flex-col overflow-hidden">
         <div className="relative min-h-0 flex-1">
-          <CanvasStage aspect={p.aspect} frame={tpl?.frame} bg={p.bg} paused={paused} onTogglePlay={() => setPaused((v) => !v)}>
+          <CanvasStage aspect={p.aspect} frame={tpl?.frame} bg={artMode ? art.color : p.bg} paused={paused} onTogglePlay={() => setPaused((v) => !v)}>
             {tpl ? (
               <Template template={tpl} text={text} logo={logo} extra={extra} assets={assets} fontsReady={fontsReady} mockup={mockup} guides={guides}>
                 {fieldEl}
@@ -276,7 +342,7 @@ export default function WaveFieldBuilder() {
           {src && imgStatus === 'cors' && (
             <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center">
               <div className="rounded-md bg-coral px-3 py-1.5 font-mono text-[10px] text-deep-navy shadow">
-                image blocked by CORS — upload the file instead of loading it by URL
+                {artMode ? 'this URL allows showing the photo but not tinting or exporting it — upload the file instead' : 'image blocked by CORS — upload the file instead of loading it by URL'}
               </div>
             </div>
           )}
@@ -287,7 +353,7 @@ export default function WaveFieldBuilder() {
 
       {/* right params panel */}
       <aside className="overflow-y-auto border-l border-line bg-panel">
-        <CollapsibleSection title="Presets" open={open.presets} onToggle={() => toggle('presets')}>
+        {!artMode && <CollapsibleSection title="Presets" open={open.presets} onToggle={() => toggle('presets')}>
           <div className="flex flex-wrap gap-1.5">
             {PRESETS.map((pr) => (
               <button key={pr.name} type="button" onClick={() => apply(pr.p)} className={presetBtn}>
@@ -302,7 +368,7 @@ export default function WaveFieldBuilder() {
               random ⟳
             </button>
           </div>
-        </CollapsibleSection>
+        </CollapsibleSection>}
 
         <CollapsibleSection title="Template" open={open.template} onToggle={() => toggle('template')} right={tpl ? tpl.name : 'none'}>
           <div className="flex flex-wrap gap-1.5">
@@ -386,6 +452,8 @@ export default function WaveFieldBuilder() {
           )}
         </CollapsibleSection>
 
+        {/* The dither's own controls: not shown while a photo takes artifacts instead. */}
+        {!artMode && <>
         <CollapsibleSection title="Animation" open={open.animation} onToggle={() => toggle('animation')}>
           <Row label="Animation"><Seg options={ANIMATIONS} value={p.animation} onChange={(v) => set('animation', v)} /></Row>
           <Row label="Shape"><Seg options={SHAPES} value={p.shape} onChange={(v) => set('shape', v)} /></Row>
@@ -404,6 +472,7 @@ export default function WaveFieldBuilder() {
           <Row label="Motion" value={p.motion === 0 ? 'static' : String(p.motion)}><Slider min={0} max={100} step={1} value={p.motion} onChange={(v) => set('motion', v)} /></Row>
           <Row label="Fade"><Seg options={FADES} value={p.fade} onChange={(v) => set('fade', v)} /></Row>
         </CollapsibleSection>
+        </>}
 
         <CollapsibleSection title="Frame" open={open.frame} onToggle={() => toggle('frame')} right={tpl ? `${tpl.frame.w}×${tpl.frame.h}` : undefined}>
           {tpl ? (
@@ -457,13 +526,74 @@ export default function WaveFieldBuilder() {
 
           {src && (
             <>
+              <Row label="Treatment"><Seg options={TREATMENTS} value={treatment} onChange={setTreatment} /></Row>
               <Row label="Position"><AlignPad value={imgPos} onChange={setImgPos} /></Row>
+            </>
+          )}
+          {src && !artMode && (
+            <>
               <Row label="Contrast" value={p.contrast.toFixed(2)}><Slider min={0.6} max={2.4} step={0.05} value={p.contrast} onChange={(v) => set('contrast', v)} /></Row>
               <Row label="Edge glow" value={p.edgeGlow.toFixed(2)}><Slider min={0} max={2.5} step={0.05} value={p.edgeGlow} onChange={(v) => set('edgeGlow', v)} /></Row>
               <Row label="Tone" value={p.tone.toFixed(2)}><Slider min={0} max={1} step={0.05} value={p.tone} onChange={(v) => set('tone', v)} /></Row>
             </>
           )}
         </CollapsibleSection>
+
+        {artMode && (
+          <CollapsibleSection title="Artifacts" open={open.artifacts} onToggle={() => toggle('artifacts')} right={`${art.items.length} · seed ${art.seed}`}>
+            <Row label="Colour"><BrandColorPicker tone="light" value={art.color} onChange={(v) => setArtK('color', v)} /></Row>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              <label className="flex items-center gap-1.5 font-mono text-[11px] text-deep-navy/70">
+                <input type="checkbox" checked={art.tint} onChange={(e) => setArtK('tint', e.target.checked)} className="accent-electric-blue" /> tint the photo
+              </label>
+              <label className="flex items-center gap-1.5 font-mono text-[11px] text-deep-navy/70">
+                <input type="checkbox" checked={art.animate} onChange={(e) => setArtK('animate', e.target.checked)} className="accent-electric-blue" /> animate the edge
+              </label>
+            </div>
+            <Row label="Cell size" value={`${art.cell}px`}><Slider min={4} max={40} step={1} value={art.cell} onChange={(v) => setArtK('cell', v)} /></Row>
+            <Row label="Roughness" value={art.rough.toFixed(2)}><Slider min={0} max={0.8} step={0.02} value={art.rough} onChange={(v) => setArtK('rough', v)} /></Row>
+            <Row label="Seed">
+              <div className="flex gap-1.5">
+                <input
+                  type="number"
+                  min={0}
+                  value={art.seed}
+                  onChange={(e) => setArtK('seed', Math.max(0, Math.round(Number(e.target.value) || 0)))}
+                  className="min-w-0 flex-1 rounded-md border border-black/15 bg-white px-2.5 py-1.5 font-mono text-[11px] text-deep-navy focus:border-electric-blue focus:outline-none"
+                />
+                <button type="button" onClick={() => setArtK('seed', newSeed())} className={fieldBtn}>new seed ⟳</button>
+              </div>
+            </Row>
+            {art.items.map((it, i) => (
+              <div key={i} className="space-y-3 rounded-md border border-black/10 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <Row label={`Artifact ${i + 1}`}><AlignPad value={it.at} onChange={(at) => setItem(i, { at })} /></Row>
+                  {art.items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setArt((a) => ({ ...a, items: a.items.filter((_, j) => j !== i) }))}
+                      className="shrink-0 rounded-md border border-black/10 px-2.5 py-1.5 font-mono text-[11px] text-deep-navy/70 transition-colors hover:border-coral hover:text-coral"
+                    >
+                      remove
+                    </button>
+                  )}
+                </div>
+                <Row label="Solid" value={it.solid.toFixed(2)}><Slider min={0} max={1} step={0.01} value={it.solid} onChange={(v) => setItem(i, { solid: v, reach: Math.max(it.reach, v) })} /></Row>
+                <Row label="Reach" value={it.reach.toFixed(2)}><Slider min={0} max={1.5} step={0.01} value={it.reach} onChange={(v) => setItem(i, { reach: v, solid: Math.min(it.solid, v) })} /></Row>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setArt((a) => ({ ...a, items: [...a.items, { at: 'bottom-right', solid: 0.15, reach: 0.45 }] }))}
+              className="w-full rounded-md border border-black/10 py-2 font-mono text-[11px] uppercase tracking-wider text-deep-navy/70 transition-colors hover:border-electric-blue hover:text-electric-blue"
+            >
+              add an artifact
+            </button>
+            <p className="font-mono text-[10px] leading-relaxed text-deep-navy/40">
+              Each artifact grows from the dot you pick. Cells are whole up to Solid and gone by Reach. The seed fixes the pattern for this frame and cell size; a frame of another size draws another pattern from the same seed.
+            </p>
+          </CollapsibleSection>
+        )}
 
         <CollapsibleSection title="Export" open={open.export} onToggle={() => toggle('export')}>
           <div className="flex items-center justify-between">
@@ -498,7 +628,7 @@ export default function WaveFieldBuilder() {
         <div className="p-4">
           <button
             type="button"
-            onClick={() => setP(DEFAULTS)}
+            onClick={() => { setP(DEFAULTS); setArt(ART_DEFAULTS); }}
             className="w-full rounded-md border border-black/10 py-2 font-mono text-[11px] uppercase tracking-wider text-deep-navy/60 transition-colors hover:border-deep-navy/30 hover:text-deep-navy"
           >
             reset to default

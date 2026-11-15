@@ -11,6 +11,7 @@ export interface ExportTarget {
   out: { w: number; h: number }; // exact export pixel size
   bg: string; // field background (the canvas has transparent gaps)
   overlay?: (ctx: CanvasRenderingContext2D, W: number, H: number) => void;
+  smooth?: boolean; // the source holds a photo: scale it smoothly, not cell-hard
 }
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -28,7 +29,8 @@ function downloadBlob(blob: Blob, filename: string) {
 
 // one composited frame at W×H: bg fill → scaled field → overlay
 function renderFrame(t: ExportTarget, ctx: CanvasRenderingContext2D, W: number, H: number) {
-  ctx.imageSmoothingEnabled = false;
+  ctx.imageSmoothingEnabled = !!t.smooth;
+  ctx.imageSmoothingQuality = 'high';
   ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
   ctx.drawImage(t.source, 0, 0, W, H);

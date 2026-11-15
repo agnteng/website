@@ -28,7 +28,7 @@ export default function CodeDrawer({ code, copied, onCopy }: Props) {
             <path d="M2.5 7.5L6 4l3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-deep-navy/70">JSX</span>
-          {!open && <span className="truncate font-mono text-[11px] text-deep-navy/35">&lt;Animation … /&gt;</span>}
+          {!open && <span className="truncate font-mono text-[11px] text-deep-navy/35">&lt;{code.match(/^<(\w+)/)?.[1] ?? 'Animation'} … /&gt;</span>}
         </button>
         {open && (
           <button
