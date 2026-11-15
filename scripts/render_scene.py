@@ -22,6 +22,7 @@ Needs Chrome or Chromium (CHROME_BIN, else the usual places).
 from __future__ import annotations
 
 import argparse
+import base64
 import functools
 import html
 import http.server
@@ -94,6 +95,71 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
         pass
 
 
+def render(scene: dict, site: str, png: str | None = None, frames: int = 0, fps: int = 15) -> list[bytes]:
+    """Draw a scene on the site's /render page. With `png`, write a screenshot there. With
+    `frames`, return that many JPEG frames of the moving picture, `fps` apart."""
+    frame = scene.get("frame") or {"w": 1920, "h": 1080}
+    with tempfile.TemporaryDirectory() as tmp:
+        root = pathlib.Path(tmp)
+        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=tmp))
+        base = f"http://127.0.0.1:{srv.server_address[1]}"
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+
+        # Any `src` that is a file here is copied next to the scene and served from there.
+        n = 0
+        def local(node):
+            nonlocal n
+            if isinstance(node, list):
+                for v in node:
+                    local(v)
+            elif isinstance(node, dict):
+                for k, v in node.items():
+                    if k != "src" or not isinstance(v, str):
+                        local(v)
+                    elif v == "/your-image.jpg":
+                        die("the scene still has /your-image.jpg, the builder's stand-in for an upload: put the real file there")
+                    elif v and "://" not in v and not v.startswith("data:"):
+                        f = pathlib.Path(v).expanduser()
+                        if f.is_file():
+                            n += 1
+                            shutil.copy(f, root / f"{n}{f.suffix}")
+                            node[k] = f"{base}/{n}{f.suffix}"
+                        elif not v.startswith("/"):  # an absolute path that is no file is the site's own
+                            die(f"{v}: no such file")
+        local(scene)
+        (root / "scene.json").write_text(json.dumps(scene))
+
+        src = urllib.parse.quote(base + "/scene.json", safe="")
+        url = f"{site}/render?src={src}" + (f"&frames={frames}&fps={fps}" if frames else "&still")
+        # The page is public and the scene is on this machine: Chrome asks a person before
+        # letting one reach the other, and there is nobody to ask. The clock is virtual, so
+        # the budget covers loading plus the length of the clip without taking that long.
+        flags = [chrome(), "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1",
+                 "--disable-features=LocalNetworkAccessChecks", f"--window-size={frame['w']},{frame['h']}",
+                 f"--virtual-time-budget={9000 + (1000 * frames) // fps}"]
+        try:
+            # Once to ask the page how it went (and for its frames), once for a screenshot.
+            dom = subprocess.run([*flags, "--dump-dom", url], capture_output=True, text=True, timeout=300).stdout
+            state = re.search(r'<html[^>]*\sdata-render="([^"]*)"', dom)
+            if not state:
+                die(f"{site}/render did not draw: is that the branding site, with this change deployed?")
+            if state.group(1) != "ok":
+                die(html.unescape(state.group(1)))
+            if png:
+                shot = root / "shot.png"
+                subprocess.run([*flags, f"--screenshot={shot}", url], capture_output=True, timeout=300)
+                if not shot.is_file():
+                    die(f"Chrome wrote no picture from {site}/render")
+                shutil.move(shot, png)
+        except subprocess.TimeoutExpired:
+            die("Chrome did not finish in time")
+        finally:
+            srv.shutdown()
+            srv.server_close()
+    found = re.search(r'<script id="frames" type="application/json">(.*?)</script>', dom, re.S)
+    return [base64.b64decode(u.split(",", 1)[1]) for u in json.loads(html.unescape(found.group(1)))] if found else []
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("scene", nargs="?", help="a scene's JSON file (or use --preset)")
@@ -136,60 +202,7 @@ def main() -> None:
         set_path(scene, *s.split("=", 1))
     frame = scene.get("frame") or {"w": 1920, "h": 1080}
 
-    with tempfile.TemporaryDirectory() as tmp:
-        root = pathlib.Path(tmp)
-        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=tmp))
-        base = f"http://127.0.0.1:{srv.server_address[1]}"
-        threading.Thread(target=srv.serve_forever, daemon=True).start()
-
-        # Any `src` that is a file here is copied next to the scene and served from there.
-        n = 0
-        def local(node):
-            nonlocal n
-            if isinstance(node, list):
-                for v in node:
-                    local(v)
-            elif isinstance(node, dict):
-                for k, v in node.items():
-                    if k != "src" or not isinstance(v, str):
-                        local(v)
-                    elif v == "/your-image.jpg":
-                        die("the scene still has /your-image.jpg, the builder's stand-in for an upload: put the real file there")
-                    elif v and "://" not in v and not v.startswith("data:"):
-                        f = pathlib.Path(v).expanduser()
-                        if f.is_file():
-                            n += 1
-                            shutil.copy(f, root / f"{n}{f.suffix}")
-                            node[k] = f"{base}/{n}{f.suffix}"
-                        elif not v.startswith("/"):  # an absolute path that is no file is the site's own
-                            die(f"{v}: no such file")
-        local(scene)
-        (root / "scene.json").write_text(json.dumps(scene))
-
-        url = f"{site}/render?still&src={urllib.parse.quote(base + '/scene.json', safe='')}"
-        shot = root / "shot.png"
-        # The page is public and the scene is on this machine: Chrome asks a person before
-        # letting one reach the other, and there is nobody to ask.
-        flags = [chrome(), "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1",
-                 "--disable-features=LocalNetworkAccessChecks", f"--window-size={frame['w']},{frame['h']}",
-                 "--virtual-time-budget=9000"]
-        try:
-            # Once to ask the page how it went, once for the picture.
-            dom = subprocess.run([*flags, "--dump-dom", url], capture_output=True, text=True, timeout=120).stdout
-            state = re.search(r'<html[^>]*\sdata-render="([^"]*)"', dom)
-            if not state:
-                die(f"{site}/render did not draw: is that the branding site, with this change deployed?")
-            if state.group(1) != "ok":
-                die(html.unescape(state.group(1)))
-            subprocess.run([*flags, f"--screenshot={shot}", url], capture_output=True, timeout=120)
-        except subprocess.TimeoutExpired:
-            die("Chrome did not finish within two minutes")
-        finally:
-            srv.shutdown()
-            srv.server_close()
-        if not shot.is_file():
-            die(f"Chrome wrote no picture from {site}/render")
-        shutil.move(shot, out)
+    render(scene, site, png=out)
     print(f"{out}  {frame['w']}x{frame['h']}")
 
 

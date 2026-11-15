@@ -1,9 +1,28 @@
 ---
 name: brand-image
-description: Render a brand image (speaker card or trio, event cover, social or sponsor banner, photo with artifacts) to a PNG from the animation builder's presets. Use when the user asks for a speaker card, announcement image, cover, banner or other branded graphic.
+description: Make a speaker announcement (JPG, GIF and MP4 for one to three speakers) or another brand image (event cover, social or sponsor banner, photo with artifacts) from the animation builder. Use when the user asks for speaker cards, an announcement image or video, a cover, a banner or other branded graphic.
 ---
 
 # Brand images
+
+## A speaker announcement
+
+One command, for one to three speakers. It writes a JPG, a GIF and an MP4:
+
+```sh
+python3 scripts/speaker_cards.py --date "Lisbon · 27 Jan" \
+  --speaker "Anna Lima|Staff Engineer, Acme|/path/to/anna.jpg" \
+  --speaker "Rui Costa|Founder, Beta|/path/to/rui.jpg" \
+  --out "$AGNTENG_MEDIA/<date>/speakers"
+```
+
+Or pass a JSON file: `{"date": "…", "speakers": [{"name", "title", "photo"}]}`.
+Photos are files or URLs; a square crop of the face works best. Look at the
+JPG before handing the set over: a face cropped by its slot, a long title
+running into the next column. Done when all three files exist and the JPG
+reads well. Needs Chrome, ffmpeg and the network.
+
+## Anything else
 
 `scripts/render_scene.py` draws a scene from the animation builder and writes a
 PNG. Run it from this repository's root. It needs Chrome and the network.
