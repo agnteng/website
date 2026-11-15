@@ -1,6 +1,8 @@
 ---
 import '../styles/site.css';
-// `image` is what a shared link shows: a path on this site or a full URL. Default: the montage.
+// `image` is what a shared link shows: a path on this site or a full URL. The default is
+// drawn from apps/site/share.scene.json: `python3 scripts/render_scene.py apps/site/share.scene.json share.jpg`,
+// then production's photos.py optimize, into apps/branding/public/assets/photos/.
 interface Props { title: string; description?: string; image?: string; class?: string }
 const { title, description = 'Agentic Engineering: a Lisbon meetup for people building software, infrastructure and companies with AI agents.', image = '/assets/photos/share.jpg', class: cls } = Astro.props;
 // No trailing slash, matching internal links and sitemap.xml.
