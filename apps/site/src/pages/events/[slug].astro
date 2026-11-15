@@ -29,6 +29,10 @@ const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
       <h1 class="rise font-sans text-5xl font-extrabold tracking-tight md:max-w-[40%] md:text-6xl">{eventName(e)}</h1>
       <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium" style="--i:1"><Icon name="Calendar" size={16} class="text-periwinkle" />{longDate(e.date)}</p>
+      <div class="rise mt-8 flex flex-wrap gap-3" style="--i:2">
+        {e.recap && <Button href={e.recap} class="!bg-white !text-electric-blue">Read the recap</Button>}
+        <Button variant="outline" href={links.luma} class={e.recap ? '!border-white/45 !text-white hover:!border-white' : '!border-white !bg-white !text-electric-blue'}>See upcoming events</Button>
+      </div>
     </div>
     {cover && (
       <div class="dither-stage relative h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
@@ -73,12 +77,6 @@ const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell
         </div>
       </section>
     )}
-
-    <section class="flex flex-wrap gap-3 border-t border-panel-navy/[0.08] py-16">
-      {e.recap && <Button variant="outline" href={e.recap}>Read the recap</Button>}
-      {e.luma && <Button variant="outline" href={e.luma.url}>This event on Luma</Button>}
-      <Button variant="primary" href={links.luma}>See upcoming events</Button>
-    </section>
   </main>
   <SiteFooter />
 </Shell>
