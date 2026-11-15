@@ -37,8 +37,9 @@ interface Props {
   canvasRef?: React.RefObject<HTMLCanvasElement | null>; // expose the canvas for export
 }
 
-// A fixed pseudo-random value in [0, 1) for a cell and a seed.
-function rnd(a: number, b: number, s: number) {
+// A fixed pseudo-random value in [0, 1) for a cell and a seed. The builder's artifact
+// layer uses it too, so a seed draws the same pattern in both.
+export function rnd(a: number, b: number, s: number) {
   let h = Math.imul(a, 374761393) ^ Math.imul(b, 668265263) ^ Math.imul(s, 1274126177);
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
