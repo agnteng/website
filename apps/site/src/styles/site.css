@@ -25,6 +25,8 @@ p, li { text-wrap: pretty; }
 .dither-stage { opacity: 0; animation: dither-in 0.35s ease-out 1.5s forwards; }
 .dither-stage:has(canvas[data-painted]) { opacity: 1; animation: none; transition: opacity 0.35s ease-out; }
 @keyframes dither-in { to { opacity: 1; } }
+/* No JavaScript, no dither: show photos at once. */
+@media (scripting: none) { .dither-stage { opacity: 1; animation: none; } }
 @media (prefers-reduced-motion: reduce) {
   .dither-stage { animation-duration: 0s; }
   .dither-stage:has(canvas[data-painted]) { transition: none; }
