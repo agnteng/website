@@ -28,3 +28,4 @@ Decision, Consequences.
 | [0009](0009-speakers-tinted-in-brand-colours.md) | Speakers are tinted in a brand colour | Accepted; palettes superseded by 0010 |
 | [0010](0010-speaker-animation-presets.md) | Speaker tiles use the brand's animation presets | Accepted |
 | [0011](0011-photos-take-artifacts.md) | Photos take artifacts, not the dither | Accepted |
+| [0012](0012-builder-edits-a-scene.md) | The animation builder edits a scene; templates are presets | Accepted |

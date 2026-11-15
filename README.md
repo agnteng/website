@@ -31,6 +31,7 @@ git config core.hooksPath .githooks   # needs: brew install gitleaks
 | `content/<date>/event.json` | One event's identity: city, venue, Luma ids, speakers. The decks import it as `@content/<date>/event.json`; production reads it for the write-ups. |
 | `content/<date>/talks/`, `questions.json` | Each talk and the Q&A, written by production's `publish_talks.py` (org ADR 0007). Never edited here. |
 | `scripts/fitness.py` | The fitness checks (`docs/adr/0005`). |
+| `scripts/render_scene.py` | A brand image from the animation builder's presets, as a PNG (`docs/adr/0012`; the `brand-image` skill). |
 | `docs/adr/` | Decisions about this repository, and why. Org-wide decisions live in the workspace. |
 | `tests/snapshots/` | What every page renders (without Luma data); `mise run fitness:render` compares against it. |
 

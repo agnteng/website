@@ -1,0 +1,9 @@
+---
+// One scene from the animation builder, drawn at its own size with nothing
+// around it: what scripts/render_scene.py photographs.
+import Base from '../layouts/Base.astro';
+import RenderScene from '../components/animation-builder/RenderScene.tsx';
+---
+<Base title="Render — Agentic Engineering" bodyClass="m-0 bg-deep-navy">
+  <RenderScene client:only="react" />
+</Base>
