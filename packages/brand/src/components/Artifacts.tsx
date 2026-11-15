@@ -106,6 +106,7 @@ export default function Artifacts({
 
   // One string for the effect's dependencies: the list is rebuilt on every render.
   const shape = JSON.stringify(artifacts);
+  const clock = useRef(0); // kept when a prop changes, so a paused frame stays the frame it was
 
   useEffect(() => {
     const canvas = ref.current;
@@ -210,16 +211,17 @@ export default function Artifacts({
 
     // The clock only runs while a frame is drawn, so a pause holds the frame and a
     // canvas that is off screen costs nothing.
-    let raf = 0, last = 0, t = 0;
+    let raf = 0, last = 0, t = clock.current;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       if (pausedRef.current || now - last < 80) return; // about twelve frames a second: cells step, they don't glide
       t += last ? Math.min(0.25, (now - last) / 1000) : 0;
       last = now;
+      clock.current = t;
       draw(t);
     };
     layout();
-    draw(0);
+    draw(t);
     const ro = new ResizeObserver(() => { layout(); draw(t); });
     ro.observe(canvas);
     const io = new IntersectionObserver(([e]) => {

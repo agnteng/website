@@ -6,7 +6,7 @@ import CodeDrawer from './animation-builder/CodeDrawer';
 import SceneView from './animation-builder/SceneView';
 import { BackgroundPanel, FramePanel, LayersPanel } from './animation-builder/panels';
 import { Range, Row, Seg, btn, btnAccent, field, note } from './animation-builder/Controls';
-import { exportJpg, exportVideo, exportGif } from './animation-builder/exporters';
+import { exportJpg, exportVideo, exportGif, GIF_MAX_EDGE, VIDEO_MAX_EDGE } from './animation-builder/exporters';
 import { drawLayers } from './animation-builder/sceneDraw';
 import { useLogoAssets, useFontsReady } from './animation-builder/useLogoAssets';
 import { FIELD, PHOTO, PRESETS, bgColor, readScene, stageSize, writeScene, type Background, type Preset, type Scene } from './animation-builder/scene';
@@ -51,6 +51,7 @@ export default function WaveFieldBuilder() {
   const [imgStatus, setImgStatus] = useState<'ok' | 'cors' | 'error' | null>(null);
   const [secs, setSecs] = useState(4);
   const [times, setTimes] = useState<(typeof SCALES)[number]>('1×'); // export size, in frames
+  const by = Number.parseInt(times, 10);
   const [pixelRatio, setPixelRatio] = useState<number | undefined>(); // set while a large export is read
   const [busy, setBusy] = useState<'jpg' | 'gif' | 'mp4' | null>(null);
   const [prog, setProg] = useState(0);
@@ -102,24 +103,27 @@ export default function WaveFieldBuilder() {
     setMsg(null);
     setBusy(kind);
     setProg(0);
-    const by = Number.parseInt(times, 10);
     const out = { w: scene.frame.w * by, h: scene.frame.h * by };
     try {
-      // A photo is redrawn from its file at the export's size; the field's flat cells scale as they are.
+      // A photo is redrawn from its file at the size the export is written at; the field's
+      // flat cells scale as they are. A whole ratio keeps the cells on whole pixels, and a
+      // canvas that is already large enough is left alone.
       if (scene.background.kind === 'photo') {
-        const stage = stageSize(scene.frame);
-        const ratio = Math.min(out.w / stage.w, CANVAS_MAX_EDGE / Math.max(stage.w, stage.h));
-        const want = Math.round(stage.w * ratio);
-        setPixelRatio(ratio);
-        for (let i = 0; i < 60 && canvas.width !== want; i++) await new Promise((r) => setTimeout(r, 50));
-        await new Promise((r) => setTimeout(r, 250)); // and a painted frame at that size
+        const stage = stageSize(scene.frame), edge = Math.max(stage.w, stage.h), long = Math.max(out.w, out.h);
+        const written = kind === 'jpg' ? long : Math.min(long, kind === 'mp4' ? VIDEO_MAX_EDGE : Math.min(GIF_MAX_EDGE, 1000 * by));
+        const ratio = Math.max(1, Math.min(Math.ceil(written / edge), Math.floor(CANVAS_MAX_EDGE / edge)));
+        if (stage.w * ratio > canvas.width) {
+          setPixelRatio(ratio);
+          for (let i = 0; i < 60 && canvas.width !== stage.w * ratio; i++) await new Promise((r) => setTimeout(r, 50));
+          await new Promise((r) => setTimeout(r, 250)); // and a painted frame at that size
+        }
       }
       const target = {
         source: canvas,
         out,
         scale: by,
         bg: bgColor(scene.background),
-        overlay: (ctx: CanvasRenderingContext2D, W: number, H: number) => drawLayers(ctx, W, H, scene.layers, assets, images.current, fontsReady, false),
+        overlay: (ctx: CanvasRenderingContext2D, W: number, H: number) => drawLayers(ctx, W, H, scene.layers, assets, images.current, fontsReady, false, W / scene.frame.w),
         smooth: scene.background.kind === 'photo', // a photo is scaled smoothly; the field's cells are kept hard
       };
       const name = `agentic-${out.w}x${out.h}`;
@@ -128,9 +132,7 @@ export default function WaveFieldBuilder() {
       else await exportGif(target, secs, name, 12, setProg);
     } catch (e) {
       console.error('export failed', e);
-      setMsg(by > 1
-        ? 'Export failed. The browser may refuse a picture this large: try a smaller scale.'
-        : 'Export failed. A photo loaded by URL from another site can block it: upload the file instead.');
+      setMsg(`Export failed. A photo loaded by URL from another site can block it: upload the file instead.${by > 1 ? ' The browser can also refuse a picture this large: try a smaller scale.' : ''}`);
     } finally {
       setPixelRatio(undefined);
       setBusy(null);
@@ -212,7 +214,7 @@ export default function WaveFieldBuilder() {
           <LayersPanel layers={scene.layers} set={(layers) => patch({ layers })} selected={selected} select={setSelected} />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Export" open={open.export} onToggle={() => toggle('export')} right={`${scene.frame.w * Number.parseInt(times, 10)} × ${scene.frame.h * Number.parseInt(times, 10)}`}>
+        <CollapsibleSection title="Export" open={open.export} onToggle={() => toggle('export')} right={`${scene.frame.w * by} × ${scene.frame.h * by}`}>
           <Row label="Scale"><Seg options={SCALES} value={times} onChange={setTimes} /></Row>
           <div className="grid grid-cols-3 gap-1.5">
             <button type="button" onClick={() => doExport('jpg')} disabled={!!busy} className={btnAccent}>JPG</button>
@@ -224,7 +226,7 @@ export default function WaveFieldBuilder() {
             ? <p className="text-[11px] text-electric-blue">Exporting {busy.toUpperCase()}…{busy === 'gif' ? ` ${Math.round(prog * 100)}%` : ''}</p>
             : msg
               ? <p className="text-[11px] text-coral">{msg}</p>
-              : <p className={note}>Scale multiplies the frame: 2× of 1200 × 630 is 2400 × 1260, with everything in it twice the size. MP4 stops at 3840 on its long side and GIF at 2000. Seconds set the GIF and MP4 length. JPG takes the current frame: pause to pick one.</p>}
+              : <p className={note}>Scale multiplies the frame: 2× of 1200 × 630 is 2400 × 1260, with everything in it twice the size. MP4 stops at {VIDEO_MAX_EDGE} on its long side and GIF at {GIF_MAX_EDGE}. Seconds set the GIF and MP4 length. JPG takes the current frame: pause to pick one.</p>}
           <div className="!mt-2.5 border-t border-line pt-2.5">
             {pasting === null
               ? (

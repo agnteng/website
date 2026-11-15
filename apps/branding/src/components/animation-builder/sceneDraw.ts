@@ -85,9 +85,10 @@ function scrim(ctx: Ctx, W: number, H: number, l: ScrimLayer) {
 
 // Drawn in cells only, in the box's turned frame: a cell's distance past the box
 // decides whether and how strongly it shows, so even a rounded corner is cells.
-function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
-  // Whole pixels: a fractional cell leaves hairlines between cells.
-  const m = Math.min(W, H), c = Math.max(2, Math.round(l.cell * m)), bw = l.w * W, bh = l.h * H;
+function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer, scale: number) {
+  // Whole pixels: a fractional cell leaves hairlines between cells. The cell is sized for
+  // the frame and then scaled, so a larger export has the frame's cells, not more of them.
+  const m = Math.min(W, H), c = Math.max(2, Math.round(Math.max(2, Math.round((l.cell * m) / scale)) * scale)), bw = l.w * W, bh = l.h * H;
   const { fx, fy } = anchorFactors(l.at);
   // which way the box opens: +1 from the left or bottom, -1 from the right or top, 0 centred
   const sx = fx === 0 ? 1 : fx === 1 ? -1 : 0, sy = fy === 1 ? 1 : fy === 0 ? -1 : 0;
@@ -146,9 +147,10 @@ function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
 
 // `images` holds each photo layer's loaded picture, by layer id. `preview` adds
 // what only the builder shows: guides, and the dashed slot of a photo with no picture.
+// `scale` is how many times the frame's own size W×H is (an export larger than the frame).
 export function drawLayers(
   ctx: Ctx, W: number, H: number, layers: Layer[], assets: OverlayAssets,
-  images: Record<string, HTMLImageElement | null>, fontsReady: boolean, preview: boolean,
+  images: Record<string, HTMLImageElement | null>, fontsReady: boolean, preview: boolean, scale = 1,
 ) {
   for (const l of layers) {
     if (l.hidden) continue;
@@ -163,7 +165,7 @@ export function drawLayers(
     else if (l.type === 'text') { if (fontsReady) text(ctx, W, H, l); }
     else if (l.type === 'photo') photo(ctx, W, H, l, images[l.id], preview);
     else if (l.type === 'scrim') scrim(ctx, W, H, l);
-    else if (l.type === 'artifact') artifact(ctx, W, H, l);
+    else if (l.type === 'artifact') artifact(ctx, W, H, l, scale);
     else if (l.type === 'rect') {
       ctx.save();
       ctx.globalAlpha = l.opacity;
