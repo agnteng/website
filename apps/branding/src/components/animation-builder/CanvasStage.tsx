@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { normalizeWH } from './templates';
+import { stageSize } from './scene';
+import { droppedImage, isImageDrop } from './ImageInput';
 
 // A Figma-style infinite canvas: a fixed-pixel artboard floating in a gray
 // viewport you can pan (drag / wheel) and zoom (ctrl/⌘+wheel toward the cursor,
@@ -17,33 +18,23 @@ interface View {
 }
 
 export default function CanvasStage({
-  aspect,
   frame,
   bg,
   children,
   paused,
   onTogglePlay,
+  onDropImage,
 }: {
-  aspect: string;
-  frame?: { w: number; h: number };
+  frame: { w: number; h: number };
   bg: string;
   children: ReactNode;
   paused?: boolean;
   onTogglePlay?: () => void;
+  onDropImage?: (file: File) => void;
 }) {
-  // An active template's frame drives the artboard size; otherwise derive from
-  // the manual aspect. Either way the artboard stays ~960px on its long edge.
-  let BASE_W: number;
-  let BASE_H: number;
-  if (frame) {
-    const n = normalizeWH(frame.w, frame.h);
-    BASE_W = n.w;
-    BASE_H = n.h;
-  } else {
-    const [aw, ah] = aspect.split('/').map((n) => Number(n.trim()) || 1);
-    BASE_W = 960;
-    BASE_H = Math.round((960 * ah) / aw);
-  }
+  // The artboard keeps the frame's shape at about 960px on its long edge.
+  const { w: BASE_W, h: BASE_H } = stageSize(frame);
+  const [dropping, setDropping] = useState(false);
 
   const stageRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<View>({ zoom: 1, x: 0, y: 0 });
@@ -79,9 +70,9 @@ export default function CanvasStage({
     apply({ zoom: next, x: px - (px - cur.x) * k, y: py - (py - cur.y) * k });
   };
 
-  // re-fit on mount and whenever the frame/aspect changes
+  // re-fit on mount and when the frame changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(fit, [aspect, frame?.w, frame?.h]);
+  useEffect(fit, [frame.w, frame.h]);
 
   // non-passive wheel listener (React onWheel is passive → can't preventDefault)
   useEffect(() => {
@@ -135,6 +126,9 @@ export default function CanvasStage({
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerLeave={endDrag}
+      onDragOver={(e) => { if (onDropImage && isImageDrop(e)) { e.preventDefault(); setDropping(true); } }}
+      onDragLeave={() => setDropping(false)}
+      onDrop={(e) => { e.preventDefault(); setDropping(false); const f = droppedImage(e); if (f) onDropImage?.(f); }}
       className={`relative h-full w-full overflow-hidden bg-canvas ${grabbing ? 'cursor-grabbing' : 'cursor-grab'}`}
       style={{
         backgroundImage:
@@ -154,6 +148,12 @@ export default function CanvasStage({
           {children}
         </div>
       </div>
+
+      {dropping && (
+        <div className="pointer-events-none absolute inset-3 z-10 grid place-items-center rounded-xl border-2 border-dashed border-electric-blue bg-electric-blue/10">
+          <span className="rounded-md bg-electric-blue px-3 py-1.5 text-[11px] text-white">drop the image</span>
+        </div>
+      )}
 
       {/* zoom HUD */}
       <div
@@ -178,7 +178,7 @@ export default function CanvasStage({
         <button
           type="button"
           onClick={reset100}
-          className="min-w-[3.5rem] rounded-md px-1 py-1 text-center font-mono text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
+          className="min-w-[3.5rem] rounded-md px-1 py-1 text-center text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
         >
           {Math.round(view.zoom * 100)}%
         </button>
@@ -189,7 +189,7 @@ export default function CanvasStage({
         <button
           type="button"
           onClick={fit}
-          className="rounded-md px-2 py-1 font-mono text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
+          className="rounded-md px-2 py-1 text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
         >
           Fit
         </button>

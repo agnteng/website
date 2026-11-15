@@ -1,16 +1,26 @@
 import { useState } from 'react';
 
 // A Chrome-DevTools-style bottom drawer. Collapsed to a thin handle; click to
-// slide the JSX panel up. Pinned to the bottom of the canvas column so it never
-// overlaps the params panel. The `code`/copy come unchanged from the orchestrator.
+// slide the code panel up. Pinned to the bottom of the canvas column so it never
+// overlaps the params panel.
 interface Props {
-  code: string;
-  copied: boolean;
-  onCopy: () => void;
+  tabs: { name: string; code: string }[]; // the same picture, written two ways
 }
 
-export default function CodeDrawer({ code, copied, onCopy }: Props) {
+export default function CodeDrawer({ tabs }: Props) {
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const { code } = tabs[tab];
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      /* clipboard blocked */
+    }
+  };
   return (
     <div className="shrink-0 border-t border-line bg-panel">
       <div className="flex items-center gap-2 px-3">
@@ -27,21 +37,31 @@ export default function CodeDrawer({ code, copied, onCopy }: Props) {
           >
             <path d="M2.5 7.5L6 4l3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-deep-navy/70">JSX</span>
-          {!open && <span className="truncate font-mono text-[11px] text-deep-navy/35">&lt;{code.match(/^<(\w+)/)?.[1] ?? 'Animation'} … /&gt;</span>}
+          <span className="text-[11px] font-semibold text-deep-navy">Code</span>
+          {!open && <span className="truncate text-[11px] text-deep-navy/35">{tabs.map((t) => t.name).join(' · ')}</span>}
         </button>
+        {open && tabs.map((t, i) => (
+          <button
+            key={t.name}
+            type="button"
+            onClick={() => setTab(i)}
+            className={`rounded-md px-2.5 py-1 text-[11px] transition-colors ${i === tab ? 'bg-deep-navy/[0.08] text-deep-navy' : 'text-deep-navy/50 hover:text-deep-navy'}`}
+          >
+            {t.name}
+          </button>
+        ))}
         {open && (
           <button
             type="button"
             onClick={onCopy}
-            className="rounded-md border border-line px-2.5 py-1 font-mono text-[11px] text-deep-navy/70 transition-colors hover:border-electric-blue hover:text-electric-blue"
+            className="rounded-md border border-line px-2.5 py-1 text-[11px] text-deep-navy/70 transition-colors hover:border-electric-blue hover:text-electric-blue"
           >
             {copied ? 'copied ✓' : 'copy'}
           </button>
         )}
       </div>
       {open && (
-        <pre className="max-h-[34vh] overflow-auto border-t border-line bg-canvas px-4 py-3 font-mono text-xs leading-relaxed text-deep-navy/85">
+        <pre className="max-h-[34vh] overflow-auto border-t border-line bg-canvas px-4 py-3 font-[ui-monospace,SFMono-Regular,Menlo,monospace] text-xs leading-relaxed text-deep-navy/85">
           {code}
         </pre>
       )}

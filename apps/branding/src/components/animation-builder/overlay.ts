@@ -220,7 +220,7 @@ function drawCoverGroup(ctx: Ctx, W: number, H: number, gs: NonNullable<OverlayS
 }
 
 // crop-to-fill an image into a rect, centred on whichever axis overflows
-function drawImageCover(ctx: Ctx, img: HTMLImageElement, x: number, y: number, w: number, h: number, radius = 0) {
+export function drawImageCover(ctx: Ctx, img: HTMLImageElement, x: number, y: number, w: number, h: number, radius = 0) {
   const ir = img.naturalWidth / img.naturalHeight;
   const r = w / h;
   let sx: number, sy: number, sw: number, sh: number;
@@ -246,7 +246,7 @@ function drawImageCover(ctx: Ctx, img: HTMLImageElement, x: number, y: number, w
 
 // fit an image inside a box (no crop), centred — for logos/sponsor marks,
 // where cropping would cut off part of the mark
-function drawImageContain(ctx: Ctx, img: HTMLImageElement, cx: number, cy: number, maxW: number, maxH: number) {
+export function drawImageContain(ctx: Ctx, img: HTMLImageElement, cx: number, cy: number, maxW: number, maxH: number) {
   const ir = img.naturalWidth / img.naturalHeight;
   let w = maxW;
   let h = w / ir;
@@ -259,7 +259,7 @@ function drawImageContain(ctx: Ctx, img: HTMLImageElement, cx: number, cy: numbe
 
 // dashed box + centred label — an empty photo/logo slot, same read as the
 // Placeholder component the slide decks use
-function drawSlotPlaceholder(ctx: Ctx, x: number, y: number, w: number, h: number, label: string) {
+export function drawSlotPlaceholder(ctx: Ctx, x: number, y: number, w: number, h: number, label: string) {
   ctx.save();
   ctx.strokeStyle = 'rgba(244,245,255,0.28)';
   ctx.lineWidth = Math.max(1, Math.min(w, h) * 0.008);

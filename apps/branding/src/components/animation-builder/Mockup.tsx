@@ -1,70 +1,11 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { drawOverlay, type OverlayAssets } from './animation-builder/overlay';
-import {
-  normalizeWH,
-  type Template as TemplateDef,
-  type TemplateExtra,
-  type TemplateLogo,
-  type TemplateText,
-} from './animation-builder/templates';
-
-// <Template> wraps <Animation>: the field flows underneath, and the template's
-// design elements (logo lockup, city pill, date, speaker photos, sponsor
-// logos) are composited on top via a resolution-independent overlay canvas.
-// Banners also render the real platform UI around the frame (preview only —
-// never part of the export).
-//
-//   <Template template={tpl} text={...} logo={...} ...><Animation .../></Template>
-
-const NO_EXTRA: TemplateExtra = { speakers: [], sponsors: [] };
-
-interface Props {
-  template: TemplateDef;
-  text: TemplateText;
-  logo: TemplateLogo;
-  extra?: TemplateExtra;
-  assets: OverlayAssets;
-  fontsReady: boolean;
-  mockup: boolean;
-  guides: boolean;
-  children: ReactNode; // the <Animation> field
-}
+// The platform's own UI drawn around a frame (DOM, preview only): how a banner
+// will sit under an avatar, a name and a follow button. Never part of an export.
+import type { Mockup as MockupKind } from './scene';
 
 const AVATAR = '/assets/logo/ae-icon.svg';
 
-export default function Template({ template, text, logo, extra = NO_EXTRA, assets, fontsReady, mockup, guides, children }: Props) {
-  const disp = normalizeWH(template.frame.w, template.frame.h);
-  const overlayRef = useRef<HTMLCanvasElement>(null);
-
-  // overlay backing res ≈ native frame (capped) so logo/text stay crisp when zoomed
-  const cap = 2048;
-  const bs = Math.min(1, cap / Math.max(template.frame.w, template.frame.h));
-  const bw = Math.round(template.frame.w * bs);
-  const bh = Math.round(template.frame.h * bs);
-
-  useEffect(() => {
-    const cv = overlayRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext('2d');
-    if (!ctx) return;
-    cv.width = bw;
-    cv.height = bh;
-    ctx.clearRect(0, 0, bw, bh);
-    drawOverlay(ctx, bw, bh, template.build(text, logo, extra), assets, fontsReady, guides);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, text.city, text.date, logo.scale, logo.variant, logo.anchor, logo.mark, extra, assets, fontsReady, guides, bw, bh]);
-
-  return (
-    <>
-      {children}
-      <canvas ref={overlayRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
-      {mockup && template.chrome && <Chrome kind={template.chrome} W={disp.w} H={disp.h} />}
-    </>
-  );
-}
-
 // ── platform mockup chrome (DOM, preview only) ──────────────────────────────
-function Chrome({ kind, W, H }: { kind: NonNullable<TemplateDef['chrome']>; W: number; H: number }) {
+export default function Mockup({ kind, W, H }: { kind: MockupKind; W: number; H: number }) {
   if (kind === 'x') {
     const d = W * 0.092;
     return (
@@ -76,7 +17,7 @@ function Chrome({ kind, W, H }: { kind: NonNullable<TemplateDef['chrome']>; W: n
           >
             <div style={{ marginLeft: d + W * 0.016, marginTop: H * 0.02 }}>
               <div className="font-sans font-bold text-white" style={{ fontSize: W * 0.024, lineHeight: 1.1 }}>Agentic Engineering</div>
-              <div className="font-mono text-white/50" style={{ fontSize: W * 0.016 }}>@agenteng</div>
+              <div className="font-sans text-white/50" style={{ fontSize: W * 0.016 }}>@agenteng</div>
             </div>
             <span className="rounded-full bg-white font-semibold text-black" style={{ fontSize: W * 0.016, padding: `${H * 0.04}px ${W * 0.018}px` }}>Follow</span>
           </div>
@@ -117,5 +58,5 @@ function Chrome({ kind, W, H }: { kind: NonNullable<TemplateDef['chrome']>; W: n
       </div>
     );
   }
-  return null; // youtube + telegram use the dashed safe-zone guide instead
+  return null;
 }
