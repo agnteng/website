@@ -1,70 +1,63 @@
 import type { ReactNode } from 'react';
-import BrandColorPicker, { BRAND_COLORS } from '../BrandColorPicker';
-import { ANIMATIONS, type AnimName } from '@agnteng/brand/components/Animation.tsx';
+import { BRAND_COLORS } from '../BrandColorPicker';
+import { ANIMATIONS } from '@agnteng/brand/components/Animation.tsx';
 import type { Artifact } from '@agnteng/brand/components/Artifacts.tsx';
-import { Row, Slider, Seg } from './Controls';
+import { Check, Colour, Num, Range, Row, Seg, Select, btn, field, iconBtn, note } from './Controls';
 import AlignPad from './AlignPad';
 import ImageInput from './ImageInput';
 import {
-  FIELD, FIELD_IMAGE, PHOTO, SOLID, FRAMES, LAYER_DEFAULTS, LAYER_NAMES, layerLabel, newId,
+  FIELD, FIELD_IMAGE, PHOTO, SOLID, FRAMES, LAYER_DEFAULTS, LAYER_NAMES, newId,
   type Background, type FieldBg, type Layer, type Mockup, type PhotoBg, type Scene, type Fade, type Shape,
 } from './scene';
 
 // The builder's sidebar, one panel per part of a scene. Each takes the part it
 // edits and a function that replaces it; none of them knows about the others.
 
-const input = 'w-full min-w-0 rounded-md border border-black/15 bg-white px-2.5 py-1.5 font-mono text-[11px] text-deep-navy focus:border-electric-blue focus:outline-none';
-const chip = 'rounded-md border border-black/10 px-2.5 py-1.5 font-mono text-[11px] text-deep-navy/70 transition-colors hover:border-electric-blue hover:text-deep-navy';
-const wide = 'w-full rounded-md border border-black/10 py-2 font-mono text-[11px] uppercase tracking-wider text-deep-navy/70 transition-colors hover:border-electric-blue hover:text-electric-blue';
-const Check = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
-  <label className="flex items-center gap-1.5 font-mono text-[11px] text-deep-navy/70">
-    <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="accent-electric-blue" /> {label}
+// A thin rule between groups of controls inside one panel.
+const Rule = () => <div className="!my-2.5 h-px bg-line" />;
+// Two numbers on one line: X and Y, or width and height.
+const Pair = ({ label, a, b }: { label: string; a: ReactNode; b: ReactNode }) => (
+  <Row label={label}><div className="grid grid-cols-2 gap-1.5">{a}{b}</div></Row>
+);
+// A number with a one-letter tag inside its field.
+const Tagged = ({ tag, ...p }: { tag: string; value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number }) => (
+  <label className="relative block">
+    <span className="pointer-events-none absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] text-deep-navy/40">{tag}</span>
+    <Num {...p} className="!pl-5" />
   </label>
 );
-const Range = ({ label, value, min, max, step = 0.01, unit = '', onChange }: { label: string; value: number; min: number; max: number; step?: number; unit?: string; onChange: (v: number) => void }) => (
-  <Row label={label} value={`${step >= 1 ? value : value.toFixed(2)}${unit}`}><Slider min={min} max={max} step={step} value={value} onChange={onChange} /></Row>
-);
-const Colour = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
-  <Row label={label}><BrandColorPicker tone="light" value={value} onChange={onChange} /></Row>
-);
-// x, y, width and height of a box, as shares of the frame
-const Box = ({ v, set }: { v: { x: number; y: number; w: number; h: number }; set: (p: Partial<{ x: number; y: number; w: number; h: number }>) => void }) => (
-  <div className="grid grid-cols-2 gap-x-3 gap-y-3">
-    <Range label="X" value={v.x} min={-0.2} max={1} onChange={(x) => set({ x })} />
-    <Range label="Y" value={v.y} min={-0.2} max={1} onChange={(y) => set({ y })} />
-    <Range label="Width" value={v.w} min={0.02} max={1.2} onChange={(w) => set({ w })} />
-    <Range label="Height" value={v.h} min={0.02} max={1.2} onChange={(h) => set({ h })} />
-  </div>
+type XYWH = { x: number; y: number; w: number; h: number };
+const Box = ({ v, set }: { v: XYWH; set: (p: Partial<XYWH>) => void }) => (
+  <>
+    <Pair label="Position" a={<Tagged tag="X" value={v.x} step={0.01} onChange={(x) => set({ x })} />} b={<Tagged tag="Y" value={v.y} step={0.01} onChange={(y) => set({ y })} />} />
+    <Pair label="Size" a={<Tagged tag="W" value={v.w} min={0.01} step={0.01} onChange={(w) => set({ w })} />} b={<Tagged tag="H" value={v.h} min={0.01} step={0.01} onChange={(h) => set({ h })} />} />
+  </>
 );
 
 // ── frame ───────────────────────────────────────────────────────────────────
-const MOCKUPS: ('none' | Mockup)[] = ['none', 'x', 'linkedin', 'substack', 'luma'];
+const MOCKUPS: { value: 'none' | Mockup; label: string }[] = [
+  { value: 'none', label: 'None' }, { value: 'x', label: 'X' }, { value: 'linkedin', label: 'LinkedIn' }, { value: 'substack', label: 'Substack' }, { value: 'luma', label: 'Luma' },
+];
 export function FramePanel({ scene, set, mockup, setMockup, guides, setGuides }: {
   scene: Scene; set: (p: Partial<Scene>) => void;
   mockup: boolean; setMockup: (v: boolean) => void; guides: boolean; setGuides: (v: boolean) => void;
 }) {
   const { w, h } = scene.frame;
-  const size = (k: 'w' | 'h', v: string) => set({ frame: { ...scene.frame, [k]: Math.max(16, Math.min(8000, Math.round(Number(v) || 0))) } });
+  const named = FRAMES.find((f) => f.w === w && f.h === h)?.name ?? 'Custom';
   return (
     <>
-      <div className="flex flex-wrap gap-1.5">
-        {FRAMES.map((f) => (
-          <button key={f.name} type="button" title={`${f.w}×${f.h}`} onClick={() => set({ frame: { w: f.w, h: f.h } })}
-            className={`rounded-md border px-2.5 py-1.5 font-mono text-[11px] transition-colors ${f.w === w && f.h === h ? 'border-electric-blue bg-electric-blue text-white' : 'border-black/10 text-deep-navy/70 hover:border-electric-blue hover:text-deep-navy'}`}>
-            {f.name}
-          </button>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Row label="Width"><input type="number" value={w} onChange={(e) => size('w', e.target.value)} className={input} /></Row>
-        <Row label="Height"><input type="number" value={h} onChange={(e) => size('h', e.target.value)} className={input} /></Row>
-      </div>
-      <Row label="Platform UI around it">
-        <Seg options={MOCKUPS} value={scene.mockup ?? 'none'} onChange={(v) => set({ mockup: v === 'none' ? undefined : v })} />
+      <Row label="Size">
+        <Select
+          label="Frame size" value={named}
+          options={[...FRAMES.map((f) => ({ value: f.name, label: `${f.name}  ${f.w} × ${f.h}` })), ...(named === 'Custom' ? [{ value: 'Custom', label: 'Custom' }] : [])]}
+          onChange={(n) => { const f = FRAMES.find((x) => x.name === n); if (f) set({ frame: { w: f.w, h: f.h } }); }}
+        />
       </Row>
-      <div className="flex flex-wrap gap-x-4 gap-y-2">
-        {scene.mockup && <Check label="show platform UI" checked={mockup} onChange={setMockup} />}
-        <Check label="guides and empty slots" checked={guides} onChange={setGuides} />
+      <Pair label="Pixels" a={<Tagged tag="W" value={w} min={16} max={8000} onChange={(v) => set({ frame: { w: v, h } })} />} b={<Tagged tag="H" value={h} min={16} max={8000} onChange={(v) => set({ frame: { w, h: v } })} />} />
+      <Row label="Platform UI"><Select<'none' | Mockup> label="Platform UI" options={MOCKUPS} value={scene.mockup ?? 'none'} onChange={(v) => set({ mockup: v === 'none' ? undefined : v })} /></Row>
+      <div className="flex flex-wrap gap-x-4">
+        {scene.mockup && <Check label="Show platform UI" checked={mockup} onChange={setMockup} />}
+        <Check label="Guides and empty slots" checked={guides} onChange={setGuides} />
       </div>
     </>
   );
@@ -75,16 +68,16 @@ const KINDS: Background['kind'][] = ['field', 'photo', 'solid'];
 const FADES: Fade[] = ['none', 'left', 'right', 'up', 'down', 'radial'];
 const SHAPES: Shape[] = ['square', 'dot', 'halftone'];
 const PALETTE = BRAND_COLORS.map((c) => c.hex);
-const FIELD_LOOKS: { name: string; p: Partial<FieldBg> }[] = [
-  { name: 'Wave', p: { animation: 'wave', color: '#1E2BE6', edge: '#3A4DFF', bg: '#05071E', cell: 10, gap: 1, density: 0.6, motion: 70 } },
-  { name: 'Aurora', p: { animation: 'aurora', color: '#1E2BE6', edge: '#16D9A6', bg: '#05071E', cell: 9, gap: 1, density: 0.5, motion: 60 } },
-  { name: 'Drift', p: { animation: 'drift', color: '#7C4DF5', edge: '#1FC6E6', bg: '#05071E', cell: 9, gap: 1, density: 0.5, motion: 45 } },
-  { name: 'Rain', p: { animation: 'rain', color: '#1FC6E6', edge: '#B5A6FF', bg: '#05071E', cell: 8, gap: 1, density: 0.16, motion: 80 } },
-  { name: 'Radar', p: { animation: 'radar', color: '#16D9A6', edge: '#B5A6FF', bg: '#05071E', cell: 9, gap: 1, density: 0.14, motion: 55 } },
-  { name: 'Bloom', p: { animation: 'bloom', color: '#ED4BA0', edge: '#7C4DF5', bg: '#05071E', cell: 10, gap: 1, density: 0.42, motion: 55 } },
-  { name: 'Swarm', p: { animation: 'swarm', color: '#1E2BE6', edge: '#1FC6E6', bg: '#05071E', cell: 9, gap: 1, density: 0.2, motion: 50 } },
-  { name: 'Fine', p: { ...FIELD } },
-];
+const FIELD_LOOKS: Record<string, Partial<FieldBg>> = {
+  Fine: { ...FIELD },
+  Wave: { animation: 'wave', color: '#1E2BE6', edge: '#3A4DFF', bg: '#05071E', cell: 10, gap: 1, density: 0.6, motion: 70 },
+  Aurora: { animation: 'aurora', color: '#1E2BE6', edge: '#16D9A6', bg: '#05071E', cell: 9, gap: 1, density: 0.5, motion: 60 },
+  Drift: { animation: 'drift', color: '#7C4DF5', edge: '#1FC6E6', bg: '#05071E', cell: 9, gap: 1, density: 0.5, motion: 45 },
+  Rain: { animation: 'rain', color: '#1FC6E6', edge: '#B5A6FF', bg: '#05071E', cell: 8, gap: 1, density: 0.16, motion: 80 },
+  Radar: { animation: 'radar', color: '#16D9A6', edge: '#B5A6FF', bg: '#05071E', cell: 9, gap: 1, density: 0.14, motion: 55 },
+  Bloom: { animation: 'bloom', color: '#ED4BA0', edge: '#7C4DF5', bg: '#05071E', cell: 10, gap: 1, density: 0.42, motion: 55 },
+  Swarm: { animation: 'swarm', color: '#1E2BE6', edge: '#1FC6E6', bg: '#05071E', cell: 9, gap: 1, density: 0.2, motion: 50 },
+};
 const rand = (n: number) => Math.floor(Math.random() * n);
 const randomField = (): Partial<FieldBg> => ({
   animation: ANIMATIONS[rand(ANIMATIONS.length)], color: PALETTE[rand(5)], edge: PALETTE[rand(PALETTE.length)],
@@ -96,12 +89,12 @@ export function BackgroundPanel({ b, set }: { b: Background; set: (b: Background
   const kind = (k: Background['kind']) => {
     if (k === b.kind) return;
     const src = b.kind === 'photo' ? b.src : b.kind === 'field' ? b.image?.src ?? '' : '';
-    const color = b.kind === 'field' ? b.color : b.color;
-    set(k === 'photo' ? { ...PHOTO, src, color } : k === 'solid' ? { ...SOLID, color } : { ...FIELD, color });
+    const { color } = b;
+    set(k === 'photo' ? { ...PHOTO, src, color } : k === 'solid' ? { ...SOLID, color } : { ...FIELD, color, image: src ? { ...FIELD_IMAGE, src } : undefined });
   };
   return (
     <>
-      <Row label="Kind"><Seg options={KINDS} value={b.kind} onChange={kind} /></Row>
+      <Seg options={KINDS} value={b.kind} onChange={kind} />
       {b.kind === 'field' && <Field b={b} set={(p) => set({ ...b, ...p })} />}
       {b.kind === 'photo' && <Photo b={b} set={(p) => set({ ...b, ...p })} />}
       {b.kind === 'solid' && <Colour label="Colour" value={b.color} onChange={(color) => set({ ...b, color })} />}
@@ -114,26 +107,31 @@ function Field({ b, set }: { b: FieldBg; set: (p: Partial<FieldBg>) => void }) {
   const setImg = (p: Partial<NonNullable<FieldBg['image']>>) => set({ image: { ...FIELD_IMAGE, ...img, ...p } });
   return (
     <>
-      <Row label="Looks">
-        <div className="flex flex-wrap gap-1.5">
-          {FIELD_LOOKS.map((l) => <button key={l.name} type="button" onClick={() => set(l.p)} className={chip}>{l.name}</button>)}
-          <button type="button" onClick={() => set(randomField())} className="rounded-md border border-electric-blue/40 bg-electric-blue/10 px-2.5 py-1.5 font-mono text-[11px] text-electric-blue transition-colors hover:bg-electric-blue/15">random ⟳</button>
+      <Row label="Look">
+        <div className="flex gap-1.5">
+          <select value="" onChange={(e) => set(FIELD_LOOKS[e.target.value])} aria-label="Apply a look" className={`${field} cursor-pointer`}>
+            <option value="" disabled>Apply a look…</option>
+            {Object.keys(FIELD_LOOKS).map((n) => <option key={n}>{n}</option>)}
+          </select>
+          <button type="button" onClick={() => set(randomField())} className={btn}>Random</button>
         </div>
       </Row>
-      <Row label="Animation"><Seg options={ANIMATIONS} value={b.animation} onChange={(animation: AnimName) => set({ animation })} /></Row>
-      <Row label="Shape"><Seg options={SHAPES} value={b.shape} onChange={(shape) => set({ shape })} /></Row>
-      <Colour label="Base colour" value={b.color} onChange={(color) => set({ color })} />
-      <Colour label="Edge colour" value={b.edge} onChange={(edge) => set({ edge })} />
-      <Colour label="Behind the cells" value={b.bg} onChange={(bg) => set({ bg })} />
-      <Range label="Cell size" value={b.cell} min={2} max={28} step={1} unit="px" onChange={(cell) => set({ cell })} />
-      <Range label="Gap" value={b.gap} min={0} max={6} step={1} unit="px" onChange={(gap) => set({ gap })} />
+      <Row label="Animation"><Select label="Animation" options={ANIMATIONS} value={b.animation} onChange={(animation) => set({ animation })} /></Row>
+      <Row label="Cells"><Seg options={SHAPES} value={b.shape} onChange={(shape) => set({ shape })} /></Row>
+      <Colour label="Colour" value={b.color} onChange={(color) => set({ color })} />
+      <Colour label="Edge" value={b.edge} onChange={(edge) => set({ edge })} />
+      <Colour label="Behind" value={b.bg} onChange={(bg) => set({ bg })} />
+      <Rule />
+      <Range label="Cell size" value={b.cell} min={2} max={28} step={1} onChange={(cell) => set({ cell })} />
+      <Range label="Gap" value={b.gap} min={0} max={6} step={1} onChange={(gap) => set({ gap })} />
       <Range label="Density" value={b.density} min={0} max={1} onChange={(density) => set({ density })} />
       <Range label="Motion" value={b.motion} min={0} max={100} step={1} onChange={(motion) => set({ motion })} />
-      <Row label="Fade"><Seg options={FADES} value={b.fade} onChange={(fade) => set({ fade })} /></Row>
-      <Row label="A photo, as a duotone of the field"><ImageInput value={img?.src ?? ''} onChange={(src) => set({ image: src ? { ...FIELD_IMAGE, ...img, src } : undefined })} /></Row>
+      <Row label="Fade"><Select label="Fade" options={FADES} value={b.fade} onChange={(fade) => set({ fade })} /></Row>
+      <Rule />
+      <Row label="Photo as a duotone" stack><ImageInput value={img?.src ?? ''} onChange={(src) => set({ image: src ? { ...FIELD_IMAGE, ...img, src } : undefined })} /></Row>
       {img?.src && (
         <>
-          <Row label="Photo position"><AlignPad value={img.position} onChange={(position) => setImg({ position })} /></Row>
+          <Row label="Crop"><AlignPad value={img.position} onChange={(position) => setImg({ position })} /></Row>
           <Range label="Contrast" value={img.contrast} min={0.6} max={2.4} step={0.05} onChange={(contrast) => setImg({ contrast })} />
           <Range label="Edge glow" value={img.edgeGlow} min={0} max={2.5} step={0.05} onChange={(edgeGlow) => setImg({ edgeGlow })} />
           <Range label="Tone" value={img.tone} min={0} max={1} step={0.05} onChange={(tone) => setImg({ tone })} />
@@ -147,39 +145,40 @@ function Photo({ b, set }: { b: PhotoBg; set: (p: Partial<PhotoBg>) => void }) {
   const item = (i: number, p: Partial<Artifact>) => set({ artifacts: b.artifacts.map((a, j) => (j === i ? { ...a, ...p } : a)) });
   return (
     <>
-      <Row label="Photo"><ImageInput value={b.src} onChange={(src) => set({ src })} /></Row>
-      <Row label="Photo position"><AlignPad value={b.position} onChange={(position) => set({ position })} /></Row>
-      <Colour label="Artifact colour" value={b.color} onChange={(color) => set({ color })} />
-      <div className="flex flex-wrap gap-x-4 gap-y-2">
-        <Check label="tint the photo" checked={b.tint} onChange={(tint) => set({ tint })} />
-        <Check label="animate the edge" checked={b.animate} onChange={(animate) => set({ animate })} />
+      <ImageInput value={b.src} onChange={(src) => set({ src })} />
+      <Row label="Crop"><AlignPad value={b.position} onChange={(position) => set({ position })} /></Row>
+      <Rule />
+      <Colour label="Artifacts" value={b.color} onChange={(color) => set({ color })} />
+      <div className="flex flex-wrap gap-x-4">
+        <Check label="Tint the photo" checked={b.tint} onChange={(tint) => set({ tint })} />
+        <Check label="Animate the edge" checked={b.animate} onChange={(animate) => set({ animate })} />
       </div>
-      <Range label="Cell size" value={b.cell} min={4} max={40} step={1} unit="px" onChange={(cell) => set({ cell })} />
+      <Range label="Cell size" value={b.cell} min={4} max={40} step={1} onChange={(cell) => set({ cell })} />
       <Range label="Roughness" value={b.rough} min={0} max={0.8} step={0.02} onChange={(rough) => set({ rough })} />
       <Row label="Seed">
         <div className="flex gap-1.5">
-          <input type="number" min={0} value={b.seed} onChange={(e) => set({ seed: Math.max(0, Math.round(Number(e.target.value) || 0)) })} className={input} />
-          <button type="button" onClick={() => set({ seed: 1000 + rand(9000) })} className={`shrink-0 ${chip}`}>new seed ⟳</button>
+          <Num value={b.seed} min={0} onChange={(seed) => set({ seed })} />
+          <button type="button" onClick={() => set({ seed: 1000 + rand(9000) })} className={btn}>New</button>
         </div>
       </Row>
       {b.artifacts.map((a, i) => (
-        <div key={i} className="space-y-3 rounded-md border border-black/10 p-3">
-          <div className="flex items-start justify-between gap-3">
-            <Row label={`Artifact ${i + 1}`}><AlignPad value={a.at} onChange={(at) => item(i, { at })} /></Row>
-            <button type="button" onClick={() => set({ artifacts: b.artifacts.filter((_, j) => j !== i) })} className={`shrink-0 ${chip} hover:!border-coral hover:!text-coral`}>remove</button>
+        <div key={i} className="space-y-2 rounded-[6px] bg-deep-navy/[0.03] p-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-medium text-deep-navy/75">Artifact {i + 1}</span>
+            <button type="button" aria-label={`Remove artifact ${i + 1}`} title="Remove" onClick={() => set({ artifacts: b.artifacts.filter((_, j) => j !== i) })} className={`${iconBtn} hover:!text-coral`}>✕</button>
           </div>
+          <Row label="Grows from"><AlignPad value={a.at} onChange={(at) => item(i, { at })} /></Row>
           <Range label="Solid" value={a.solid} min={0} max={1} onChange={(solid) => item(i, { solid, reach: Math.max(a.reach, solid) })} />
           <Range label="Reach" value={a.reach} min={0} max={1.5} onChange={(reach) => item(i, { reach, solid: Math.min(a.solid, reach) })} />
         </div>
       ))}
-      <button type="button" onClick={() => set({ artifacts: [...b.artifacts, { at: 'bottom-right', solid: 0.15, reach: 0.45 }] })} className={wide}>add an artifact</button>
+      <button type="button" onClick={() => set({ artifacts: [...b.artifacts, { at: 'bottom-right', solid: 0.15, reach: 0.45 }] })} className={`${btn} w-full`}>Add an artifact</button>
     </>
   );
 }
 
 // ── layers ──────────────────────────────────────────────────────────────────
 const TYPES = Object.keys(LAYER_DEFAULTS) as Layer['type'][];
-const icon = 'grid h-6 w-6 shrink-0 place-items-center rounded font-mono text-[11px] text-deep-navy/50 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy disabled:opacity-25 disabled:hover:bg-transparent';
 
 export function LayersPanel({ layers, set, selected, select }: { layers: Layer[]; set: (l: Layer[]) => void; selected: string | null; select: (id: string | null) => void }) {
   const patch = (id: string, p: Partial<Layer>) => set(layers.map((l) => (l.id === id ? ({ ...l, ...p } as Layer) : l)));
@@ -196,30 +195,35 @@ export function LayersPanel({ layers, set, selected, select }: { layers: Layer[]
   const cur = layers.find((l) => l.id === selected);
   return (
     <>
-      {layers.length === 0 && <p className="font-mono text-[10px] leading-relaxed text-deep-navy/45">Nothing on top of the background yet. Add a logo, some text or a photo.</p>}
+      {layers.length === 0 && <p className={note}>Nothing on top of the background yet.</p>}
       {/* The list reads top to bottom as front to back, so it runs against the drawing order. */}
-      <ul className="space-y-1">
+      <ul className="-mx-1">
         {layers.map((l, i) => (
-          <li key={l.id} className={`flex items-center gap-1 rounded-md border px-1.5 py-1 ${l.id === selected ? 'border-electric-blue bg-electric-blue/[0.06]' : 'border-black/10'}`}>
-            <button type="button" onClick={() => select(l.id === selected ? null : l.id)} className={`min-w-0 flex-1 truncate py-0.5 text-left font-mono text-[11px] ${l.hidden ? 'text-deep-navy/35 line-through' : 'text-deep-navy/80'}`}>
-              <span className="text-deep-navy/40">{LAYER_NAMES[l.type]} </span>{l.type === 'text' || l.type === 'photo' ? layerLabel(l) : l.type === 'logo' ? l.form : ''}
+          <li key={l.id} className={`group flex h-7 items-center rounded-[5px] pl-2 pr-0.5 ${l.id === selected ? 'bg-electric-blue/10' : 'hover:bg-deep-navy/[0.04]'}`}>
+            <button type="button" onClick={() => select(l.id === selected ? null : l.id)} aria-pressed={l.id === selected} className={`flex h-full min-w-0 flex-1 items-center gap-1.5 text-left text-[11px] ${l.hidden ? 'text-deep-navy/35' : 'text-deep-navy'}`}>
+              <span className="shrink-0 text-deep-navy/45">{LAYER_NAMES[l.type]}</span>
+              <span className="truncate">{l.type === 'text' ? l.text : l.type === 'photo' ? l.label : l.type === 'logo' ? l.form : ''}</span>
             </button>
-            <button type="button" aria-label={l.hidden ? 'Show' : 'Hide'} title={l.hidden ? 'Show' : 'Hide'} onClick={() => patch(l.id, { hidden: !l.hidden })} className={icon}>{l.hidden ? '○' : '●'}</button>
-            <button type="button" aria-label="Bring forward" title="Bring forward" disabled={i === layers.length - 1} onClick={() => move(i, 1)} className={icon}>↓</button>
-            <button type="button" aria-label="Send back" title="Send back" disabled={i === 0} onClick={() => move(i, -1)} className={icon}>↑</button>
-            <button type="button" aria-label="Delete" title="Delete" onClick={() => { set(layers.filter((x) => x.id !== l.id)); if (selected === l.id) select(null); }} className={`${icon} hover:!text-coral`}>✕</button>
+            <span className={`flex ${l.id === selected ? '' : 'opacity-0 focus-within:opacity-100 group-hover:opacity-100'}`}>
+              <button type="button" aria-label="Bring forward" title="Bring forward" disabled={i === layers.length - 1} onClick={() => move(i, 1)} className={iconBtn}>↑</button>
+              <button type="button" aria-label="Send back" title="Send back" disabled={i === 0} onClick={() => move(i, -1)} className={iconBtn}>↓</button>
+              <button type="button" aria-label="Delete" title="Delete" onClick={() => { set(layers.filter((x) => x.id !== l.id)); if (selected === l.id) select(null); }} className={`${iconBtn} hover:!text-coral`}>✕</button>
+            </span>
+            <button type="button" aria-label={l.hidden ? 'Show' : 'Hide'} title={l.hidden ? 'Show' : 'Hide'} onClick={() => patch(l.id, { hidden: !l.hidden })} className={iconBtn}>
+              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" fill="none" stroke="currentColor" strokeWidth="1.2" /><circle cx="8" cy="8" r="1.8" fill={l.hidden ? 'none' : 'currentColor'} stroke="currentColor" strokeWidth="1.2" /></svg>
+            </button>
           </li>
         )).reverse()}
       </ul>
-      <Row label="Add">
-        <div className="flex flex-wrap gap-1.5">
-          {TYPES.map((t) => <button key={t} type="button" onClick={() => add(t)} className={chip}>+ {LAYER_NAMES[t].toLowerCase()}</button>)}
-        </div>
-      </Row>
+      <select value="" onChange={(e) => add(e.target.value as Layer['type'])} aria-label="Add a layer" className={`${field} cursor-pointer`}>
+        <option value="" disabled>Add a layer…</option>
+        {TYPES.map((t) => <option key={t} value={t}>{LAYER_NAMES[t]}</option>)}
+      </select>
       {cur && (
-        <div className="space-y-4 rounded-md border border-electric-blue/40 p-3">
+        <>
+          <Rule />
           <LayerEditor l={cur} set={(p) => patch(cur.id, p)} />
-        </div>
+        </>
       )}
     </>
   );
@@ -227,9 +231,9 @@ export function LayersPanel({ layers, set, selected, select }: { layers: Layer[]
 
 const FORMS = ['lockup', 'line', 'mark'] as const;
 const VARIANTS = ['white', 'blue'] as const;
-const FONTS = ['sans', 'mono'] as const;
+const FONTS = [{ value: 'sans', label: 'Manrope' }, { value: 'mono', label: 'Kode Mono' }] as const;
 const ALIGNS = ['left', 'center', 'right'] as const;
-const WEIGHTS = ['500', '600', '800'] as const;
+const WEIGHTS = [{ value: '500', label: 'Medium' }, { value: '600', label: 'Semibold' }, { value: '800', label: 'Extrabold' }] as const;
 const FITS = ['cover', 'contain'] as const;
 const SCRIMS = ['bottom', 'left', 'right', 'vignette'] as const;
 const GUIDES = ['rect', 'circle'] as const;
@@ -241,39 +245,37 @@ function LayerEditor({ l, set }: { l: Layer; set: (p: Partial<Layer>) => void })
       <Row label="Colour"><Seg options={VARIANTS} value={l.variant} onChange={(variant) => set({ variant })} /></Row>
       <Row label="Placement"><AlignPad value={l.anchor} onChange={(anchor) => set({ anchor, dx: 0, dy: 0 })} /></Row>
       <Range label="Size" value={l.scale} min={0.05} max={1} onChange={(scale) => set({ scale })} />
-      <div className="grid grid-cols-2 gap-3">
-        <Range label="Nudge X" value={l.dx} min={-0.5} max={0.5} onChange={(dx) => set({ dx })} />
-        <Range label="Nudge Y" value={l.dy} min={-0.5} max={0.5} onChange={(dy) => set({ dy })} />
-      </div>
+      <Pair label="Nudge" a={<Tagged tag="X" value={l.dx} step={0.01} onChange={(dx) => set({ dx })} />} b={<Tagged tag="Y" value={l.dy} step={0.01} onChange={(dy) => set({ dy })} />} />
     </>
   );
   if (l.type === 'text') return (
     <>
-      <Row label="Text"><input type="text" value={l.text} onChange={(e) => set({ text: e.target.value })} className={input} /></Row>
-      <Row label="Typeface"><Seg options={FONTS} value={l.font} onChange={(font) => set({ font })} /></Row>
-      <Row label="Weight"><Seg options={WEIGHTS} value={String(l.weight) as (typeof WEIGHTS)[number]} onChange={(w) => set({ weight: Number(w) })} /></Row>
+      <input type="text" value={l.text} onChange={(e) => set({ text: e.target.value })} aria-label="Text" placeholder="Text" className={field} />
+      <Row label="Typeface">
+        <div className="grid grid-cols-2 gap-1.5">
+          <Select<'sans' | 'mono'> label="Typeface" options={FONTS} value={l.font} onChange={(font) => set({ font })} />
+          <Select<string> label="Weight" options={WEIGHTS} value={String(l.weight)} onChange={(w) => set({ weight: Number(w) })} />
+        </div>
+      </Row>
       <Range label="Size" value={l.size} min={0.01} max={0.4} step={0.002} onChange={(size) => set({ size })} />
       <Colour label="Colour" value={l.color} onChange={(color) => set({ color })} />
       <Row label="Align"><Seg options={ALIGNS} value={l.align} onChange={(align) => set({ align })} /></Row>
-      <div className="grid grid-cols-2 gap-3">
-        <Range label="X" value={l.x} min={0} max={1} step={0.005} onChange={(x) => set({ x })} />
-        <Range label="Y" value={l.y} min={0} max={1} step={0.005} onChange={(y) => set({ y })} />
+      <Pair label="Position" a={<Tagged tag="X" value={l.x} step={0.005} onChange={(x) => set({ x })} />} b={<Tagged tag="Y" value={l.y} step={0.005} onChange={(y) => set({ y })} />} />
+      <Range label="Spacing" value={l.spacing} min={-0.05} max={0.4} onChange={(spacing) => set({ spacing })} />
+      <div className="flex flex-wrap gap-x-4">
+        <Check label="Capitals" checked={l.upper} onChange={(upper) => set({ upper })} />
+        <Check label="In a pill" checked={l.pill} onChange={(pill) => set({ pill })} />
       </div>
-      <Range label="Letter spacing" value={l.spacing} min={-0.05} max={0.4} onChange={(spacing) => set({ spacing })} />
-      <div className="flex flex-wrap gap-x-4 gap-y-2">
-        <Check label="capitals" checked={l.upper} onChange={(upper) => set({ upper })} />
-        <Check label="in a pill" checked={l.pill} onChange={(pill) => set({ pill })} />
-      </div>
-      {l.pill && <Colour label="Pill colour" value={l.pillColor} onChange={(pillColor) => set({ pillColor })} />}
+      {l.pill && <Colour label="Pill" value={l.pillColor} onChange={(pillColor) => set({ pillColor })} />}
     </>
   );
   if (l.type === 'photo') return (
     <>
-      <Row label="Picture"><ImageInput value={l.src} onChange={(src) => set({ src })} /></Row>
-      <Row label="Name of the slot"><input type="text" value={l.label} onChange={(e) => set({ label: e.target.value })} className={input} /></Row>
+      <ImageInput value={l.src} onChange={(src) => set({ src })} />
+      <Row label="Slot name"><input type="text" value={l.label} onChange={(e) => set({ label: e.target.value })} className={field} /></Row>
       <Row label="Fit"><Seg options={FITS} value={l.fit} onChange={(fit) => set({ fit })} /></Row>
       <Box v={l} set={set} />
-      <Range label="Corner radius" value={l.radius} min={0} max={0.5} onChange={(radius) => set({ radius })} />
+      <Range label="Radius" value={l.radius} min={0} max={0.5} onChange={(radius) => set({ radius })} />
     </>
   );
   if (l.type === 'rect') return (
@@ -281,12 +283,12 @@ function LayerEditor({ l, set }: { l: Layer; set: (p: Partial<Layer>) => void })
       <Colour label="Colour" value={l.color} onChange={(color) => set({ color })} />
       <Range label="Opacity" value={l.opacity} min={0} max={1} onChange={(opacity) => set({ opacity })} />
       <Box v={l} set={set} />
-      <Range label="Corner radius" value={l.radius} min={0} max={0.5} onChange={(radius) => set({ radius })} />
+      <Range label="Radius" value={l.radius} min={0} max={0.5} onChange={(radius) => set({ radius })} />
     </>
   );
   if (l.type === 'scrim') return (
     <>
-      <Row label="Dark toward"><Seg options={SCRIMS} value={l.shape} onChange={(shape) => set({ shape })} /></Row>
+      <Row label="Dark toward"><Select label="Dark toward" options={SCRIMS} value={l.shape} onChange={(shape) => set({ shape })} /></Row>
       <Colour label="Colour" value={l.color} onChange={(color) => set({ color })} />
       <Range label="Strength" value={l.opacity} min={0} max={1} onChange={(opacity) => set({ opacity })} />
     </>
@@ -295,7 +297,7 @@ function LayerEditor({ l, set }: { l: Layer; set: (p: Partial<Layer>) => void })
     <>
       <Row label="Shape"><Seg options={GUIDES} value={l.shape} onChange={(shape) => set({ shape })} /></Row>
       <Box v={l} set={set} />
-      <p className="font-mono text-[10px] leading-relaxed text-deep-navy/45">A guide marks where a platform crops. It is never exported.</p>
+      <p className={note}>A guide marks where a platform crops. It is never exported.</p>
     </>
   );
 }

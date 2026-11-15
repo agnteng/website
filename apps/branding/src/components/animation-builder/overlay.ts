@@ -154,7 +154,7 @@ export function drawPill(ctx: Ctx, cx: number, top: number, city: string, s: num
   return pillH;
 }
 
-export function drawText(
+function drawText(
   ctx: Ctx,
   value: string,
   x: number,

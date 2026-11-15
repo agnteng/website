@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-15
+- Refines: 0006 (this repository's scripts)
 
 ## Context
 The builder had a fixed list of templates, each a function that drew its own
@@ -27,9 +28,16 @@ Chrome to make a PNG.
 
 ## Consequences
 A new format is a preset, not code. The old per-template drawing functions for
-speaker cards, the trio and the sponsor banner are gone; their designs are
-presets built from layers, so they differ in detail from before. The decks'
-title slides still call the older overlay code directly.
+speaker cards, the trio and the sponsor banner are no longer used by the
+builder; their designs are presets built from layers, so they differ in
+detail from before. The decks' title slides still call the older overlay
+code directly.
+
+`scripts/render_scene.py` is the second script here, after `fitness.py`
+(0006 moved the rest to production). It stays because it is a client of this
+repository's builder and of the brand, not of an event: it has no event
+data, and production can call it like any other tool. In 0011, "the builder's
+Artifacts treatment" is now the photo background.
 
 Rendering needs a browser, because the picture is the builder's own canvas
 drawing; there is no second renderer to keep in step.

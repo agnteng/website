@@ -9,7 +9,7 @@ export default function AlignPad({ value, onChange }: { value: Anchor; onChange:
     return { x: 10 + fx * 24, y: 10 + fy * 24 };
   };
   return (
-    <svg viewBox="0 0 44 44" width="40" height="40" className="rounded-md border border-black/10 bg-white">
+    <svg viewBox="0 0 44 44" width="32" height="32" className="rounded-[5px] bg-deep-navy/[0.05]">
       <rect x="6.5" y="6.5" width="31" height="31" rx="4" fill="none" stroke="rgba(5,7,30,0.12)" />
       {ANCHORS.map((a) => {
         const { x, y } = pos(a);

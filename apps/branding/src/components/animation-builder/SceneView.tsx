@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import AnimImage from '@agnteng/brand/components/Image.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import { drawLayers } from './sceneDraw';
 import { stageSize, type Scene } from './scene';
 import type { OverlayAssets } from './overlay';
-import { useImageList } from './useImageList';
 import Mockup from './Mockup';
 
 // A scene on screen: its background (a canvas of its own) with the layers on a
@@ -29,23 +28,45 @@ interface Props {
 }
 
 const NO_ARTIFACTS: [] = [];
+
+// Each source's picture, once it has loaded. A site that sends no CORS headers
+// refuses the first request; its picture can then be shown but not exported.
+function usePictures(srcs: string[]): Record<string, HTMLImageElement> {
+  const [map, setMap] = useState<Record<string, HTMLImageElement>>({});
+  const asked = useRef(new Set<string>());
+  const key = srcs.join('|');
+  useEffect(() => {
+    for (const src of srcs) {
+      if (asked.current.has(src)) continue;
+      asked.current.add(src);
+      const load = (cors: boolean) => {
+        const im = new Image();
+        if (cors) im.crossOrigin = 'anonymous';
+        im.onload = () => setMap((m) => ({ ...m, [src]: im }));
+        im.onerror = () => cors && load(false);
+        im.src = src;
+      };
+      load(!/^(blob|data):/.test(src));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return map;
+}
 const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } as const;
 
 export default function SceneView({ scene, assets, fontsReady, scale = 1, paused = false, preview = false, mockup = false, canvasRef, onStatus, onImages }: Props) {
   const { background: b, layers, frame } = scene;
   const overlayRef = useRef<HTMLCanvasElement>(null);
 
-  const photos = layers.filter((l) => l.type === 'photo');
-  const loaded = useImageList(photos.map((l) => l.src || null));
+  const bySrc = usePictures(layers.flatMap((l) => (l.type === 'photo' && l.src ? [l.src] : [])));
   const images = useMemo(
-    () => Object.fromEntries(photos.map((l, i) => [l.id, loaded[i] ?? null])),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loaded, photos.map((l) => l.id).join('|')],
+    () => Object.fromEntries(layers.flatMap((l) => (l.type === 'photo' ? [[l.id, bySrc[l.src] ?? null]] : []))),
+    [layers, bySrc],
   );
   useEffect(() => onImages?.(images), [images, onImages]);
 
   // The layers' canvas holds about the frame's own pixels (capped), so type and logos stay crisp.
-  const k = Math.min(1, 2560 / Math.max(frame.w, frame.h));
+  const k = Math.min(1, 4096 / Math.max(frame.w, frame.h));
   const bw = Math.round(frame.w * k), bh = Math.round(frame.h * k);
   useEffect(() => {
     const cv = overlayRef.current;

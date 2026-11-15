@@ -30,7 +30,7 @@ function logo(ctx: Ctx, W: number, H: number, l: LogoLayer, a: OverlayAssets) {
 
 function text(ctx: Ctx, W: number, H: number, l: TextLayer) {
   const size = Math.min(W, H) * l.size;
-  const value = l.upper ? l.text.toUpperCase() : l.text;
+  const value = l.upper ? String(l.text).toUpperCase() : String(l.text);
   const sp = ctx as Spacing;
   ctx.font = `${l.weight} ${size}px ${FONTS[l.font]}`;
   sp.letterSpacing = `${l.spacing * size}px`;
@@ -63,7 +63,8 @@ function photo(ctx: Ctx, W: number, H: number, l: PhotoLayer, im: HTMLImageEleme
 }
 
 function scrim(ctx: Ctx, W: number, H: number, l: ScrimLayer) {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(l.color.slice(i, i + 2), 16));
+  // #RRGGBB, else the brand's navy
+  const [r, g, b] = /^#[0-9a-f]{6}$/i.test(l.color) ? [1, 3, 5].map((i) => parseInt(l.color.slice(i, i + 2), 16)) : [5, 7, 30];
   const c = (a: number) => `rgba(${r},${g},${b},${a * l.opacity})`;
   let grad: CanvasGradient;
   if (l.shape === 'vignette') {
@@ -89,6 +90,13 @@ export function drawLayers(
 ) {
   for (const l of layers) {
     if (l.hidden) continue;
+    try {
+      layer(l);
+    } catch (e) {
+      console.error(`layer ${l.id} (${l.type}) could not be drawn`, e); // the rest still are
+    }
+  }
+  function layer(l: Layer) {
     if (l.type === 'logo') logo(ctx, W, H, l, assets);
     else if (l.type === 'text') { if (fontsReady) text(ctx, W, H, l); }
     else if (l.type === 'photo') photo(ctx, W, H, l, images[l.id], preview);

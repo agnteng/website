@@ -5,6 +5,7 @@ import TopBar from './animation-builder/TopBar';
 import CodeDrawer from './animation-builder/CodeDrawer';
 import SceneView from './animation-builder/SceneView';
 import { BackgroundPanel, FramePanel, LayersPanel } from './animation-builder/panels';
+import { Range, Row, btn, btnAccent, field, note } from './animation-builder/Controls';
 import { exportJpg, exportVideo, exportGif } from './animation-builder/exporters';
 import { drawLayers } from './animation-builder/sceneDraw';
 import { useLogoAssets, useFontsReady } from './animation-builder/useLogoAssets';
@@ -57,6 +58,9 @@ export default function WaveFieldBuilder() {
   const onImages = useCallback((m: Record<string, HTMLImageElement | null>) => { images.current = m; }, []);
   const assets = useLogoAssets();
   const fontsReady = useFontsReady();
+  // The notice about a photo that cannot be read belongs to the picture that raised it.
+  const bgSrc = scene.background.kind === 'photo' ? scene.background.src : scene.background.kind === 'field' ? scene.background.image?.src : '';
+  useEffect(() => setImgStatus(null), [bgSrc]);
   const toggle = (id: SectionId) => setOpen((o) => ({ ...o, [id]: !o[id] }));
   const patch = (p: Partial<Scene>) => setScene((s) => ({ ...s, ...p }));
 
@@ -123,14 +127,10 @@ export default function WaveFieldBuilder() {
     }
   };
 
-  const chip = 'rounded-md border border-black/10 px-2.5 py-1.5 font-mono text-[11px] text-deep-navy/70 transition-colors hover:border-electric-blue hover:text-deep-navy';
-  const wide = 'w-full rounded-md border border-black/10 py-2 font-mono text-[11px] uppercase tracking-wider text-deep-navy/70 transition-colors hover:border-electric-blue hover:text-electric-blue disabled:cursor-not-allowed disabled:opacity-40';
-  const field = 'w-full min-w-0 rounded-md border border-black/15 bg-white px-2.5 py-1.5 font-mono text-[11px] text-deep-navy focus:border-electric-blue focus:outline-none';
-  const label = 'mb-2 block font-mono text-[11px] uppercase tracking-wider text-deep-navy/55';
   const visible = scene.layers.filter((l) => l.type !== 'guide').length;
 
   return (
-    <div className="grid h-screen grid-cols-[1fr_328px] grid-rows-[52px_1fr] bg-canvas font-sans text-deep-navy">
+    <div className="grid h-screen grid-cols-[1fr_288px] grid-rows-[44px_1fr] bg-canvas font-sans text-deep-navy">
       <TopBar />
 
       <div className="flex min-h-0 flex-col overflow-hidden">
@@ -140,7 +140,7 @@ export default function WaveFieldBuilder() {
           </CanvasStage>
           {imgStatus === 'cors' && (
             <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center">
-              <div className="rounded-md bg-coral px-3 py-1.5 font-mono text-[10px] text-deep-navy shadow">
+              <div className="rounded-md bg-coral px-3 py-1.5 text-[11px] text-deep-navy shadow">
                 This URL allows showing the photo but not recolouring or exporting it. Upload the file instead.
               </div>
             </div>
@@ -154,81 +154,74 @@ export default function WaveFieldBuilder() {
         />
       </div>
 
-      <aside className="overflow-y-auto border-l border-line bg-panel">
+      <aside className="overflow-y-auto border-l border-line bg-panel font-sans">
         <CollapsibleSection title="Presets" open={open.presets} onToggle={() => toggle('presets')}>
-          {GROUPS.map((g) => (
-            <div key={g}>
-              <span className={label}>{g}</span>
-              <div className="flex flex-wrap gap-1.5">
-                {PRESETS.filter((p) => p.group === g).map((p) => <button key={p.name} type="button" onClick={() => applyPreset(p)} className={chip}>{p.name}</button>)}
+          {[...GROUPS.map((g) => [g, PRESETS.filter((p) => p.group === g)] as const), ['Yours', mine] as const].map(([g, list]) => (
+            <Row key={g} label={g} top>
+              <div className="flex flex-wrap gap-1">
+                {list.map((p, i) => (
+                  <span key={p.name + i} className="inline-flex h-6 overflow-hidden rounded-[5px] border border-black/10 text-[11px] transition-colors hover:border-black/25">
+                    <button type="button" onClick={() => applyPreset(p)} className="px-2 text-deep-navy/80 hover:text-deep-navy">{p.name}</button>
+                    {g === 'Yours' && <button type="button" aria-label={`Delete ${p.name}`} title="Delete" onClick={() => keep(mine.filter((_, j) => j !== i))} className="border-l border-black/10 px-1.5 text-deep-navy/40 hover:text-coral">✕</button>}
+                  </span>
+                ))}
+                {g === 'Yours' && naming === null && <button type="button" onClick={() => setNaming('')} className={btn}>Save current…</button>}
               </div>
-            </div>
+            </Row>
           ))}
-          <div>
-            <span className={label}>Yours</span>
-            <div className="flex flex-wrap gap-1.5">
-              {mine.map((p, i) => (
-                <span key={i} className="inline-flex overflow-hidden rounded-md border border-black/10">
-                  <button type="button" onClick={() => applyPreset(p)} className="px-2.5 py-1.5 font-mono text-[11px] text-deep-navy/70 transition-colors hover:text-electric-blue">{p.name}</button>
-                  <button type="button" aria-label={`Delete ${p.name}`} onClick={() => keep(mine.filter((_, j) => j !== i))} className="border-l border-black/10 px-2 font-mono text-[11px] text-deep-navy/40 transition-colors hover:text-coral">✕</button>
-                </span>
-              ))}
-              {naming === null && <button type="button" onClick={() => setNaming('')} className="rounded-md border border-electric-blue/40 bg-electric-blue/10 px-2.5 py-1.5 font-mono text-[11px] text-electric-blue transition-colors hover:bg-electric-blue/15">+ save this one</button>}
-            </div>
-            {naming !== null && (
-              <form className="mt-2 flex gap-1.5" onSubmit={(e) => { e.preventDefault(); if (naming.trim()) { keep([...mine, { name: naming.trim(), group: 'Yours', scene }]); setNaming(null); } }}>
-                <input autoFocus type="text" value={naming} onChange={(e) => setNaming(e.target.value)} placeholder="Name it" aria-label="Preset name" className={field} />
-                <button type="submit" className={`shrink-0 ${chip}`}>save</button>
-                <button type="button" onClick={() => setNaming(null)} className={`shrink-0 ${chip}`}>cancel</button>
-              </form>
-            )}
-          </div>
-          <p className="font-mono text-[10px] leading-relaxed text-deep-navy/45">A preset fills in the frame and the layers; change anything afterwards. Yours also keep their background, and stay in this browser.</p>
+          {naming !== null && (
+            <form className="flex gap-1.5" onSubmit={(e) => { e.preventDefault(); if (naming.trim()) { keep([...mine, { name: naming.trim(), group: 'Yours', scene }]); setNaming(null); } }}>
+              <input autoFocus type="text" value={naming} onChange={(e) => setNaming(e.target.value)} placeholder="Name this preset" aria-label="Preset name" className={field} />
+              <button type="submit" className={btnAccent}>Save</button>
+              <button type="button" onClick={() => setNaming(null)} className={btn}>Cancel</button>
+            </form>
+          )}
+          <p className={note}>A preset fills in the frame and the layers; everything stays editable. Yours also keep their background and live in this browser, without uploaded pictures.</p>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Frame" open={open.frame} onToggle={() => toggle('frame')} right={`${scene.frame.w}×${scene.frame.h}`}>
+        <CollapsibleSection title="Frame" open={open.frame} onToggle={() => toggle('frame')} right={`${scene.frame.w} × ${scene.frame.h}`}>
           <FramePanel scene={scene} set={patch} mockup={mockup} setMockup={setMockup} guides={guides} setGuides={setGuides} />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Background" open={open.background} onToggle={() => toggle('background')} right={scene.background.kind}>
+        <CollapsibleSection title="Background" open={open.background} onToggle={() => toggle('background')}>
           <BackgroundPanel b={scene.background} set={(background) => patch({ background })} />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Layers" open={open.layers} onToggle={() => toggle('layers')} right={String(scene.layers.length)}>
+        <CollapsibleSection title="Layers" open={open.layers} onToggle={() => toggle('layers')} right={scene.layers.length || undefined}>
           <LayersPanel layers={scene.layers} set={(layers) => patch({ layers })} selected={selected} select={setSelected} />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Export" open={open.export} onToggle={() => toggle('export')}>
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-deep-navy/55">Seconds</span>
-            <input type="number" min={1} max={15} value={secs} onChange={(e) => setSecs(Math.max(1, Math.min(15, Math.round(Number(e.target.value) || 1))))} className="w-16 rounded-md border border-black/15 bg-white px-2.5 py-1.5 font-mono text-[11px] text-deep-navy focus:border-electric-blue focus:outline-none" />
-          </div>
+        <CollapsibleSection title="Export" open={open.export} onToggle={() => toggle('export')} right={`${scene.frame.w} × ${scene.frame.h}`}>
           <div className="grid grid-cols-3 gap-1.5">
-            <button type="button" onClick={() => doExport('jpg')} disabled={!!busy} className={wide}>JPG</button>
-            <button type="button" onClick={() => doExport('gif')} disabled={!!busy} className={wide}>GIF</button>
-            <button type="button" onClick={() => doExport('mp4')} disabled={!!busy} className={wide}>MP4</button>
+            <button type="button" onClick={() => doExport('jpg')} disabled={!!busy} className={btnAccent}>JPG</button>
+            <button type="button" onClick={() => doExport('gif')} disabled={!!busy} className={btnAccent}>GIF</button>
+            <button type="button" onClick={() => doExport('mp4')} disabled={!!busy} className={btnAccent}>MP4</button>
           </div>
-          {pasting === null
-            ? <button type="button" onClick={() => setPasting('')} className={wide}>open a scene from JSON</button>
-            : (
-              <div className="space-y-1.5">
-                <textarea autoFocus value={pasting} onChange={(e) => setPasting(e.target.value)} placeholder='{ "frame": { "w": 1920, "h": 1080 }, … }' aria-label="Scene JSON" rows={5} className={`${field} resize-y`} />
-                <div className="flex gap-1.5">
-                  <button type="button" onClick={paste} className={wide}>open</button>
-                  <button type="button" onClick={() => { setPasting(null); setMsg(null); }} className={wide}>cancel</button>
-                </div>
-              </div>
-            )}
+          <Range label="Seconds" value={secs} min={1} max={15} step={1} onChange={setSecs} />
           {busy
-            ? <div className="font-mono text-[10px] text-electric-blue">exporting {busy.toUpperCase()}…{busy === 'gif' ? ` ${Math.round(prog * 100)}%` : ''}</div>
+            ? <p className="text-[11px] text-electric-blue">Exporting {busy.toUpperCase()}…{busy === 'gif' ? ` ${Math.round(prog * 100)}%` : ''}</p>
             : msg
-              ? <div className="font-mono text-[10px] text-coral">{msg}</div>
-              : <p className="font-mono text-[10px] leading-relaxed text-deep-navy/40">Exports are {scene.frame.w}×{scene.frame.h}. Seconds set the GIF and MP4 length; JPG takes the current frame, so pause to pick one. The scene itself is in the Code drawer.</p>}
+              ? <p className="text-[11px] text-coral">{msg}</p>
+              : <p className={note}>Seconds set the GIF and MP4 length. JPG takes the current frame: pause to pick one.</p>}
+          <div className="!mt-2.5 border-t border-line pt-2.5">
+            {pasting === null
+              ? (
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button type="button" onClick={() => setPasting('')} className={btn}>Open scene JSON…</button>
+                  <button type="button" onClick={() => { setScene(START); setSelected(null); }} className={btn}>Start over</button>
+                </div>
+              )
+              : (
+                <div className="space-y-1.5">
+                  <textarea autoFocus value={pasting} onChange={(e) => setPasting(e.target.value)} placeholder='{ "frame": { "w": 1920, "h": 1080 }, … }' aria-label="Scene JSON" rows={5} className={`${field} !h-auto resize-y py-1.5 font-[ui-monospace,SFMono-Regular,Menlo,monospace]`} />
+                  <div className="flex gap-1.5">
+                    <button type="button" onClick={paste} className={btnAccent}>Open</button>
+                    <button type="button" onClick={() => { setPasting(null); setMsg(null); }} className={btn}>Cancel</button>
+                  </div>
+                </div>
+              )}
+          </div>
         </CollapsibleSection>
-
-        <div className="p-4">
-          <button type="button" onClick={() => { setScene(START); setSelected(null); }} className={wide}>start over</button>
-        </div>
       </aside>
     </div>
   );

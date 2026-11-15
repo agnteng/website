@@ -17,7 +17,7 @@ export default function Mockup({ kind, W, H }: { kind: MockupKind; W: number; H:
           >
             <div style={{ marginLeft: d + W * 0.016, marginTop: H * 0.02 }}>
               <div className="font-sans font-bold text-white" style={{ fontSize: W * 0.024, lineHeight: 1.1 }}>Agentic Engineering</div>
-              <div className="font-mono text-white/50" style={{ fontSize: W * 0.016 }}>@agenteng</div>
+              <div className="font-sans text-white/50" style={{ fontSize: W * 0.016 }}>@agenteng</div>
             </div>
             <span className="rounded-full bg-white font-semibold text-black" style={{ fontSize: W * 0.016, padding: `${H * 0.04}px ${W * 0.018}px` }}>Follow</span>
           </div>

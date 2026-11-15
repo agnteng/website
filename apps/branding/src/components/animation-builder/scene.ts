@@ -152,8 +152,6 @@ export const LAYER_DEFAULTS: { [K in Layer['type']]: Omit<Extract<Layer, { type:
 export const LAYER_NAMES: Record<Layer['type'], string> = {
   logo: 'Logo', text: 'Text', photo: 'Photo', rect: 'Box', scrim: 'Scrim', guide: 'Guide',
 };
-export const layerLabel = (l: Layer) =>
-  l.type === 'text' ? l.text || 'Text' : l.type === 'photo' ? l.label || 'Photo' : l.type === 'logo' ? `Logo · ${l.form}` : LAYER_NAMES[l.type];
 
 // The colour around the artboard and behind an export.
 export const bgColor = (b: Background) => (b.kind === 'field' ? b.bg : b.color);
@@ -262,6 +260,9 @@ export const PRESETS: Preset[] = [
   },
 ];
 
+// A frame side in px: whole, and within what a canvas can hold.
+export const side = (v: unknown, fallback: number) => Math.max(16, Math.min(8000, Math.round(Number(v)) || fallback));
+
 // ── reading a scene from outside (a pasted JSON, the render page's input) ───
 // Fills in whatever is missing, so a short scene written by hand or by a model works.
 export function readScene(input: unknown): Scene {
@@ -271,10 +272,16 @@ export function readScene(input: unknown): Scene {
     b.kind === 'photo' ? { ...PHOTO, ...b }
     : b.kind === 'solid' ? { ...SOLID, ...b }
     : { ...FIELD, ...(b as Partial<FieldBg>), kind: 'field', image: (b as FieldBg).image && { ...FIELD_IMAGE, ...(b as FieldBg).image } };
+  const seen = new Set<string>();
   const layers = (Array.isArray(s.layers) ? s.layers : [])
-    .filter((l): l is Layer => !!l && l.type in LAYER_DEFAULTS)
-    .map((l) => ({ ...LAYER_DEFAULTS[l.type], ...l, id: l.id || newId() }) as Layer);
-  const frame = { w: Math.round(Number(s.frame?.w)) || 1920, h: Math.round(Number(s.frame?.h)) || 1080 };
+    .filter((l): l is Layer => !!l && Object.hasOwn(LAYER_DEFAULTS, l.type))
+    .map((l) => {
+      // every layer needs an id of its own: a copied layer arrives with its original's
+      const id = l.id && !seen.has(l.id) ? l.id : newId();
+      seen.add(id);
+      return { ...LAYER_DEFAULTS[l.type], ...l, id } as Layer;
+    });
+  const frame = { w: side(s.frame?.w, 1920), h: side(s.frame?.h, 1080) };
   return { frame, background, layers, ...(s.mockup ? { mockup: s.mockup } : {}) };
 }
 

@@ -70,7 +70,7 @@ export default function CanvasStage({
     apply({ zoom: next, x: px - (px - cur.x) * k, y: py - (py - cur.y) * k });
   };
 
-  // re-fit on mount and whenever the frame/aspect changes
+  // re-fit on mount and when the frame changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(fit, [frame.w, frame.h]);
 
@@ -151,7 +151,7 @@ export default function CanvasStage({
 
       {dropping && (
         <div className="pointer-events-none absolute inset-3 z-10 grid place-items-center rounded-xl border-2 border-dashed border-electric-blue bg-electric-blue/10">
-          <span className="rounded-md bg-electric-blue px-3 py-1.5 font-mono text-[11px] text-white">drop the image</span>
+          <span className="rounded-md bg-electric-blue px-3 py-1.5 text-[11px] text-white">drop the image</span>
         </div>
       )}
 
@@ -178,7 +178,7 @@ export default function CanvasStage({
         <button
           type="button"
           onClick={reset100}
-          className="min-w-[3.5rem] rounded-md px-1 py-1 text-center font-mono text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
+          className="min-w-[3.5rem] rounded-md px-1 py-1 text-center text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
         >
           {Math.round(view.zoom * 100)}%
         </button>
@@ -189,7 +189,7 @@ export default function CanvasStage({
         <button
           type="button"
           onClick={fit}
-          className="rounded-md px-2 py-1 font-mono text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
+          className="rounded-md px-2 py-1 text-[11px] text-deep-navy/70 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
         >
           Fit
         </button>

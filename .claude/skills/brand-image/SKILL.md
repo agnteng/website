@@ -1,6 +1,6 @@
 ---
 name: brand-image
-description: Make a brand image for Agentic Engineering from the animation builder's presets - a speaker card, speaker trio, event cover, social banner, sponsor banner, or a photo with artifacts - as a PNG, without opening the builder. Use when the user asks for a speaker card or announcement image, a cover or banner, or any branded graphic with a logo, text or photo on the brand's animated background.
+description: Render a brand image (speaker card or trio, event cover, social or sponsor banner, photo with artifacts) to a PNG from the animation builder's presets. Use when the user asks for a speaker card, announcement image, cover, banner or other branded graphic.
 ---
 
 # Brand images
@@ -17,7 +17,7 @@ PNG. Run it from this repository's root. It needs Chrome and the network.
    python3 scripts/render_scene.py --preset "Speaker card" \
      --set layers.0.src=/path/to/photo.jpg \
      --set "layers.2.text=Anna Lima" --set "layers.3.text=Staff Engineer, Acme" \
-     out.png
+     "$AGNTENG_MEDIA/<date>/speaker-anna-lima.png"
    ```
 
    A `src` that is a file on this machine is served to the renderer for you.
@@ -33,4 +33,4 @@ takes its default. The user can also build it in the builder
 (`branding.agnteng.com/playground`) and paste the Code drawer's Scene tab.
 
 Speaker photos are private until published: write outputs under
-`$AGNTENG_MEDIA/<date>/`, not into the repository.
+`$AGNTENG_MEDIA/<date>/`, never into the repository.
