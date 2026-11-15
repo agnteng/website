@@ -308,8 +308,8 @@ def check_photos() -> None:
         chunks = png_chunks(data) if f.suffix == ".png" else {}
         if b"IHDR" not in chunks:
             fail("photos", f"{where}: masks are .png; make them with speaker_masks.py")
-        elif chunks[b"IHDR"][8:10] != b"\x08\x00":
-            fail("photos", f"{where}: not 8-bit greyscale (mode L); use speaker_masks.py")
+        elif chunks[b"IHDR"][8:10] != b"\x08\x04":
+            fail("photos", f"{where}: not 8-bit greyscale with alpha (mode LA); use speaker_masks.py")
         elif len(data) > MASK_MAX_BYTES:
             fail("photos", f"{where}: over {MASK_MAX_BYTES // 1000} KB; use speaker_masks.py")
         elif chunks.keys() & MASK_METADATA:
