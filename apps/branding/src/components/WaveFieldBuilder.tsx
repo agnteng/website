@@ -90,7 +90,7 @@ interface ArtParams {
   rough: number;
   animate: boolean;
   seed: number;
-  items: Required<Artifact>[];
+  items: Artifact[];
 }
 const ART_DEFAULTS: ArtParams = {
   color: '#1E2BE6',
@@ -110,7 +110,7 @@ export default function WaveFieldBuilder() {
   const [seed, setSeed] = useState(1);
   const [src, setSrc] = useState('');
   const [imgPos, setImgPos] = useState<ImagePosition>('center');
-  const [treatment, setTreatment] = useState<Treatment>('dither');
+  const [treatment, setTreatment] = useState<Treatment>('artifacts');
   const [art, setArt] = useState<ArtParams>(ART_DEFAULTS);
   const [urlDraft, setUrlDraft] = useState('');
   const [imgStatus, setImgStatus] = useState<'ok' | 'cors' | 'error' | null>(null);
@@ -156,7 +156,7 @@ export default function WaveFieldBuilder() {
   const setLogoK = <K extends keyof TemplateLogo>(k: K, v: TemplateLogo[K]) => setLogo((l) => ({ ...l, [k]: v }));
   const apply = (patch: Partial<Params>) => setP((s) => ({ ...s, ...patch }));
   const setArtK = <K extends keyof ArtParams>(k: K, v: ArtParams[K]) => setArt((a) => ({ ...a, [k]: v }));
-  const setItem = (i: number, patch: Partial<Required<Artifact>>) =>
+  const setItem = (i: number, patch: Partial<Artifact>) =>
     setArt((a) => ({ ...a, items: a.items.map((it, j) => (j === i ? { ...it, ...patch } : it)) }));
   // Artifacts replace the dither only while a photo is loaded.
   const artMode = !!src && treatment === 'artifacts';
@@ -259,7 +259,8 @@ export default function WaveFieldBuilder() {
         ? (ctx: CanvasRenderingContext2D, W: number, H: number) =>
             drawOverlay(ctx, W, H, tpl.build(text, logo, extra), assets, fontsReady, false)
         : undefined;
-      const target = { source: canvas, out, bg: artMode ? art.color : p.bg, overlay };
+      // A photo is scaled smoothly; the dither's cells are kept hard.
+      const target = { source: canvas, out, bg: artMode ? art.color : p.bg, overlay, smooth: artMode };
       const name = tpl ? `agentic-${tpl.id}-${out.w}x${out.h}` : artMode ? `agentic-artifacts-${art.seed}` : `agentic-${p.animation}${src ? '-image' : ''}`;
       if (kind === 'jpg') await exportJpg(target, name);
       else if (kind === 'mp4') await exportVideo(target, secs, name);
@@ -294,11 +295,11 @@ export default function WaveFieldBuilder() {
       cell={art.cell}
       rough={art.rough}
       seed={art.seed}
-      animate={art.animate && !paused}
+      animate={art.animate}
+      paused={paused}
       artifacts={art.items}
       canvasRef={canvasRef}
       onStatus={setImgStatus}
-      style={fill}
     />
   ) : (
     <Animation
@@ -589,7 +590,7 @@ export default function WaveFieldBuilder() {
               add an artifact
             </button>
             <p className="font-mono text-[10px] leading-relaxed text-deep-navy/40">
-              Each artifact grows from the dot you pick. Cells are whole up to Solid and gone by Reach. The seed fixes the pattern: the same seed in the code draws the same cells.
+              Each artifact grows from the dot you pick. Cells are whole up to Solid and gone by Reach. The seed fixes the pattern for this frame and cell size; a frame of another size draws another pattern from the same seed.
             </p>
           </CollapsibleSection>
         )}

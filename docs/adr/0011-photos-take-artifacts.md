@@ -11,18 +11,12 @@ whole, with cells in one colour covering part of it and breaking up along a
 ragged edge, so the photo dissolves into a block of that colour.
 
 ## Decision
-A photo that should carry the brand's pixels takes artifacts: the `Artifacts`
-component in `packages/brand`. Each artifact grows from an edge, a corner or
-the centre; cells are whole near it and thin out to nothing. The photo may be
-tinted into the artifacts' colour. A seed fixes the pattern, so the same seed
-draws the same cells, and an optional animation lets a few cells along the
-edge blink slowly.
-
-The animation builder has an Artifacts treatment for a loaded photo and
-writes the component's JSX; a look is designed there and pasted where it is
-used. The hero and the photos of The meetup use it. Speaker tiles keep their
-own treatment (0009, 0010), which is a dither behind a cut-out person, not
-over a photo.
+A photo that should carry the brand's pixels takes artifacts (`Artifacts` in
+`packages/brand`), not the dither. A look is designed in the animation
+builder's Artifacts treatment, which writes the component's JSX, and pasted
+where it is used. The hero and the photos of The meetup use it. Speaker tiles
+keep their own treatment (0009 and 0010 here): a dither behind a cut-out
+person, not over a photo.
 
 ## Consequences
 On a page built with Astro's images, `Artifacts` is laid over the image with
@@ -30,3 +24,6 @@ no `src`, and the image is tinted by CSS (`BlueTone.astro` for the brand
 blue). With `src` the component draws the photo itself on its canvas, which is
 what the builder exports. Tinting on the canvas needs a photo the browser may
 read: one from the same site, or an upload.
+
+A seed fixes the pattern for one frame size and cell size, since cells sit
+on a grid: the same JSX in a frame of another size draws another pattern.

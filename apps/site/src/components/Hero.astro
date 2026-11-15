@@ -1,9 +1,8 @@
 ---
 // The home page's hero: an electric-blue block. Photos of the meetups take its blue and
-// break up into it cell by cell.
+// break up into it cell by cell. The page includes <BlueTone /> for the photos' colour.
 import { Image } from 'astro:assets';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
-import BlueTone from './BlueTone.astro';
 import Button from '@agnteng/brand/components/Button.astro';
 import { nextEvent, register, galleryPhoto, shortDate, startTime } from '../lib/data';
 
@@ -36,14 +35,11 @@ const photos = shots.map((p, i) => {
   const [w, l, t] = place(p, PHONE), [wd, ld, td] = place(p, DESK);
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
-const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } as const;
 // The cells that hide the photos' leading edge. Whole across `solid`, which is at
 // least the edge the photos may stop short of.
-const cells = { color: '#1E2BE6', seed: 2027, cell: 10, animate: true, style: fill } as const;
+const cells = { color: '#1E2BE6', seed: 2027, cell: 10, animate: true } as const;
 ---
 <section class="relative isolate overflow-hidden bg-electric-blue text-white">
-  <BlueTone />
-
   <!-- The skip link lands here. -->
   <div id="main" class="relative z-10 mx-auto grid max-w-7xl items-center px-4 pt-14 pb-10 md:min-h-[72dvh] md:grid-cols-12 md:px-8 md:pt-20 md:pb-40">
     <div class="md:col-span-6">
