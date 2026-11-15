@@ -1,0 +1,43 @@
+{
+  "frame": {
+    "w": 1200,
+    "h": 630
+  },
+  "background": {
+    "kind": "photo",
+    "src": "content/2026-08-26/photos/04.jpg",
+    "position": "center",
+    "color": "#1E2BE6",
+    "tint": true,
+    "cell": 12,
+    "rough": 0.3,
+    "seed": 2027,
+    "animate": false,
+    "artifacts": [
+      {
+        "at": "bottom-left",
+        "solid": 0.3,
+        "reach": 0.85
+      },
+      {
+        "at": "top-right",
+        "solid": 0.3,
+        "reach": 0.85
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "scrim",
+      "shape": "vignette",
+      "color": "#1E2BE6",
+      "opacity": 0.55
+    },
+    {
+      "type": "logo",
+      "form": "lockup",
+      "anchor": "center",
+      "scale": 0.5
+    }
+  ]
+}
