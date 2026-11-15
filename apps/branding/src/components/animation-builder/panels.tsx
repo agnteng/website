@@ -293,6 +293,9 @@ function LayerEditor({ l, set }: { l: Layer; set: (p: Partial<Layer>) => void })
       <Range label="Reach" value={l.reach} min={0} max={0.4} step={0.002} onChange={(reach) => set({ reach })} />
       <Range label="Turn" value={l.turn} min={-15} max={15} step={0.5} onChange={(turn) => set({ turn })} />
       <Range label="Roundness" value={l.radius} min={0} max={0.3} step={0.005} onChange={(radius) => set({ radius })} />
+      <Range label="Wave" value={l.wave} min={0} max={0.15} step={0.002} onChange={(wave) => set({ wave })} />
+      <Range label="Wave length" value={l.waveLength} min={0.05} max={1.5} step={0.01} onChange={(waveLength) => set({ waveLength })} />
+      <Range label="Wave shift" value={l.waveShift} min={0} max={1} step={0.01} onChange={(waveShift) => set({ waveShift })} />
       <Colour label="Colour" value={l.color} onChange={(color) => set({ color })} />
       <Rule />
       <Range label="Cell size" value={l.cell} min={0.004} max={0.08} step={0.001} onChange={(cell) => set({ cell })} />
