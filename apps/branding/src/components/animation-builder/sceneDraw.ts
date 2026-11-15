@@ -83,8 +83,8 @@ function scrim(ctx: Ctx, W: number, H: number, l: ScrimLayer) {
   ctx.fillRect(0, 0, W, H);
 }
 
-// Drawn in the box's turned frame; a cell's distance past the box decides whether and
-// how strongly it shows.
+// Drawn in the box's turned frame: the box itself as one smooth shape, then the cells
+// past it, each kept by its distance from the box.
 function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
   // Whole pixels: a fractional cell leaves hairlines between cells.
   const m = Math.min(W, H), c = Math.max(2, Math.round(l.cell * m)), bw = l.w * W, bh = l.h * H;
@@ -93,11 +93,14 @@ function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
   const sx = fx === 0 ? 1 : fx === 1 ? -1 : 0, sy = fy === 1 ? 1 : fy === 0 ? -1 : 0;
   const cx = sx === 1 ? bw / 2 : sx === -1 ? W - bw / 2 : W / 2;
   const cy = sy === 1 ? H - bh / 2 : sy === -1 ? bh / 2 : H / 2;
-  // pixels past the box: positive outside, negative inside
-  const past = (x: number, y: number) => Math.max(
-    sx ? sx * (x - cx) - bw / 2 : Math.abs(x - cx) - bw / 2,
-    sy ? sy * (cy - y) - bh / 2 : Math.abs(y - cy) - bh / 2,
-  );
+  // Pixels past the box, positive outside and negative inside, rounded at the corners
+  // it shows: on the sides it grows from it runs on, so those corners never round.
+  const r = Math.max(0, Math.min(l.radius * m, bw / 2, bh / 2));
+  const past = (x: number, y: number) => {
+    const qx = (sx ? sx * (x - cx) : Math.abs(x - cx)) - bw / 2 + r;
+    const qy = (sy ? sy * (cy - y) : Math.abs(y - cy)) - bh / 2 + r;
+    return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
+  };
   const reach = Math.max(c, l.reach * m), far = reach * 1.8;
   const th = (l.turn * Math.PI) / 180, cos = Math.cos(th), sin = Math.sin(th);
   ctx.save();
@@ -105,6 +108,14 @@ function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
   ctx.rotate(th);
   ctx.translate(-cx, -cy);
   ctx.fillStyle = l.color;
+  // The box: on the sides it grows from it runs a frame's length past the edge, and
+  // only the corners it shows are rounded.
+  const L = sx === 1, R = sx === -1, B = sy === 1, T = sy === -1, far0 = Math.max(W, H);
+  const x0 = cx - bw / 2 - (L ? far0 : 0), x1 = cx + bw / 2 + (R ? far0 : 0);
+  const y0 = cy - bh / 2 - (T ? far0 : 0), y1 = cy + bh / 2 + (B ? far0 : 0);
+  ctx.beginPath();
+  ctx.roundRect(x0, y0, x1 - x0, y1 - y0, [!L && !T ? r : 0, !R && !T ? r : 0, !R && !B ? r : 0, !L && !B ? r : 0]);
+  ctx.fill();
   // The grid's lines fall on the box's open sides; it spans the frame as seen from
   // the turned box, and no further.
   const ox = Math.round(sx === -1 ? cx - bw / 2 : cx + bw / 2), oy = Math.round(sy === -1 ? cy + bh / 2 : cy - bh / 2);
@@ -117,7 +128,9 @@ function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
   for (let j = j0; j < j1; j++) {
     for (let i = i0; i < i1; i++) {
       const x = ox + i * c, y = oy + j * c;
-      const d = past(x + c / 2, y + c / 2) + (rnd(i >> 1, j >> 1, l.seed + 101) - 0.5) * l.rough * c;
+      const at = past(x + c / 2, y + c / 2);
+      if (at <= -c / 2) continue; // the box covers it
+      const d = at + (rnd(i >> 1, j >> 1, l.seed + 101) - 0.5) * l.rough * c;
       if (d > far) continue;
       if (d > reach) {
         // past the edge, a few strays, thinning out
@@ -128,10 +141,7 @@ function artifact(ctx: Ctx, W: number, H: number, l: ArtifactLayer) {
         if (rnd(i, j, l.seed) >= k * k * (3 - 2 * k)) continue;
         ctx.globalAlpha = 0.4 + 0.6 * k * k;
       } else ctx.globalAlpha = 1;
-      // Turned, solid cells overlap by a hair so no seam shows; see-through ones don't,
-      // or the overlaps would show darker.
-      const o = th && ctx.globalAlpha === 1 ? 0.6 : 0;
-      ctx.fillRect(x - o / 2, y - o / 2, c + o, c + o);
+      ctx.fillRect(x, y, c, c);
     }
   }
   ctx.restore();

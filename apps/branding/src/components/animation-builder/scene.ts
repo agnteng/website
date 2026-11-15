@@ -116,6 +116,7 @@ export interface ArtifactLayer extends Base {
   h: number;
   reach: number; // how far past it the cells thin out to nothing
   turn: number; // degrees, about its own middle
+  radius: number; // of its open corners, as a share of the frame's shorter side
   cell: number;
   rough: number; // how ragged its edge is, in cells
   stray: number; // the chance of a lone cell just past the edge
@@ -163,7 +164,7 @@ export const LAYER_DEFAULTS: { [K in Layer['type']]: Omit<Extract<Layer, { type:
   photo: { type: 'photo', src: '', x: 0.3, y: 0.25, w: 0.4, h: 0.5, fit: 'cover', radius: 0.04, label: 'Photo' },
   rect: { type: 'rect', x: 0, y: 0.7, w: 1, h: 0.3, color: '#0B0E2A', opacity: 1, radius: 0 },
   scrim: { type: 'scrim', shape: 'bottom', color: '#05071E', opacity: 0.9 },
-  artifact: { type: 'artifact', at: 'bottom-left', w: 0.3, h: 0.18, reach: 0.067, turn: -3, cell: 0.022, rough: 1.6, stray: 0.22, seed: 4821, color: '#1E2BE6' },
+  artifact: { type: 'artifact', at: 'bottom-left', w: 0.3, h: 0.18, reach: 0.067, turn: -3, radius: 0, cell: 0.022, rough: 1.6, stray: 0.22, seed: 4821, color: '#1E2BE6' },
   guide: { type: 'guide', shape: 'rect', x: 0.5, y: 0.5, w: 0.6, h: 0.3 },
 };
 export const LAYER_NAMES: Record<Layer['type'], string> = {
