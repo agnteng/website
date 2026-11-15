@@ -25,8 +25,8 @@ const shareImage = new URL(image, Astro.site).href;
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={shareImage} />
     <meta name="twitter:card" content="summary_large_image" />
-    <!-- No JS, no dither: show photos at once. -->
-    <noscript><style is:inline>:root .dither-stage { opacity: 1; }</style></noscript>
+    <!-- No <noscript> in here: with one, the build loses the end of the head and puts the
+         stylesheet after the body, so the page shows unstyled first. -->
     <link rel="icon" type="image/svg+xml" href="/assets/logo/ae-icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

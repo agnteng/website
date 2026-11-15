@@ -327,8 +327,11 @@ def check_dither() -> None:
     css = (site / "styles" / "site.css").read_text()
     if not re.search(r"\.dither-stage\s*\{[^}]*animation:", css):
         fail("dither", "site.css: .dither-stage lost its fallback animation, so a failed island hides photos for good")
-    if ".dither-stage" not in (site / "layouts" / "Shell.astro").read_text().split("<noscript>", 1)[-1]:
-        fail("dither", "Shell.astro: no noscript rule shows .dither-stage without JavaScript")
+    if not re.search(r"@media \(scripting: none\)\s*\{\s*\.dither-stage\s*\{[^}]*opacity: 1", css):
+        fail("dither", "site.css: no (scripting: none) rule shows .dither-stage without JavaScript")
+    # With a <noscript> in the head, the build puts the stylesheet after the body.
+    if "<noscript" in (site / "layouts" / "Shell.astro").read_text().split("</head>", 1)[0].split("-->")[-1]:
+        fail("dither", "Shell.astro: <noscript> in the head moves the stylesheet below the body; use a media query")
     for f in sorted(site.rglob("*.astro")):
         text = f.read_text()
         # A photo with a DuotoneField over it shows first unless both sit in a stage.
@@ -443,9 +446,11 @@ def check_live() -> None:
 def check_live_site() -> None:
     w = "https://agnteng.com"
     for page in ("", "talks", "speakers", "robots.txt", "search.json"):
-        code, _ = get(f"{w}/{page}")
+        code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")
+        elif b"<body" in body and b'rel="stylesheet" href="/_astro/' not in body.split(b"<body", 1)[0]:
+            fail("live", f"{w}/{page} loads its stylesheet after the body, so it shows unstyled first")
     code, body = get(f"{w}/sitemap.xml")
     locs = re.findall(r"<loc>([^<]+)</loc>", body.decode()) if code == 200 else []
     talk = next((u for u in locs if "/talks/" in u), None)
