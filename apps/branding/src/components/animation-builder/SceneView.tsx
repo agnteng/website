@@ -19,6 +19,7 @@ interface Props {
   assets: OverlayAssets;
   fontsReady: boolean;
   scale?: number;
+  pixelRatio?: number; // a photo background's canvas pixels per stage pixel, for a large export
   paused?: boolean;
   preview?: boolean; // guides and empty photo slots
   mockup?: boolean;
@@ -54,7 +55,7 @@ function usePictures(srcs: string[]): Record<string, HTMLImageElement> {
 }
 const fill = { position: 'absolute', inset: 0, width: '100%', height: '100%' } as const;
 
-export default function SceneView({ scene, assets, fontsReady, scale = 1, paused = false, preview = false, mockup = false, canvasRef, onStatus, onImages }: Props) {
+export default function SceneView({ scene, assets, fontsReady, scale = 1, pixelRatio, paused = false, preview = false, mockup = false, canvasRef, onStatus, onImages }: Props) {
   const { background: b, layers, frame } = scene;
   const overlayRef = useRef<HTMLCanvasElement>(null);
 
@@ -92,7 +93,7 @@ export default function SceneView({ scene, assets, fontsReady, scale = 1, paused
         </Animation>
       ) : b.kind === 'photo' ? (
         <Artifacts
-          src={b.src} position={b.position} color={b.color} tint={b.tint} cell={px(b.cell)} rough={b.rough}
+          src={b.src} position={b.position} color={b.color} edge={b.edge} tint={b.tint && b.tintOpacity} cell={px(b.cell)} pixelRatio={pixelRatio} rough={b.rough}
           seed={b.seed} animate={b.animate} paused={paused} artifacts={b.artifacts} canvasRef={canvasRef} onStatus={onStatus} style={fill}
         />
       ) : (

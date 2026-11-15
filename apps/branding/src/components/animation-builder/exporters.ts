@@ -9,6 +9,7 @@
 export interface ExportTarget {
   source: HTMLCanvasElement; // the live Animation field canvas
   out: { w: number; h: number }; // exact export pixel size
+  scale?: number; // the export scale `out` was multiplied by (1 unless chosen)
   bg: string; // field background (the canvas has transparent gaps)
   overlay?: (ctx: CanvasRenderingContext2D, W: number, H: number) => void;
   smooth?: boolean; // the source holds a photo: scale it smoothly, not cell-hard
@@ -26,6 +27,9 @@ function downloadBlob(blob: Blob, filename: string) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
+
+// The file's name carries the size it was written at, which a cap may have lowered.
+const sized = (name: string, w: number, h: number) => name.replace(/\d+x\d+$/, `${w}x${h}`);
 
 // one composited frame at W×H: bg fill → scaled field → overlay
 function renderFrame(t: ExportTarget, ctx: CanvasRenderingContext2D, W: number, H: number) {
@@ -46,7 +50,8 @@ export function exportJpg(t: ExportTarget, name: string) {
       renderFrame(t, c.getContext('2d')!, t.out.w, t.out.h);
       c.toBlob(
         (blob) => {
-          if (blob) downloadBlob(blob, `${name}.jpg`);
+          if (!blob) return reject(new Error('the browser made no image at this size'));
+          downloadBlob(blob, `${name}.jpg`);
           resolve();
         },
         'image/jpeg',
@@ -60,15 +65,24 @@ export function exportJpg(t: ExportTarget, name: string) {
 
 type CaptureCanvas = HTMLCanvasElement & { captureStream?: (fps?: number) => MediaStream };
 
+// Browsers' video encoders stop at about 4K: a larger frame is recorded at that.
+export const VIDEO_MAX_EDGE = 3840;
+// A GIF this size is already tens of megabytes.
+export const GIF_MAX_EDGE = 2000;
+
 export async function exportVideo(t: ExportTarget, seconds: number, name: string, fps = 30) {
+  const k = Math.min(1, VIDEO_MAX_EDGE / Math.max(t.out.w, t.out.h));
+  const even = (n: number) => Math.max(2, Math.round((n * k) / 2) * 2); // encoders want even sides
+  const W = even(t.out.w), H = even(t.out.h);
   const off = document.createElement('canvas');
-  off.width = t.out.w;
-  off.height = t.out.h;
+  off.width = W;
+  off.height = H;
   const octx = off.getContext('2d')!;
   const cap = (off as CaptureCanvas).captureStream;
   if (!cap) throw new Error('captureStream unsupported');
   const stream = cap.call(off, fps);
   const types = [
+    ...(Math.max(W, H) > 1920 ? ['video/mp4;codecs=avc1.640033'] : []), // level 5.1, for frames past 1080p
     'video/mp4;codecs=avc1.640028',
     'video/mp4',
     'video/webm;codecs=vp9',
@@ -76,7 +90,9 @@ export async function exportVideo(t: ExportTarget, seconds: number, name: string
     'video/webm',
   ];
   const mime = types.find((m) => MediaRecorder.isTypeSupported(m)) || '';
-  const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  // The default bitrate suits a small frame; a large one turns to blocks.
+  const videoBitsPerSecond = Math.min(60_000_000, Math.max(8_000_000, W * H * 6));
+  const rec = new MediaRecorder(stream, { ...(mime ? { mimeType: mime } : {}), videoBitsPerSecond });
   const chunks: BlobPart[] = [];
   rec.ondataavailable = (e) => {
     if (e.data && e.data.size) chunks.push(e.data);
@@ -87,7 +103,7 @@ export async function exportVideo(t: ExportTarget, seconds: number, name: string
   let stopped = false;
   const loop = () => {
     if (stopped) return;
-    renderFrame(t, octx, t.out.w, t.out.h);
+    renderFrame(t, octx, W, H);
     raf = requestAnimationFrame(loop);
   };
 
@@ -104,7 +120,7 @@ export async function exportVideo(t: ExportTarget, seconds: number, name: string
 
   const outMime = rec.mimeType || mime || 'video/webm';
   const ext = outMime.includes('mp4') ? 'mp4' : 'webm';
-  downloadBlob(new Blob(chunks, { type: outMime }), `${name}.${ext}`);
+  downloadBlob(new Blob(chunks, { type: outMime }), `${sized(name, W, H)}.${ext}`);
 }
 
 export async function exportGif(t: ExportTarget, seconds: number, name: string, fps = 12, onProgress?: (p: number) => void) {
@@ -112,8 +128,8 @@ export async function exportGif(t: ExportTarget, seconds: number, name: string, 
   const lib = ((mod as Record<string, unknown>).GIFEncoder ? mod : (mod as { default: unknown }).default) as typeof import('gifenc');
   const { GIFEncoder, quantize, applyPalette } = lib;
 
-  // cap the long edge at 1000 (square covers export full-size; huge banners stay sane)
-  const maxEdge = 1000;
+  // cap the long edge at 1000 per unit of export scale (square covers export full-size; huge banners stay sane)
+  const maxEdge = Math.min(GIF_MAX_EDGE, 1000 * (t.scale ?? 1));
   const scale = Math.min(1, maxEdge / Math.max(t.out.w, t.out.h));
   const w = Math.max(1, Math.round(t.out.w * scale));
   const h = Math.max(1, Math.round(t.out.h * scale));
@@ -137,5 +153,5 @@ export async function exportGif(t: ExportTarget, seconds: number, name: string, 
     await sleep(delay);
   }
   gif.finish();
-  downloadBlob(new Blob([gif.bytes()], { type: 'image/gif' }), `${name}.gif`);
+  downloadBlob(new Blob([gif.bytes()], { type: 'image/gif' }), `${sized(name, w, h)}.gif`);
 }

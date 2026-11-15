@@ -149,10 +149,13 @@ function Photo({ b, set }: { b: PhotoBg; set: (p: Partial<PhotoBg>) => void }) {
       <Row label="Crop"><AlignPad value={b.position} onChange={(position) => set({ position })} /></Row>
       <Rule />
       <Colour label="Artifacts" value={b.color} onChange={(color) => set({ color })} />
+      <Check label="Second colour at the edge" checked={!!b.edge} onChange={(on) => set({ edge: on ? '#ED4BA0' : '' })} />
+      {b.edge && <Colour label="Second" value={b.edge} onChange={(edge) => set({ edge })} />}
       <div className="flex flex-wrap gap-x-4">
         <Check label="Tint the photo" checked={b.tint} onChange={(tint) => set({ tint })} />
         <Check label="Animate the edge" checked={b.animate} onChange={(animate) => set({ animate })} />
       </div>
+      {b.tint && <Range label="Tint opacity" value={b.tintOpacity} min={0} max={1} step={0.05} onChange={(tintOpacity) => set({ tintOpacity })} />}
       <Range label="Cell size" value={b.cell} min={4} max={40} step={1} onChange={(cell) => set({ cell })} />
       <Range label="Roughness" value={b.rough} min={0} max={0.8} step={0.02} onChange={(rough) => set({ rough })} />
       <Row label="Seed">

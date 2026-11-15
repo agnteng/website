@@ -30,3 +30,4 @@ Decision, Consequences.
 | [0011](0011-photos-take-artifacts.md) | Photos take artifacts, not the dither | Accepted |
 | [0012](0012-builder-edits-a-scene.md) | The animation builder edits a scene; templates are presets | Accepted |
 | [0013](0013-builder-has-an-artifact-layer.md) | The builder has an artifact layer, for lower thirds | Accepted |
+| [0014](0014-artifacts-second-colour-and-tint-strength.md) | Artifacts can take a second colour and a partial tint | Accepted |

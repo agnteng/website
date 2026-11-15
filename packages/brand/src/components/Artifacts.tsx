@@ -9,7 +9,8 @@ import { anchorFactors, type Anchor } from './anchor';
 //     artifacts={[{ at: 'left', solid: 0.2, reach: 0.5 }]} />
 //
 // The canvas fills its parent. With `src` it draws the photo too (cover-cropped,
-// and recoloured into `color` when `tint` is set). Without it the canvas is
+// and recoloured into `color` when `tint` is set; `tint={0.5}` goes half way).
+// `edge` is a second colour that a few of the ragged cells take. Without `src` the canvas is
 // transparent and only draws the cells: lay it over images of your own.
 //
 // The seed fixes the pattern for a given frame size and cell size: cells sit on
@@ -26,12 +27,14 @@ interface Props {
   color?: string;
   seed?: number;
   cell?: number; // cell size in px
+  pixelRatio?: number; // canvas pixels per layout pixel; the screen's (up to 2) unless given
   rough?: number; // how ragged the edge is (0 = a straight fade)
   animate?: boolean; // a few cells along the edge blink in and out, slowly
   paused?: boolean; // hold the animation on its current frame
   src?: string;
   position?: Anchor; // the photo's cover crop
-  tint?: boolean; // recolour the photo: shadows navy, mid-tones `color`, highlights near white
+  edge?: string; // a second colour: a few of the ragged cells take it, more of them further out
+  tint?: boolean | number; // recolour the photo: shadows navy, mid-tones `color`, highlights near white. A number (0–1) is how strongly
   onStatus?: (s: 'ok' | 'cors' | 'error') => void;
   style?: React.CSSProperties;
   canvasRef?: React.RefObject<HTMLCanvasElement | null>; // expose the canvas for export
@@ -64,12 +67,14 @@ export default function Artifacts({
   color = '#1E2BE6',
   seed = 1,
   cell = 10,
+  pixelRatio,
   rough = 0.3,
   animate = false,
   paused = false,
   src = '',
   position = 'center',
   tint = false,
+  edge = '',
   onStatus,
   style,
   canvasRef,
@@ -104,6 +109,7 @@ export default function Artifacts({
 
   // One string for the effect's dependencies: the list is rebuilt on every render.
   const shape = JSON.stringify(artifacts);
+  const clock = useRef(0); // kept when a prop changes, so a paused frame stays the frame it was
 
   useEffect(() => {
     const canvas = ref.current;
@@ -133,15 +139,17 @@ export default function Artifacts({
       try {
         // Reading the pixels is also the test for a photo the browser won't let out.
         const px = pctx.getImageData(0, 0, photo.width, photo.height);
-        if (tint) {
+        const amount = tint === true ? 1 : Math.max(0, Math.min(1, Number(tint) || 0));
+        if (amount > 0) {
           const c2 = rgb(color);
           const dark = mix(rgb('#05071E'), c2, 0.08), light = mix(rgb('#F4F5FF'), c2, 0.04);
           for (let i = 0; i < px.data.length; i += 4) {
             const l = (0.2126 * px.data[i] + 0.7152 * px.data[i + 1] + 0.0722 * px.data[i + 2]) / 255;
             const [from, to, t] = l < 0.5 ? [dark, c2, l * 2] : [c2, light, l * 2 - 1];
-            px.data[i] = from[0] + (to[0] - from[0]) * t;
-            px.data[i + 1] = from[1] + (to[1] - from[1]) * t;
-            px.data[i + 2] = from[2] + (to[2] - from[2]) * t;
+            for (let ch = 0; ch < 3; ch++) {
+              const toned = from[ch] + (to[ch] - from[ch]) * t;
+              px.data[i + ch] += (toned - px.data[i + ch]) * amount; // part way from the photo's own colour
+            }
           }
           pctx.putImageData(px, 0, 0);
         }
@@ -155,7 +163,7 @@ export default function Artifacts({
       // The layout size, not the on-screen one: a zoomed or scaled parent keeps its cells.
       w = canvas.clientWidth;
       h = canvas.clientHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = pixelRatio ?? Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       // Enough cells to overhang the frame, centred: its edges are always inside the grid.
@@ -197,6 +205,8 @@ export default function Artifacts({
             if (!still) p += 0.16 * Math.sin(t * (0.5 + rnd(i, j, seed + 3) * 1.2) + 6.283 * rnd(i, j, seed + 5));
             if (rnd(i, j, seed) >= p) continue;
           }
+          // Only ragged cells take the second colour, and few of them: an accent, not a second field.
+          ctx.fillStyle = edge && k < 1 && rnd(i, j, seed + 7) < 0.04 + 0.18 * (1 - k) ? edge : color;
           ctx.globalAlpha = 0.3 + 0.7 * k;
           ctx.fillRect(offx + i * c, offy + j * c, c, c);
         }
@@ -208,16 +218,17 @@ export default function Artifacts({
 
     // The clock only runs while a frame is drawn, so a pause holds the frame and a
     // canvas that is off screen costs nothing.
-    let raf = 0, last = 0, t = 0;
+    let raf = 0, last = 0, t = clock.current;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       if (pausedRef.current || now - last < 80) return; // about twelve frames a second: cells step, they don't glide
       t += last ? Math.min(0.25, (now - last) / 1000) : 0;
       last = now;
+      clock.current = t;
       draw(t);
     };
     layout();
-    draw(0);
+    draw(t);
     const ro = new ResizeObserver(() => { layout(); draw(t); });
     ro.observe(canvas);
     const io = new IntersectionObserver(([e]) => {
@@ -231,7 +242,7 @@ export default function Artifacts({
       ro.disconnect();
       io.disconnect();
     };
-  }, [shape, color, seed, cell, rough, animate, img, position, tint]);
+  }, [shape, color, seed, cell, pixelRatio, rough, animate, img, position, tint, edge]);
 
   return <canvas ref={ref} style={{ display: 'block', width: '100%', height: '100%', ...style }} />;
 }
