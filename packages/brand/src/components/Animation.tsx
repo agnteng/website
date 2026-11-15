@@ -20,12 +20,6 @@ import { anchorFactors } from './anchor';
 export const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 
 // directional density falloff (shared with the banner export renderer)
-// A fixed pseudo-random value in [0, 1) for a pair of integers.
-const noise = (a: number, b: number) => {
-  const n = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
-  return n - Math.floor(n);
-};
-
 export function fadeFactor(fade: string, fx: number, fy: number) {
   if (fade === 'left') return 1 - fx;
   if (fade === 'right') return fx;
@@ -145,10 +139,6 @@ interface Props {
   bg?: string;
   density?: number;
   fade?: 'none' | 'left' | 'right' | 'up' | 'down' | 'radial';
-  // Pattern fields with a fade: between these two fade values cells drop out at random
-  // along a ragged edge and dim, instead of thinning evenly. None below the first, whole
-  // above the second.
-  dissolve?: [number, number];
   gap?: number;
   cell?: number;
   motion?: number;
@@ -169,7 +159,6 @@ export default function Animation({
   bg = '#05071E',
   density = 0.55,
   fade = 'none',
-  dissolve,
   gap = 1,
   cell = 10,
   motion = 70,
@@ -354,7 +343,6 @@ export default function Animation({
       const t = reduce ? 0 : (now - start - pausedAccum) / 1000 + phase;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      ctx.globalAlpha = 1;
       const c = Math.max(2, cell);
       const sq = Math.max(1, c - gap);
       const offx = Math.floor((w - cols * c) / 2);
@@ -406,16 +394,7 @@ export default function Animation({
               }
             } else {
               // pattern field — density drives coverage
-              const f = fadeFactor(fade, fx, fy);
-              const cov = density * (dissolve ? 1 : f) + delta * ampD;
-              if (dissolve) {
-                // Each 4×4 block shifts the ramp, which makes the edge ragged;
-                // within it a cell survives with the ramp's probability.
-                const at = f + (noise(i >> 2, j >> 2) - 0.5) * 0.3;
-                const k = clamp((at - dissolve[0]) / Math.max(1e-6, dissolve[1] - dissolve[0]), 0, 1);
-                if (noise(i, j) >= k * k * (3 - 2 * k)) continue;
-                ctx.globalAlpha = 0.3 + 0.7 * k;
-              }
+              const cov = density * fadeFactor(fade, fx, fy) + delta * ampD;
               if (shape === 'halftone') {
                 const r = (c / 2) * Math.sqrt(clamp(cov, 0, 1));
                 if (r > 0.35) {
@@ -451,7 +430,7 @@ export default function Animation({
       ro.disconnect();
       io.disconnect();
     };
-  }, [animation, density, fade, dissolve?.[0], dissolve?.[1], color, edge, bg, gap, cell, motion, shape, imgSrc, imgContrast, imgEdgeGlow, imgTone, imgPos]);
+  }, [animation, density, fade, color, edge, bg, gap, cell, motion, shape, imgSrc, imgContrast, imgEdgeGlow, imgTone, imgPos]);
 
   return <canvas ref={ref} className={className} style={style} aria-hidden="true" />;
 }

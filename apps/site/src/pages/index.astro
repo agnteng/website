@@ -7,6 +7,7 @@ import TalkTile from '../components/TalkTile.astro';
 import TintedPhoto from '../components/TintedPhoto.astro';
 import SpeakerCard from '../components/SpeakerCard.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import { nextEvent, past, talks, talksAt, coverAt, galleryPhoto, speakers, links, register, shortDate, eventSlug, eventName } from '../lib/data';
@@ -53,7 +54,13 @@ const night = [
     <ol class="mt-10 grid gap-8 md:mt-14 md:grid-cols-3 md:gap-6">
       {night.map((n, i) => (
         <li class:list={['reveal', i === 1 && 'md:mt-16', i === 2 && 'md:mt-32']}>
-          <TintedPhoto src={n.photo.img} alt={n.photo.alt} sizes="33vw" class="aspect-[4/5] w-full rounded-2xl max-md:hidden" />
+          <!-- The hero's treatment (its <BlueTone /> is on this page): the photo in the brand
+               blues, with blue cells eating two opposite corners. -->
+          <TintedPhoto src={n.photo.img} alt={n.photo.alt} sizes="33vw" blue class="aspect-[4/5] w-full rounded-2xl max-md:hidden">
+            <div class="dither-stage absolute inset-0" aria-hidden="true">
+              <Artifacts client:visible color="#1E2BE6" seed={i + 11} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.2, reach: 0.62 }, { at: 'top-right', solid: 0.2, reach: 0.62 }]} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+            </div>
+          </TintedPhoto>
           <p class="font-sans text-2xl font-extrabold md:mt-5">{n.title}</p>
           <p class="mt-2 max-w-[38ch] leading-relaxed text-panel-navy/70">{n.body}</p>
         </li>
