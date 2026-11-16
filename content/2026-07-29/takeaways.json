@@ -1,0 +1,22 @@
+[
+  {
+    "title": "AI turned makers into reviewers.",
+    "text": "People no longer do three or four tasks a day; they review twenty. The constant small wins wear down attention in a way you don't feel while working."
+  },
+  {
+    "title": "Burnout arrives off the clock.",
+    "text": "It shows up on a Sunday evening, not during the work, and replacing a burned-out teammate costs about six months of salary. Teams sandbox their agents carefully and set no limits for themselves."
+  },
+  {
+    "title": "Claude Code can run your life admin.",
+    "text": "On a fixed $100 a month, one personal agent built on Claude Code handled an insurance claim, a homeowners' association dispute and a business buyout in a single week."
+  },
+  {
+    "title": "People learn new environments by testing hypotheses.",
+    "text": "Given a puzzle current AI can't solve and no instructions, people solved it by proposing a rule, testing it and revising it on a partial picture of the world."
+  },
+  {
+    "title": "That's what today's AI is missing.",
+    "text": "Neural networks transfer skills well but adapt badly to unfamiliar settings. Flexible AI needs hypothesis testing built in."
+  }
+]

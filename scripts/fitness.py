@@ -198,6 +198,14 @@ def check_talks() -> None:
         video = t.get("video")
         if video is not None and not re.fullmatch(r"[\w-]{11}", str(video.get("youtubeId", ""))):
             fail("talks", f"{where}: video.youtubeId is not a YouTube id")
+    # An event's main takeaways (production's takeaways.md): 4 to 6, each a claim and a text.
+    for f in sorted((ROOT / "content").glob("*/takeaways.json")):
+        where, items = f.relative_to(ROOT), json.loads(f.read_text())
+        if not 4 <= len(items) <= 6:
+            fail("talks", f"{where}: {len(items)} takeaways; an event has 4 to 6")
+        for i, t in enumerate(items):
+            if not t.get("title") or not t.get("text"):
+                fail("talks", f"{where}: takeaway {i} needs a title and a text")
     # Rendered thumbnails beside their talks (production's publish_talks.py).
     for f in sorted((ROOT / "content").glob("*/talks/*.jpg")):
         where, data = f.relative_to(ROOT), f.read_bytes()
@@ -335,6 +343,11 @@ def check_venue() -> None:
     # A gallery's alt texts are on its event page too.
     events = [json.loads(f.read_text()) for f in (ROOT / "content").glob("*/event.json")]
     venues = re.compile("|".join(re.escape(e["venue"]) for e in events if e.get("venue")), re.I)
+    # A meetup's takeaways are on its event page too.
+    for f in sorted((ROOT / "content").glob("*/takeaways.json")):
+        for t in json.loads(f.read_text()):
+            if venues.search(t.get("title", "") + " " + t.get("text", "")):
+                fail("venue", f"{f.relative_to(ROOT)}: a takeaway names a venue; change it in production's takeaways.md")
     for f in sorted((ROOT / "content").glob("*/photos.json")):
         for p in json.loads(f.read_text()):
             if venues.search(p.get("alt", "")):

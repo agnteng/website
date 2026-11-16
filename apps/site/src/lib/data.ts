@@ -167,6 +167,12 @@ export const galleryPhoto = (date: string, file: string): Photo => {
   return p;
 };
 
+// What someone learned at a meetup, from its talks and Q&A (production's takeaways.md).
+export type Takeaway = { title: string; text: string };
+const takeawayFiles = import.meta.glob<Takeaway[]>('@content/*/takeaways.json', { eager: true, import: 'default' });
+export const takeawaysAt = (e: Event): Takeaway[] =>
+  Object.entries(takeawayFiles).find(([path]) => dateOf(path) === e.date)?.[1] ?? [];
+
 export const questionsAt = (e: Event): Question[] =>
   Object.entries(questionFiles).find(([path]) => dateOf(path) === e.date)?.[1] ?? [];
 

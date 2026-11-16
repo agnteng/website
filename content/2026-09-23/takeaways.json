@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Many small bots beat one assistant.",
+    "text": "Give each job its own bot (news briefings, brand mentions, prospecting), then put several in one chat to work as a team."
+  },
+  {
+    "title": "Tell the agent what done looks like.",
+    "text": "Evaluation matters more than the model: an agent with a clear definition of done can keep looping until it gets there."
+  },
+  {
+    "title": "Long autonomous runs need supervision built in.",
+    "text": "A coordinating agent that checks every pull request, and a heartbeat that notices when an agent has stopped, kept five agents productive for 30 hours."
+  },
+  {
+    "title": "Automate what already works.",
+    "text": "That 30-hour run rested on seven weeks of building first. Get the product working, then automate the workflow you know."
+  },
+  {
+    "title": "Removing names doesn't protect anyone.",
+    "text": "A few details, like a family of five that arrived in March, are enough to identify someone among thousands, and every session with a model adds another."
+  },
+  {
+    "title": "Collect fields, not stories.",
+    "text": "Keep sensitive detail out of prompts and the model's files. If a device is seized, the session logs show exactly who was spoken to."
+  }
+]
