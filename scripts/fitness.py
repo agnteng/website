@@ -471,7 +471,8 @@ def check_live_site() -> None:
         elif b"<body" in body and b'rel="stylesheet" href="/_astro/' not in body.split(b"<body", 1)[0]:
             fail("live", f"{w}/{page} loads its stylesheet after the body, so it shows unstyled first")
     code, body = get(f"{w}/sitemap.xml")
-    locs = re.findall(r"<loc>([^<]+)</loc>", body.decode()) if code == 200 else []
+    sitemap = body.decode() if code == 200 else ""
+    locs = re.findall(r"<loc>([^<]+)</loc>", sitemap)
     talk = next((u for u in locs if "/talks/" in u), None)
     if not talk:
         fail("live", f"{w}/sitemap.xml lists no talks")
@@ -479,9 +480,11 @@ def check_live_site() -> None:
         code, body = get(talk)
         if code != 200 or b'property="og:image"' not in body:
             fail("live", f"{talk} answered {code} or has no share image")
-        if b'"@type":"VideoObject"' not in body:
-            fail("live", f"{talk} does not describe its video to search engines (docs/adr/0015)")
-    # One address per page: the others redirect to it.
+    # A talk with a public video (the sitemap dates those) describes it to search engines.
+    dated = re.search(r"<loc>([^<]+/talks/[^<]+)</loc><lastmod>", sitemap)
+    if dated and b'"@type":"VideoObject"' not in get(dated.group(1))[1]:
+        fail("live", f"{dated.group(1)} has a public video and no VideoObject")
+    # One address per page (docs/adr/0016): the others redirect to it.
     for other in ("talks/", "talks/index.html"):
         code, to = unfollowed(f"{w}/{other}")
         if code != 301 or not to.endswith("/talks"):

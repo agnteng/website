@@ -1,6 +1,6 @@
 // schema.org JSON-LD for search engines, built from the content the pages show.
 // A page passes its nodes to Shell as `schema`.
-import { links, eventName, eventSlug, eventSummary, coverAt, thumbnail, type Event, type Talk } from './data';
+import { links, eventName, eventSlug, eventSummary, coverAt, isUpcoming, thumbnail, type Event, type Talk } from './data';
 
 const abs = (path: string) => new URL(path, import.meta.env.SITE).href;
 
@@ -25,7 +25,7 @@ export const eventNode = (e: Event) => ({
   organizer: org,
   ...(coverAt(e) && { image: abs(coverAt(e)!.img.src) }),
   ...(e.speakers?.length && { performer: e.speakers.map((s) => ({ '@type': 'Person', name: s.name, description: s.title })) }),
-  ...(e.free && e.luma && { offers: { '@type': 'Offer', price: 0, priceCurrency: 'EUR', url: e.luma.url, availability: 'https://schema.org/InStock' } }),
+  ...(isUpcoming(e) && e.free && e.luma && { offers: { '@type': 'Offer', price: 0, priceCurrency: 'EUR', url: e.luma.url, availability: 'https://schema.org/InStock' } }),
 });
 
 // Search engines need the publish date, which a video has once it is public.

@@ -1,6 +1,7 @@
 ---
 // One meetup. Before it happens: the date, the venue and the way to register on Luma.
-// Afterwards: its talks, photos and Q&A.
+// Afterwards: its talks, photos and Q&A. In between, while its talks aren't published,
+// it keeps its venue and speakers.
 import { Image } from 'astro:assets';
 import Shell from '../../layouts/Shell.astro';
 import SiteNav from '../../components/SiteNav.astro';
@@ -23,10 +24,11 @@ const upcoming = isUpcoming(e);
 const talks = talksAt(e);
 const questions = questionsAt(e);
 const photos = photosAt(e);
-// A meetup that hasn't happened has no photos: it borrows the last one's.
-const cover = coverAt(e) ?? (upcoming && past[0] ? coverAt(past[0]) : undefined);
+const published = talks.length > 0;
+// A meetup with no photos yet borrows the cover of the latest one that has some.
+const cover = coverAt(e) ?? past.map(coverAt).find(Boolean);
 const luma = e.luma?.url ?? links.luma;
-const speakers = upcoming ? (e.speakers ?? []).map((s) => ({ slug: '', ...s, href: luma })) : [];
+const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...s, href: luma }));
 // The cells that hide the cover's leading edge; each night has its own pattern.
 const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell: 10, animate: true } as const;
 ---
@@ -36,7 +38,7 @@ const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell
     <SiteNav onHero />
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
       <h1 class="rise font-sans text-5xl font-extrabold tracking-tight md:max-w-[40%] md:text-6xl">{eventName(e)}</h1>
-      <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium md:max-w-[40%]" style="--i:1"><Icon name="Calendar" size={16} class="shrink-0 text-periwinkle" />{longDate(e.date)}{upcoming && ` · ${e.venue}`}</p>
+      <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium md:max-w-[40%]" style="--i:1"><Icon name="Calendar" size={16} class="shrink-0 text-periwinkle" />{longDate(e.date)}{!published && ` · ${e.venue}`}</p>
       <div class="rise mt-8 flex flex-wrap gap-3" style="--i:2">
         {upcoming
           ? <Button href={luma} class={`${e === nextEvent ? 'js-register ' : ''}!bg-white !text-electric-blue`}>{e.free ? 'Register – Free' : 'Register'}</Button>
@@ -62,7 +64,7 @@ const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell
           <h2 class="font-sans text-3xl font-extrabold tracking-tight md:col-span-4 md:text-4xl">The meetup</h2>
           <div class="space-y-5 text-lg md:col-span-8">
             <p>People show what they’ve shipped with agents: ten-minute talks, then open questions. In {e.city}, in English.</p>
-            <p>To speak, register and describe your talk in the talk field. Ten minutes, real work, no pitches.</p>
+            <p>To speak, register and describe your talk in the talk field. Real work, no pitches.</p>
           </div>
         </div>
       </section>
@@ -75,7 +77,13 @@ const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell
       </section>
     )}
 
-    {talks.length > 0 && (
+    {!upcoming && !published && (
+      <section class="py-16 md:py-24">
+        <p class="text-lg">The talks from this meetup aren’t published yet.</p>
+      </section>
+    )}
+
+    {published && (
       <section class="py-16 md:py-24">
         <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-4xl">Talks</h2>
         <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{talks.map((t, i) => <li class="reveal"><TalkTile talk={t} index={i} summary /></li>)}</ul>

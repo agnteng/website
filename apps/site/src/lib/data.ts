@@ -162,8 +162,8 @@ export const questionsAt = (e: Event): Question[] =>
 export const eventSlug = (e: Event) => `${slugify(e.city)}-${e.number}`;
 export const eventName = (e: Event) => `${e.city} #${e.number}`;
 
-// One sentence on an event, for search results and link previews: what was talked
-// about, or before it happens, when and where it is.
+// An event's description for search results and link previews: its talks, or
+// before it happens, when and where it is.
 export const eventSummary = (e: Event) => {
   const name = `Agentic Engineering ${eventName(e)}`;
   if (isUpcoming(e)) return `${name}: ${longDate(e.date)} at ${e.venue}, ${e.city}. Ten-minute talks on building with AI agents, then open questions.${e.free ? ' Free.' : ''}`;
