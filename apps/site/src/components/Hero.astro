@@ -36,8 +36,8 @@ const photos = shots.map((p, i) => {
   const [w, l, t] = place(p, PHONE), [wd, ld, td] = place(p, DESK);
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
-// The cells that hide the photos' leading edge. Whole across `solid`, which is at
-// least the edge the photos may stop short of. A few of the ragged ones are magenta.
+// The cells that hide the photos' leading edge. Whole across `solid` less `wave`, which
+// is at least the edge the photos may stop short of. A few of the ragged ones are magenta.
 const cells = { color: '#1E2BE6', edge: '#ED4BA0', seed: 2027, cell: 10, animate: true } as const;
 ---
 <section class="relative isolate overflow-hidden bg-electric-blue text-white">
@@ -69,10 +69,10 @@ const cells = { color: '#1E2BE6', edge: '#ED4BA0', seed: 2027, cell: 10, animate
     <!-- Cells cover the frame's leading edge and thin out to nothing: the photo breaks
          up into the block. Above the photo that is fading in. -->
     <div class="absolute inset-0 z-2 max-md:hidden">
-      <Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.22, reach: 0.52 }]} />
+      <Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.25, reach: 0.55, wave: 0.03, waveLength: 0.6 }]} />
     </div>
     <div class="absolute inset-0 z-2 md:hidden">
-      <Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45 }]} />
+      <Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45, wave: 0.05, waveLength: 0.7 }]} />
     </div>
   </div>
 </section>
