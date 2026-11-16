@@ -42,12 +42,12 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
       <EventDate date={e.date} event={e} variant="hero" class="rise mt-6" style="--i:1" />
       <div class="rise mt-8 flex flex-wrap gap-3" style="--i:2">
         {upcoming
-          ? <RegisterButton event={e} on="blue" />
+          ? <RegisterButton event={e} />
           : <>
               {e.recap && <Button variant="inverse" href={e.recap}>Read the recap</Button>}
               {nextEvent
                 ? <Button variant={e.recap ? 'inverse-outline' : 'inverse'} href={`/events/${eventSlug(nextEvent)}`}>Next meetup</Button>
-                : <RegisterButton on="blue" followLuma secondary={!!e.recap} />}
+                : <RegisterButton followLuma secondary={!!e.recap} />}
             </>}
       </div>
     </div>

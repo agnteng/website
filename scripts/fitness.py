@@ -341,6 +341,19 @@ def check_venue() -> None:
                 fail("venue", f"{f.relative_to(ROOT)}: the alt text of {p.get('file')} names a venue; change it in production's gallery.tsv")
 
 
+# ── one Register button (docs/adr/0023) ──
+
+def check_register() -> None:
+    site = ROOT / "apps" / "site" / "src"
+    for f in sorted(site.rglob("*.astro")):
+        if f.name == "RegisterButton.astro":
+            continue
+        text = f.read_text()
+        # A Luma register link or a "Register" label written outside RegisterButton.
+        if re.search(r">\s*Register\b|['\"`]Register\b|\bjs-register\b(?!['\"]\))", text.split("<script", 1)[0]):
+            fail("register", f"{f.relative_to(ROOT)} writes its own Register button; use RegisterButton")
+
+
 # ── a photo never shows before its dither (apps/site/src/styles/site.css) ──
 
 def check_dither() -> None:
@@ -550,7 +563,7 @@ def main() -> None:
                   ("events", check_events), ("talks", check_talks),
                   ("photos", check_photos), ("search", check_search),
                   ("dither", check_dither), ("telegram", check_telegram),
-                  ("venue", check_venue)]
+                  ("venue", check_venue), ("register", check_register)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()

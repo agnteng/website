@@ -1,6 +1,5 @@
 ---
-// `onHero` puts the bar on a hero's own blue, with a white Register button;
-// otherwise it is deep navy. Inside a section it still is the page's banner, hence the role.
+// `onHero` puts the bar on a hero's own blue; otherwise it is deep navy. Inside a section it still is the page's banner, hence the role.
 import RegisterButton from './RegisterButton.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import { nextEvent, links } from '../lib/data';
@@ -33,7 +32,7 @@ const sections = [{ label: 'Talks', href: '/talks' }, { label: 'Speakers', href:
       <nav aria-label="Sections" class="hidden items-center gap-6 xl:flex">
         {sections.map((s) => <a href={s.href} aria-current={here.startsWith(s.href) ? 'page' : undefined} class="text-sm font-medium text-white/90 transition hover:text-white aria-[current=page]:text-white aria-[current=page]:underline aria-[current=page]:underline-offset-8">{s.label}</a>)}
       </nav>
-      <RegisterButton on={onHero ? 'blue' : 'light'} size="sm" short />
+      <RegisterButton size="sm" />
     </div>
   </div>
 </header>

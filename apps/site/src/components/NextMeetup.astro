@@ -11,14 +11,14 @@ const { event, class: cls, style } = Astro.props;
 {event && (
   <div class={cls} style={style}>
     <div data-next-event={event === nextEvent ? '' : undefined} class="flex flex-wrap items-center gap-x-6 gap-y-4">
-      <RegisterButton event={event} on="blue" />
+      <RegisterButton event={event} />
       <div class="leading-tight">
         <a href={`/events/${eventSlug(event)}`} class="block text-lg font-extrabold hover:underline">Next meetup: {eventName(event)}</a>
         <EventDate date={event.date} event={event} variant="hero" class="mt-1.5" />
       </div>
     </div>
     <div data-next-event-after hidden class="flex flex-wrap items-center gap-x-6 gap-y-4">
-      <RegisterButton on="blue" followLuma />
+      <RegisterButton followLuma />
       <p class="text-lg font-extrabold">The next date is on its way.</p>
     </div>
   </div>

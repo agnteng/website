@@ -178,7 +178,7 @@ export const eventName = (e: Event) => `${e.city} #${e.number}`;
 // before it happens, the date and the city.
 export const eventSummary = (e: Event) => {
   const name = `Agentic Engineering ${eventName(e)}`;
-  if (isUpcoming(e)) return `${name}: ${longDate(e.date)} in ${e.city}. Ten-minute talks on building with AI agents, then open questions.${e.free ? ' Free.' : ''}`;
+  if (isUpcoming(e)) return `${name}: ${longDate(e.date)} in ${e.city}. Ten-minute talks on building with AI agents, then open questions.`;
   const titles = talksAt(e).map((t) => t.title);
   return titles.length ? `${name}: ${titles.join(', ')}.` : `${name}, ${longDate(e.date)} in ${e.city}.`;
 };
@@ -214,8 +214,6 @@ export const pitch = 'A monthly meetup where people show what they’ve shipped 
 export const pitchIn = (city: string) => `${pitch} In ${city}, in English.`;
 export const toSpeak = 'To speak, register for the next meetup and describe your talk in the talk field. Ten minutes, real work, no pitches.';
 
-// What a meetup's Register button says. Luma's hosts approve each guest when `approval` is set.
-export const registerLabel = (e: Event) => `${e.approval ? 'Request a spot' : 'Register'}${e.free ? ' – Free' : ''}`;
 
 // Each meetup owns one of the brand's three meetup colours, by its number in its city, so a
 // new meetup never changes another's. Covers take it; the blue heroes and the gallery don't.
