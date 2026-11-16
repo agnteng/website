@@ -18,8 +18,8 @@ and `Label` for headings and labels, `RegisterButton` for registering,
 meetup's photo. The pitch line and the line on speaking are written once in
 `lib/data.ts`.
 
-Each meetup owns one of the brand's three meetup colours (`eventTint`, in date
-order), and its photos take that colour wherever they are shown, except the
+Each meetup owns one of the brand's three meetup colours (`eventTint`, by its
+number in its city, so a new meetup never changes another's), and its photos take that colour wherever they are shown, except the
 blue heroes and the gallery, which is the untinted record of the night.
 
 ## Consequences
