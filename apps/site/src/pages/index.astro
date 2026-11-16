@@ -6,24 +6,24 @@ import SiteFooter from '../components/SiteFooter.astro';
 import TalkTile from '../components/TalkTile.astro';
 import TintedPhoto from '../components/TintedPhoto.astro';
 import SpeakerCard from '../components/SpeakerCard.astro';
-import Animation from '@agnteng/brand/components/Animation.tsx';
+import EventTile from '../components/EventTile.astro';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
-import { nextEvent, past, talks, talksAt, coverAt, galleryPhoto, speakers, links, register, shortDate, eventSlug, eventName } from '../lib/data';
+import { nextEvent, past, talks, galleryPhoto, speakers, links, register, shortDate } from '../lib/data';
 import { latestPosts } from '../lib/newsletter';
+import { organization, website, eventNode } from '../lib/schema';
+import { TINTS } from '../lib/tints';
 
 const posts = await latestPosts();
 const recent = talks.slice(0, 3);
-// Brand colours for photo washes.
-const TINTS = ['#1E2BE6', '#7C4DF5', '#1FC6E6', '#ED4BA0', '#16D9A6', '#FF6E4D'];
 const night = [
   { title: 'Connect with others', body: 'Meet the founders and engineers building with agents.', photo: galleryPhoto('2026-08-26', '04.jpg') },
   { title: 'Learn from experts', body: 'Hear three people show what they built, in ten minutes each.', photo: galleryPhoto('2026-11-11', '13.jpg') },
   { title: 'Ask your questions', body: 'Put your questions to the speakers in an open Q&A.', photo: galleryPhoto('2026-11-11', '28.jpg') },
 ];
 ---
-<Shell title="Agentic Engineering, Lisbon" class="bg-soft-white text-panel-navy">
+<Shell title="Agentic Engineering: AI agents meetup in Lisbon" schema={[organization, website, nextEvent && eventNode(nextEvent)]} class="bg-soft-white text-panel-navy">
   <main>
   <BlueTone />
   <Hero />
@@ -71,21 +71,7 @@ const night = [
   <section id="events" class="mx-auto max-w-7xl border-t border-panel-navy/[0.08] px-4 py-24 md:px-8 md:py-32">
     <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-5xl">Previous meetups</h2>
     <ul class="mt-12 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
-      {past.map((e, i) => {
-        const n = talksAt(e).length;
-        const cover = coverAt(e);
-        return (
-          <li class="reveal">
-            <a href={n ? `/events/${eventSlug(e)}` : e.luma?.url ?? links.luma} class="group block">
-              {cover
-                ? <TintedPhoto src={cover.img} alt={cover.alt} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" zoom tint={TINTS[i % TINTS.length]} class="aspect-[4/3] rounded-2xl" />
-                : <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-deep-navy"><Animation client:visible paused color="#1E2BE6" edge="#B5A6FF" cell={8} density={0.6} fade="radial" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} /></div>}
-              <p class="mt-3 font-sans font-bold group-hover:text-electric-blue">{eventName(e)}</p>
-              <p class="mt-0.5 text-sm text-panel-navy/60">{shortDate(e.date)}</p>
-            </a>
-          </li>
-        );
-      })}
+      {past.map((e, i) => <li class="reveal"><EventTile event={e} index={i} /></li>)}
     </ul>
   </section>
 

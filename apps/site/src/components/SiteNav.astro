@@ -11,7 +11,8 @@ const luma = links.luma;
 ---
 <header role="banner" class:list={['relative z-20', !onHero && 'border-b border-white/10 bg-deep-navy']}>
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 md:grid-cols-[1fr_minmax(0,28rem)_1fr] md:gap-8 md:px-8">
-    <a href="/" class="flex items-center gap-2.5 justify-self-start">
+    <!-- Named here: on a phone the wordmark, which carries the name, is hidden. -->
+    <a href="/" aria-label="Agentic Engineering" class="flex items-center gap-2.5 justify-self-start">
       <img src="/assets/logo/ae-mark-white.svg" alt="" class="h-7 w-auto" />
       <img src="/assets/logo/ae-wordmark-line-white.svg" alt="Agentic Engineering" class="h-[18px] w-auto max-sm:hidden" />
     </a>

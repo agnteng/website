@@ -31,3 +31,4 @@ Decision, Consequences.
 | [0012](0012-builder-edits-a-scene.md) | The animation builder edits a scene; templates are presets | Accepted |
 | [0013](0013-builder-has-an-artifact-layer.md) | The builder has an artifact layer, for lower thirds | Accepted |
 | [0014](0014-artifacts-second-colour-and-tint-strength.md) | Artifacts can take a second colour and a partial tint | Accepted |
+| [0015](0015-search-engines-index-agnteng-com-only.md) | Search engines index agnteng.com only, one address per page | Accepted |

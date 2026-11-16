@@ -413,6 +413,21 @@ def get(url: str) -> tuple[int, bytes]:
         return 0, b""  # no answer at all
 
 
+def unfollowed(url: str) -> tuple[int, str]:
+    """A URL's own status and Location: a redirect is reported, not followed."""
+    class Stay(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            return None
+    try:
+        r = urllib.request.build_opener(Stay).open(urllib.request.Request(
+            url, headers={"User-Agent": "agnteng-fitness"}), timeout=20)
+        return r.status, ""
+    except urllib.error.HTTPError as e:
+        return e.code, e.headers.get("Location", "")
+    except (urllib.error.URLError, OSError):
+        return 0, ""
+
+
 # ── talks search finds exactly what the content says ──
 
 def check_search() -> None:
@@ -440,12 +455,16 @@ def check_live() -> None:
         fail("live", f"{s}/ is not serving the sponsor deck")
     if get(f"{s}/brand-guidelines/")[0] != 404:
         fail("live", f"{s} serves more than the sponsor deck")
+    # Only agnteng.com is for search engines (docs/adr/0015).
+    for page in (f"{b}/", f"{b}/website-mockups/", f"{s}/"):
+        if b'name="robots" content="noindex"' not in get(page)[1]:
+            fail("live", f"{page} can be indexed: it has no noindex")
     check_live_site()
 
 
 def check_live_site() -> None:
     w = "https://agnteng.com"
-    for page in ("", "talks", "speakers", "robots.txt", "search.json"):
+    for page in ("", "talks", "speakers", "events", "robots.txt", "search.json", "favicon.ico"):
         code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")
@@ -460,6 +479,13 @@ def check_live_site() -> None:
         code, body = get(talk)
         if code != 200 or b'property="og:image"' not in body:
             fail("live", f"{talk} answered {code} or has no share image")
+        if b'"@type":"VideoObject"' not in body:
+            fail("live", f"{talk} does not describe its video to search engines (docs/adr/0015)")
+    # One address per page: the others redirect to it.
+    for other in ("talks/", "talks/index.html"):
+        code, to = unfollowed(f"{w}/{other}")
+        if code != 301 or not to.endswith("/talks"):
+            fail("live", f"{w}/{other} answered {code} {to}: it should redirect to {w}/talks")
     # www is a redirect to the one address; urlopen follows it.
     try:
         r = urllib.request.urlopen(urllib.request.Request(

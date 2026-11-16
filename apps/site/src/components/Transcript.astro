@@ -15,9 +15,9 @@ const at = (ts: string) => ts.split(':').reduce((s, n) => s * 60 + Number(n), 0)
       {paras.map((p) => (
         <div class="grid scroll-mt-24 grid-cols-[3.5rem_1fr] gap-3 rounded-lg has-[:target]:bg-periwinkle/25">
           <!-- Each timestamp's id (#t-SECONDS) lets search link to the moment a word was said. -->
-          <h3 id={p.at ? `t-${at(p.at)}` : undefined} class="font-mono text-sm font-normal text-electric-blue">
+          <span id={p.at ? `t-${at(p.at)}` : undefined} class="font-mono text-sm text-electric-blue">
             {p.at && talk.video ? <a href={watchAt(talk, at(p.at))} class="hover:underline">{p.at}</a> : p.at}
-          </h3>
+          </span>
           <p>{p.text}</p>
         </div>
       ))}
