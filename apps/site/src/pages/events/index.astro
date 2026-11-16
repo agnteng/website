@@ -47,7 +47,7 @@ const hero = galleryPhoto('2026-07-29', '03.jpg');
         <ul class="mt-8 space-y-4">
           {later.map((e) => (
             <li class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-electric-blue p-6 text-white md:p-8">
-              <div><SubHeading><a href={`/events/${eventSlug(e)}`} class="hover:underline">{eventName(e)}</a></SubHeading><EventDate date={e.date} event={e} variant="hero" class="mt-2" /></div>
+              <div><SubHeading><a href={`/events/${eventSlug(e)}`} class="hover:underline">{eventName(e)}</a></SubHeading><EventDate date={e.date} variant="hero" class="mt-2" /></div>
               <RegisterButton event={e} />
             </li>
           ))}
