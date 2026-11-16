@@ -11,10 +11,11 @@ Luma's, and the site is static.
 
 ## Decision
 Every event in `content/` has a page at `/events/<city>-<n>`. Before the
-meetup it shows the date, the venue, the speakers and a Register link to the
+meetup it shows the date, the city, the speakers and a Register link to the
 event's Luma page; afterwards its talks, photos and Q&A; in between it says
 the talks aren't published yet. `/events` lists every event as a calendar,
-upcoming first. The site never takes a registration itself.
+upcoming first. The site never takes a registration itself, and these pages
+never name the venue: where to go is Luma's to tell a guest.
 
 ## Consequences
 An upcoming event's page has little on it until speakers are announced. The

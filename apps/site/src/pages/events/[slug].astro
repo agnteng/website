@@ -1,7 +1,7 @@
 ---
-// One meetup. Before it happens: the date, the venue and the way to register on Luma.
-// Afterwards: its talks, photos and Q&A. In between, while its talks aren't published,
-// it keeps its venue and speakers.
+// One meetup. Before it happens: the date and the way to register on Luma. Afterwards:
+// its talks, photos and Q&A. In between, while its talks aren't published, it keeps its
+// speakers. Never the venue's name (AGENTS.md).
 import { Image } from 'astro:assets';
 import Shell from '../../layouts/Shell.astro';
 import SiteNav from '../../components/SiteNav.astro';
@@ -38,7 +38,7 @@ const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell
     <SiteNav onHero />
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
       <h1 class="rise font-sans text-5xl font-extrabold tracking-tight md:max-w-[40%] md:text-6xl">{eventName(e)}</h1>
-      <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium md:max-w-[40%]" style="--i:1"><Icon name="Calendar" size={16} class="shrink-0 text-periwinkle" />{longDate(e.date)}{!published && ` · ${e.venue}`}</p>
+      <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium md:max-w-[40%]" style="--i:1"><Icon name="Calendar" size={16} class="shrink-0 text-periwinkle" />{longDate(e.date)}</p>
       <div class="rise mt-8 flex flex-wrap gap-3" style="--i:2">
         {upcoming
           ? <Button href={luma} class={`${e === nextEvent ? 'js-register ' : ''}!bg-white !text-electric-blue`}>{e.free ? 'Register – Free' : 'Register'}</Button>

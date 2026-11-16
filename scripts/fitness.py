@@ -320,6 +320,15 @@ def check_photos() -> None:
             fail("photos", f"{where}: not the size of speakers/{photo.name}; re-run speaker_masks.py")
 
 
+# ── event pages never name the venue (AGENTS.md) ──
+
+def check_venue() -> None:
+    site = ROOT / "apps" / "site" / "src"
+    for f in [*sorted((site / "pages" / "events").glob("*")), site / "lib" / "schema.ts", site / "lib" / "data.ts"]:
+        if re.search(r"\.venue\b", f.read_text()):
+            fail("venue", f"{f.relative_to(ROOT)} uses an event's venue: event pages give the city only")
+
+
 # ── a photo never shows before its dither (apps/site/src/styles/site.css) ──
 
 def check_dither() -> None:
@@ -515,7 +524,8 @@ def main() -> None:
         checks = [("internal-names", check_internal_names), ("media", check_media),
                   ("events", check_events), ("talks", check_talks),
                   ("photos", check_photos), ("search", check_search),
-                  ("dither", check_dither), ("telegram", check_telegram)]
+                  ("dither", check_dither), ("telegram", check_telegram),
+                  ("venue", check_venue)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()

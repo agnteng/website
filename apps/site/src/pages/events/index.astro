@@ -1,6 +1,6 @@
 ---
 // Every meetup as a calendar: the ones to come, soonest first, then the ones before,
-// each with its date, its place and the talks given there.
+// each with its date, its city and the talks given there.
 import Shell from '../../layouts/Shell.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
@@ -36,7 +36,7 @@ const groups = [
                 </p>
                 <article class:list={['flex items-start gap-5 rounded-2xl p-5 md:p-6', soon ? 'bg-electric-blue text-white' : 'border border-panel-navy/[0.08] bg-white']}>
                   <div class="min-w-0 flex-1">
-                    <p class:list={['font-mono text-xs uppercase tracking-wider', soon ? 'text-white/80' : 'text-electric-blue']}>{e.city} · {e.venue}</p>
+                    <p class:list={['font-mono text-xs uppercase tracking-wider', soon ? 'text-white/80' : 'text-electric-blue']}>{e.city}</p>
                     <h3 class="mt-2 font-sans text-2xl font-extrabold tracking-tight"><a href={page} class="hover:underline">{eventName(e)}</a></h3>
                     {soon
                       ? <>

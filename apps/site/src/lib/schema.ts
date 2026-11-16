@@ -21,7 +21,8 @@ export const eventNode = (e: Event) => ({
   startDate: e.luma?.startAt ?? e.date,
   eventStatus: 'https://schema.org/EventScheduled',
   eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-  location: { '@type': 'Place', name: e.venue, address: { '@type': 'PostalAddress', addressLocality: e.city } },
+  // The city only: event pages never name the venue (AGENTS.md).
+  location: { '@type': 'Place', name: e.city, address: { '@type': 'PostalAddress', addressLocality: e.city } },
   organizer: org,
   ...(coverAt(e) && { image: abs(coverAt(e)!.img.src) }),
   ...(e.speakers?.length && { performer: e.speakers.map((s) => ({ '@type': 'Person', name: s.name, description: s.title })) }),

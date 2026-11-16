@@ -31,6 +31,9 @@ it, in the same pull request. Then these rules:
 - **Event data has one home**: `content/<date>/event.json`. Decks import it;
   don't copy its values into code. Production's `scripts/luma_event.py` fills
   it from Luma.
+- **Event pages never name the venue.** `/events` and `/events/<city>-<n>` on
+  agnteng.com give the date and the city, in their text, their descriptions
+  and their structured data alike. `mise run fitness` checks it.
 - **A deploy is done when `mise run fitness:live` passes.** A build that loses
   `LUMA_API_KEY` still returns 200 everywhere (`docs/adr/0002`).
 - **Video, write-ups and event tooling live in `agnteng/production`**, checked

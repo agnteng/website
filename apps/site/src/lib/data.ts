@@ -163,12 +163,12 @@ export const eventSlug = (e: Event) => `${slugify(e.city)}-${e.number}`;
 export const eventName = (e: Event) => `${e.city} #${e.number}`;
 
 // An event's description for search results and link previews: its talks, or
-// before it happens, when and where it is.
+// before it happens, the date and the city.
 export const eventSummary = (e: Event) => {
   const name = `Agentic Engineering ${eventName(e)}`;
-  if (isUpcoming(e)) return `${name}: ${longDate(e.date)} at ${e.venue}, ${e.city}. Ten-minute talks on building with AI agents, then open questions.${e.free ? ' Free.' : ''}`;
+  if (isUpcoming(e)) return `${name}: ${longDate(e.date)} in ${e.city}. Ten-minute talks on building with AI agents, then open questions.${e.free ? ' Free.' : ''}`;
   const titles = talksAt(e).map((t) => t.title);
-  return titles.length ? `${name}: ${titles.join(', ')}.` : `${name}, ${longDate(e.date)} at ${e.venue}.`;
+  return titles.length ? `${name}: ${titles.join(', ')}.` : `${name}, ${longDate(e.date)} in ${e.city}.`;
 };
 
 
