@@ -37,8 +37,8 @@ const photos = shots.map((p, i) => {
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
 // The cells that hide the photos' leading edge. Whole across `solid` less `wave`, which
-// is at least the edge the photos may stop short of. A few of the ragged ones are magenta.
-const cells = { color: '#1E2BE6', edge: '#ED4BA0', seed: 2027, cell: 10, animate: true } as const;
+// is at least the edge the photos may stop short of. A few of the ragged ones take `edge`.
+const cells = { color: '#1E2BE6', edge: '#B5A6FF', seed: 2027, cell: 10, animate: true } as const;
 ---
 <section class="relative isolate overflow-hidden bg-electric-blue text-white">
   <SiteNav onHero />
