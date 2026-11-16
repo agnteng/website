@@ -487,7 +487,7 @@ def check_live_site() -> None:
         code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")
-        elif b"<body" in body and not re.search(rb'rel="stylesheet" href="/(_astro|assets)/', body.split(b"<body", 1)[0]):
+        elif b"<body" in body and b'rel="stylesheet" href="/assets/' not in body.split(b"<body", 1)[0]:
             fail("live", f"{w}/{page} loads its stylesheet after the body, so it shows unstyled first")
     # The home page's font and images are the site's own (docs/adr/0018, 0019), and answer.
     home = get(f"{w}/")[1].decode(errors="replace")

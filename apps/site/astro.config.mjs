@@ -8,8 +8,7 @@ import { imageNames, hashOf } from './image-names.mjs';
 // Event data and talks live in content/ at the repository root.
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
-// Everything that isn't a page is in /assets/: images in /assets/images/ under the names from
-// image-names.mjs, the build's scripts, styles and fonts in /assets/ itself.
+// Build output goes to /assets/ (images to /assets/images/, named by image-names.mjs).
 const names = imageNames(repoRoot);
 /** @param {{ names: string[]; source: string | Uint8Array }} asset */
 const assetFileNames = (asset) =>
