@@ -1,6 +1,8 @@
 // Everything the site shows comes from content/: each event's event.json
 // (written from Luma) and its talks/*.json (published by agnteng/production).
 
+import { getImage } from 'astro:assets';
+
 export type Link = { label: string; url: string };
 
 export type EventSpeaker = { name: string; title: string; photo?: string };
@@ -146,6 +148,17 @@ export const headshot = (photo: string) => {
   // ?v: the CDN caches a mask by its address; raise it when the masks' format changes.
   return s && { mask: `/assets/speaker-masks/${name}.png?v=2`, size: s.size, face: s.face };
 };
+// A speaker's headshot as an image the build can resize. The files are the branding
+// app's, which both sites serve whole; pages here take smaller copies.
+const speakerFiles = import.meta.glob<ImageMetadata>('../../../branding/public/assets/speakers/*.jpg', { eager: true, import: 'default' });
+export const speakerImage = (photo: string): ImageMetadata => {
+  const img = speakerFiles[`../../../branding/public${photo}`];
+  if (!img) throw new Error(`${photo} is not in apps/branding/public/assets/speakers`);
+  return img;
+};
+// The headshot as a small file for an avatar: the original is ten times the circle it fills.
+export const avatarOf = async (photo?: string) => photo && (await getImage({ src: speakerImage(photo), width: 144 })).src;
+
 // One gallery photo by file name. Re-publishing a gallery renumbers its files,
 // so a pick that is no longer there fails the build instead of showing another photo.
 export const galleryPhoto = (date: string, file: string): Photo => {

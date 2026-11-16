@@ -1,6 +1,16 @@
 @import "@agnteng/brand/styles.css";
+/* The brand's typefaces, served by the site itself: variable fonts, one file per
+   script, fetched only when a page has text in that script. */
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/kode-mono";
 
 @source "../";
+
+/* The packages name their families "… Variable". */
+@theme {
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Kode Mono Variable", ui-monospace, monospace;
+}
 
 /* Set by the script in talks/[id].astro. */
 .video-player.is-floating { position: fixed; inset: auto 1rem 1rem auto; z-index: 50; width: min(22rem, calc(100vw - 2rem)); height: auto; aspect-ratio: 16 / 9; box-shadow: 0 20px 40px -12px rgb(5 7 30 / 0.5); }

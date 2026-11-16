@@ -7,7 +7,7 @@ import Transcript from '../../components/Transcript.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Avatar from '@agnteng/brand/components/Avatar.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
-import { talks, talksAt, longDate, eventSlug, eventName, thumbnail, type Talk } from '../../lib/data';
+import { talks, talksAt, longDate, eventSlug, eventName, thumbnail, avatarOf, type Talk } from '../../lib/data';
 import { videoNode, breadcrumbs } from '../../lib/schema';
 
 export function getStaticPaths() {
@@ -28,7 +28,7 @@ const linkLists = ([
       <a href={`/events/${eventSlug(e)}`} class="rise inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-electric-blue hover:underline">{eventName(e)}, {longDate(e.date)}</a>
       <h1 class="rise mt-4 font-sans text-3xl font-extrabold leading-[1.1] tracking-tight md:text-5xl" style="--i:1">{talk.title}</h1>
       <div class="rise mt-6 flex items-center gap-3" style="--i:2">
-        <Avatar name={talk.person.name} src={talk.person.photo} size={48} />
+        <Avatar name={talk.person.name} src={await avatarOf(talk.person.photo)} size={48} />
         <p><span class="font-bold">{talk.person.name}</span>{talk.person.title && <span class="block text-sm text-panel-navy/60"> {talk.person.title}</span>}</p>
       </div>
     </section>

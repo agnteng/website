@@ -174,6 +174,8 @@ def check_events() -> None:
             photo = s.get("photo")
             if photo and not (public / photo.lstrip("/")).is_file():
                 fail("events", f"{where}: speaker {i} photo {photo} does not exist")
+            elif photo and not re.fullmatch(r"/assets/speakers/[^/]+\.jpg", photo):
+                fail("events", f"{where}: speaker {i} photo {photo} should be /assets/speakers/<name>.jpg")
 
 
 # ── published talks (org ADR 0007) ──
@@ -324,7 +326,8 @@ def check_photos() -> None:
 
 def check_venue() -> None:
     site = ROOT / "apps" / "site" / "src"
-    for f in [*sorted((site / "pages" / "events").glob("*.astro")), site / "lib" / "schema.ts", site / "lib" / "data.ts"]:
+    for f in [*sorted((site / "pages" / "events").glob("*.astro")), site / "lib" / "schema.ts", site / "lib" / "data.ts",
+              site.parent / "image-names.mjs"]:
         if re.search(r"\.(venue|tonight)\b", f.read_text()):
             fail("venue", f"{f.relative_to(ROOT)} uses an event's venue: event pages give the city only")
     # A gallery's alt texts are on its event page too.
@@ -486,6 +489,17 @@ def check_live_site() -> None:
             fail("live", f"{w}/{page} answered {code}")
         elif b"<body" in body and b'rel="stylesheet" href="/_astro/' not in body.split(b"<body", 1)[0]:
             fail("live", f"{w}/{page} loads its stylesheet after the body, so it shows unstyled first")
+    # The home page's font and images are the site's own (docs/adr/0018, 0019), and answer.
+    home = get(f"{w}/")[1].decode(errors="replace")
+    font = re.search(r'<link rel="preload" as="font"[^>]*href="([^"]+)"', home)
+    image = re.search(r'<img[^>]+src="(/images/[^"]+)"', home)
+    if home and ("fonts.googleapis.com" in home or not font):
+        fail("live", f"{w}/ does not serve its own fonts")
+    if home and (re.search(r'<img[^>]+src="/_astro/[^"]+\.(jpe?g|png|webp|avif)"', home) or not image):
+        fail("live", f"{w}/ shows photos from /_astro/, not /images/")
+    for found in (font, image):
+        if found and get(w + found.group(1))[0] != 200:
+            fail("live", f"{w}{found.group(1)} does not answer")
     code, body = get(f"{w}/sitemap.xml")
     sitemap = body.decode() if code == 200 else ""
     locs = re.findall(r"<loc>([^<]+)</loc>", sitemap)

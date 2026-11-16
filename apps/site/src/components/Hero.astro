@@ -61,7 +61,7 @@ const photos = shots.map((p, i) => {
   <div class="dither-stage relative isolate h-96 w-full overflow-hidden [container-type:size] md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
     <!-- `sizes` is the photos' own width: they are larger than their frame. -->
     {photos.map((p, i) => (
-      <Image src={p.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 110vw, 150vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
+      <Image src={p.img} alt="" widths={[960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 110vw, 150vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
     ))}
     <HeroCells seed={2027} />
   </div>

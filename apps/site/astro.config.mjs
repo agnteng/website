@@ -3,9 +3,18 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'node:url';
+import { imageNames, hashOf } from './image-names.mjs';
 
 // Event data and talks live in content/ at the repository root.
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
+
+// Images go to /images/ under the names from image-names.mjs; resized copies land beside them.
+const names = imageNames(repoRoot);
+/** @param {{ names: string[]; source: string | Uint8Array }} asset */
+const assetFileNames = (asset) =>
+  /\.(jpe?g|png|webp|avif|gif)$/i.test(asset.names[0] ?? '')
+    ? `images/${names.get(hashOf(asset.source)) || '[name]'}.[hash][extname]`
+    : '_astro/[name].[hash][extname]';
 
 export default defineConfig({
   site: 'https://agnteng.com',
@@ -15,6 +24,8 @@ export default defineConfig({
   publicDir: '../branding/public',
   vite: {
     plugins: [tailwindcss()],
+    // A font stays a file: inlined, a script nobody reads would cost every visitor.
+    build: { rollupOptions: { output: { assetFileNames } }, assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined) },
     resolve: { alias: { '@content': `${repoRoot}content` }, dedupe: ['react', 'react-dom'] },
   },
   server: { host: '127.0.0.1', port: 4330 },

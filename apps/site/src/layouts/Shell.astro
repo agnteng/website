@@ -1,5 +1,7 @@
 ---
 import '../styles/site.css';
+// Nearly all the text is in this one file; fetching it early avoids a flash of the fallback font.
+import manrope from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
 // `image` is what a shared link shows: a path on this site or a full URL. The default is
 // drawn from apps/site/share.scene.json: `python3 scripts/render_scene.py apps/site/share.scene.json share.jpg`,
 // then production's photos.py optimize, into apps/branding/public/assets/photos/. Raise `v` below
@@ -34,9 +36,7 @@ const shareImage = new URL(image, Astro.site).href;
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/assets/logo/ae-icon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preload" as="font" type="font/woff2" href={manrope} crossorigin />
   </head>
   <body class:list={['font-sans', cls]}>
     <a href="#main" class="sr-only rounded-full bg-white px-5 py-3 font-semibold text-panel-navy shadow-lg focus:not-sr-only focus:fixed focus:px-5 focus:py-3 focus:left-4 focus:top-4 focus:z-50">Skip to content</a>

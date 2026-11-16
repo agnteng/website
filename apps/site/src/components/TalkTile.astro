@@ -4,7 +4,7 @@
 import { Image } from 'astro:assets';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Avatar from '@agnteng/brand/components/Avatar.astro';
-import { still as stillOf, thumbnail, type Talk } from '../lib/data';
+import { still as stillOf, thumbnail, avatarOf, type Talk } from '../lib/data';
 // `summary` adds the talk's one-sentence summary under its title.
 interface Props { talk: Talk; index?: number; summary?: boolean }
 const { talk, index = 0, summary = false } = Astro.props;
@@ -27,7 +27,7 @@ const fade = (['right', 'left', 'radial', 'up', 'down'] as const)[index % 5];
     <!-- Filled by the talks search: where the words were said, linked to that moment. -->
     <p data-snippet hidden class="search-excerpt mt-3 line-clamp-3 text-sm leading-relaxed text-panel-navy/75"></p>
     <p class="mt-auto flex items-center gap-2.5 pt-5 font-sans text-sm text-panel-navy/60">
-      <span aria-hidden="true"><Avatar name={talk.person.name} src={talk.person.photo} size={28} /></span>{talk.person.name}
+      <span aria-hidden="true"><Avatar name={talk.person.name} src={await avatarOf(talk.person.photo)} size={28} /></span>{talk.person.name}
     </p>
   </div>
 </a>
