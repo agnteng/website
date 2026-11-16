@@ -73,7 +73,7 @@ const night = [
       {past.map((e) => (
         <li class="reveal">
           <a href={`/events/${eventSlug(e)}`} class="group block">
-            <EventCover event={e} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" zoom class="relative aspect-[4/3] rounded-2xl" />
+            <EventCover event={e} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" zoom cells={false} class="relative aspect-[4/3] rounded-2xl" />
             <EventDate date={e.date} variant="eyebrow" class="mt-3" />
             <p class="mt-1 font-sans font-bold group-hover:text-electric-blue">{eventName(e)}</p>
           </a>

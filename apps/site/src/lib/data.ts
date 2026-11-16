@@ -13,7 +13,7 @@ export type Event = {
   number: number;
   venue: string;
   tonight: string;
-  luma?: { apiId: string; url: string; startAt: string };
+  luma?: { apiId: string; url: string; startAt: string; timezone?: string };
   speakers?: EventSpeaker[];
   recap?: string; // the night's Substack post
   free?: boolean; // Luma has a free ticket
@@ -204,10 +204,11 @@ export const shortDate = (d: string) => fmt(d, { day: 'numeric', month: 'short',
 // "Wed 27 Jan 2027": where people decide whether to come.
 export const dayDate = (d: string) => fmt(d, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).replace(',', '');
 
-// When a meetup starts, in its city's time ("19:00"), from Luma's start.
-const ZONES: Record<string, string> = { Lisbon: 'Europe/Lisbon', Berlin: 'Europe/Berlin' };
+// When a meetup starts, in its own time zone ("19:00"); nothing when Luma gave no zone.
 export const startTime = (e: Event) =>
-  e.luma?.startAt && new Date(e.luma.startAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: ZONES[e.city] ?? 'Europe/Lisbon' });
+  e.luma?.startAt && e.luma.timezone
+    ? new Date(e.luma.startAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: e.luma.timezone })
+    : undefined;
 
 // The meetup in one line, and how to speak at one: every page says them the same way.
 export const pitch = 'A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions.';

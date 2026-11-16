@@ -168,6 +168,8 @@ def check_events() -> None:
                 fail("events", f"{where}: luma.url should be an https URL")
             if not re.match(r"\d{4}-\d\d-\d\dT\d\d:\d\d", str(luma.get("startAt", ""))):
                 fail("events", f"{where}: luma.startAt should be an ISO timestamp")
+            if not re.fullmatch(r"[A-Za-z_]+(/[A-Za-z_+-]+)+", str(luma.get("timezone", ""))):
+                fail("events", f"{where}: luma.timezone should be Luma's zone, e.g. Europe/Lisbon (luma_event.py writes it)")
         for i, s in enumerate(e.get("speakers", [])):
             if not s.get("name") or not s.get("title"):
                 fail("events", f"{where}: speaker {i} needs name and title")

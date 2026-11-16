@@ -1,7 +1,0 @@
----
-// The site's one small label: Kode Mono, upper case, tracked. EventDate's eyebrow uses it too.
-import { label } from '../lib/type';
-interface Props { as?: 'p' | 'span' | 'h2'; class?: string }
-const { as: Tag = 'p', class: cls } = Astro.props;
----
-<Tag class:list={[label, !cls?.includes('text-') && 'text-electric-blue', cls]}><slot /></Tag>
