@@ -34,3 +34,5 @@ Decision, Consequences.
 | [0015](0015-search-engines-index-agnteng-com-only.md) | Search engines index agnteng.com only | Accepted |
 | [0016](0016-one-address-per-page.md) | A page of agnteng.com has one address | Accepted |
 | [0017](0017-every-event-has-a-page.md) | Every event has a page; registration stays on Luma | Accepted |
+| [0018](0018-fonts-served-by-the-site.md) | agnteng.com serves its own fonts | Accepted |
+| [0019](0019-images-in-images-with-names.md) | Images are published in `/images/` under names that say what they show | Accepted |

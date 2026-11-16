@@ -486,6 +486,11 @@ def check_live_site() -> None:
             fail("live", f"{w}/{page} answered {code}")
         elif b"<body" in body and b'rel="stylesheet" href="/_astro/' not in body.split(b"<body", 1)[0]:
             fail("live", f"{w}/{page} loads its stylesheet after the body, so it shows unstyled first")
+    home = get(f"{w}/")[1]
+    if b"fonts.googleapis.com" in home:
+        fail("live", f"{w}/ fetches its fonts from another host (docs/adr/0018)")
+    if re.search(rb'<img[^>]+src="/_astro/', home) or b'src="/images/' not in home:
+        fail("live", f"{w}/ shows images from /_astro/, not /images/ (docs/adr/0019)")
     code, body = get(f"{w}/sitemap.xml")
     sitemap = body.decode() if code == 200 else ""
     locs = re.findall(r"<loc>([^<]+)</loc>", sitemap)

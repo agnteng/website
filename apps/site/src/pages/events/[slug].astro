@@ -48,7 +48,7 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
     </div>
     {cover && (
       <div class="dither-stage relative isolate h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
-        <Image src={cover.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
+        <Image src={cover.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
         <!-- Each night has its own pattern. -->
         <HeroCells seed={Number(e.date.replaceAll('-', ''))} />
       </div>
