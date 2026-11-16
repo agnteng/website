@@ -1,10 +1,11 @@
 ---
+import { Image } from 'astro:assets';
 import Shell from '../layouts/Shell.astro';
 import Hero from '../components/Hero.astro';
-import BlueTone from '../components/BlueTone.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import TalkTile from '../components/TalkTile.astro';
 import TintedPhoto from '../components/TintedPhoto.astro';
+import Tone from '../components/Tone.astro';
 import SpeakerCard from '../components/SpeakerCard.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
@@ -15,17 +16,17 @@ import { latestPosts } from '../lib/newsletter';
 
 const posts = await latestPosts();
 const recent = talks.slice(0, 3);
-// Brand colours for photo washes.
+// Brand colours for the previous meetups' photo washes.
 const TINTS = ['#1E2BE6', '#7C4DF5', '#1FC6E6', '#ED4BA0', '#16D9A6', '#FF6E4D'];
 const night = [
-  { title: 'Connect with others', body: 'Meet the founders and engineers building with agents.', photo: galleryPhoto('2026-08-26', '04.jpg') },
-  { title: 'Learn from experts', body: 'Hear three people show what they built, in ten minutes each.', photo: galleryPhoto('2026-11-11', '13.jpg') },
-  { title: 'Ask your questions', body: 'Put your questions to the speakers in an open Q&A.', photo: galleryPhoto('2026-11-11', '28.jpg') },
+  { title: 'Connect with others', body: 'Meet the founders and engineers building with agents.', photo: galleryPhoto('2026-11-11', '08.jpg'), tint: '#1E2BE6' },
+  { title: 'Learn from experts', body: 'Hear three people show what they built, in ten minutes each.', photo: galleryPhoto('2026-11-11', '13.jpg'), tint: '#7C4DF5' },
+  { title: 'Ask your questions', body: 'Put your questions to the speakers in an open Q&A.', photo: galleryPhoto('2026-11-11', '28.jpg'), tint: '#ED4BA0' },
 ];
 ---
 <Shell title="Agentic Engineering, Lisbon" class="bg-soft-white text-panel-navy">
   <main>
-  <BlueTone />
+  <Tone />
   <Hero />
 
   <section id="talks" class="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-32">
@@ -56,11 +57,14 @@ const night = [
     <ol class="mt-10 grid gap-8 md:mt-14 md:grid-cols-3 md:gap-6">
       {night.map((n, i) => (
         <li class:list={['reveal', i === 1 && 'md:mt-16', i === 2 && 'md:mt-32']}>
-          <TintedPhoto src={n.photo.img} alt={n.photo.alt} sizes="33vw" tint={TINTS[i]} class="aspect-[4/5] w-full rounded-2xl max-md:hidden">
+          <!-- The photo, three quarters of the way to its colour, breaking up into cells of it. -->
+          <div class="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-deep-navy max-md:hidden">
+            <Tone id={`meetup-tone-${i}`} color={n.tint} amount={0.75} />
+            <Image src={n.photo.img} alt={n.photo.alt} widths={[480, 960]} sizes="33vw" loading="lazy" class="absolute inset-0 size-full object-cover" style={`filter:url(#meetup-tone-${i})`} />
             <div class="dither-stage absolute inset-0" aria-hidden="true">
-              <Artifacts client:visible color={TINTS[i]} seed={i + 11} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.1, reach: 0.48 }, { at: 'top-right', solid: 0.1, reach: 0.48 }]} />
+              <Artifacts client:visible color={n.tint} seed={i + 11} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.1, reach: 0.48 }, { at: 'top-right', solid: 0.1, reach: 0.48 }]} />
             </div>
-          </TintedPhoto>
+          </div>
           <p class="font-sans text-2xl font-extrabold md:mt-5">{n.title}</p>
           <p class="mt-2 max-w-[38ch] leading-relaxed text-panel-navy/70">{n.body}</p>
         </li>

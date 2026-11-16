@@ -1,9 +1,9 @@
 ---
 // The home page's hero: an electric-blue block. Photos of the meetups take its blue and
-// break up into it cell by cell. The page includes <BlueTone /> for the photos' colour.
+// break up into it cell by cell. The page includes <Tone /> for the photos' colour.
 import { Image } from 'astro:assets';
-import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
+import HeroCells from './HeroCells.astro';
 import SiteNav from './SiteNav.astro';
 import { nextEvent, register, galleryPhoto, shortDate } from '../lib/data';
 
@@ -18,8 +18,8 @@ const shots = [
   { ...galleryPhoto('2026-08-26', '10.jpg'), head: [0.57, 0.5], zoom: 1.15 },
   { ...galleryPhoto('2026-11-11', '20.jpg'), head: [0.37, 0.47], zoom: 1 },
 ];
-// Where a head goes in the frame, and how much of the frame's leading edge the cells
-// always cover (the photo may stop short of it). Beside the copy on desktop, the frame's
+// Where a head goes in the frame, and how far the photo may stop short of the frame's
+// leading edge: no more than <HeroCells> keeps whole. Beside the copy on desktop, the frame's
 // left side dissolves; under the copy on a phone, its top does.
 const DESK = { at: [0.67, 0.36], clear: [0.2, 0] };
 const PHONE = { at: [0.5, 0.5], clear: [0, 0] };
@@ -36,9 +36,6 @@ const photos = shots.map((p, i) => {
   const [w, l, t] = place(p, PHONE), [wd, ld, td] = place(p, DESK);
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
-// The cells that hide the photos' leading edge. Whole across `solid` less `wave`, which
-// is at least the edge the photos may stop short of. A few of the ragged ones take `edge`.
-const cells = { color: '#1E2BE6', edge: '#B5A6FF', seed: 2027, cell: 10, animate: true } as const;
 ---
 <section class="relative isolate overflow-hidden bg-electric-blue text-white">
   <SiteNav onHero />
@@ -66,14 +63,7 @@ const cells = { color: '#1E2BE6', edge: '#B5A6FF', seed: 2027, cell: 10, animate
     {photos.map((p, i) => (
       <Image src={p.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 110vw, 150vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
     ))}
-    <!-- Cells cover the frame's leading edge and thin out to nothing: the photo breaks
-         up into the block. Above the photo that is fading in. -->
-    <div class="absolute inset-0 z-2 max-md:hidden">
-      <Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.25, reach: 0.55, wave: 0.03, waveLength: 0.6 }]} />
-    </div>
-    <div class="absolute inset-0 z-2 md:hidden">
-      <Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45, wave: 0.05, waveLength: 0.7 }]} />
-    </div>
+    <HeroCells seed={2027} />
   </div>
 </section>
 <style>
