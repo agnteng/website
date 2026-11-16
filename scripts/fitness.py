@@ -320,6 +320,22 @@ def check_photos() -> None:
             fail("photos", f"{where}: not the size of speakers/{photo.name}; re-run speaker_masks.py")
 
 
+# ── event pages never name the venue (AGENTS.md) ──
+
+def check_venue() -> None:
+    site = ROOT / "apps" / "site" / "src"
+    for f in [*sorted((site / "pages" / "events").glob("*.astro")), site / "lib" / "schema.ts", site / "lib" / "data.ts"]:
+        if re.search(r"\.(venue|tonight)\b", f.read_text()):
+            fail("venue", f"{f.relative_to(ROOT)} uses an event's venue: event pages give the city only")
+    # A gallery's alt texts are on its event page too.
+    events = [json.loads(f.read_text()) for f in (ROOT / "content").glob("*/event.json")]
+    venues = re.compile("|".join(re.escape(e["venue"]) for e in events if e.get("venue")), re.I)
+    for f in sorted((ROOT / "content").glob("*/photos.json")):
+        for p in json.loads(f.read_text()):
+            if venues.search(p.get("alt", "")):
+                fail("venue", f"{f.relative_to(ROOT)}: the alt text of {p.get('file')} names a venue; change it in production's gallery.tsv")
+
+
 # ── a photo never shows before its dither (apps/site/src/styles/site.css) ──
 
 def check_dither() -> None:
@@ -413,6 +429,21 @@ def get(url: str) -> tuple[int, bytes]:
         return 0, b""  # no answer at all
 
 
+def unfollowed(url: str) -> tuple[int, str]:
+    """A URL's own status and Location: a redirect is reported, not followed."""
+    class Stay(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            return None
+    try:
+        r = urllib.request.build_opener(Stay).open(urllib.request.Request(
+            url, headers={"User-Agent": "agnteng-fitness"}), timeout=20)
+        return r.status, ""
+    except urllib.error.HTTPError as e:
+        return e.code, e.headers.get("Location", "")
+    except (urllib.error.URLError, OSError):
+        return 0, ""
+
+
 # ── talks search finds exactly what the content says ──
 
 def check_search() -> None:
@@ -440,19 +471,24 @@ def check_live() -> None:
         fail("live", f"{s}/ is not serving the sponsor deck")
     if get(f"{s}/brand-guidelines/")[0] != 404:
         fail("live", f"{s} serves more than the sponsor deck")
+    # Only agnteng.com is for search engines (docs/adr/0015).
+    for page in (f"{b}/", f"{b}/website-mockups/", f"{s}/"):
+        if b'name="robots" content="noindex"' not in get(page)[1]:
+            fail("live", f"{page} can be indexed: it has no noindex")
     check_live_site()
 
 
 def check_live_site() -> None:
     w = "https://agnteng.com"
-    for page in ("", "talks", "speakers", "robots.txt", "search.json"):
+    for page in ("", "talks", "speakers", "events", "robots.txt", "search.json", "favicon.ico"):
         code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")
         elif b"<body" in body and b'rel="stylesheet" href="/_astro/' not in body.split(b"<body", 1)[0]:
             fail("live", f"{w}/{page} loads its stylesheet after the body, so it shows unstyled first")
     code, body = get(f"{w}/sitemap.xml")
-    locs = re.findall(r"<loc>([^<]+)</loc>", body.decode()) if code == 200 else []
+    sitemap = body.decode() if code == 200 else ""
+    locs = re.findall(r"<loc>([^<]+)</loc>", sitemap)
     talk = next((u for u in locs if "/talks/" in u), None)
     if not talk:
         fail("live", f"{w}/sitemap.xml lists no talks")
@@ -460,6 +496,17 @@ def check_live_site() -> None:
         code, body = get(talk)
         if code != 200 or b'property="og:image"' not in body:
             fail("live", f"{talk} answered {code} or has no share image")
+    # A talk with a public video (the sitemap dates those) describes it to search engines.
+    dated = re.search(r"<loc>([^<]+/talks/[^<]+)</loc><lastmod>", sitemap)
+    if not dated:
+        fail("live", f"{w}/sitemap.xml dates no talk: every video lost its publish date")
+    elif b'"@type":"VideoObject"' not in get(dated.group(1))[1]:
+        fail("live", f"{dated.group(1)} has a public video and no VideoObject")
+    # One address per page (docs/adr/0016): the others redirect to it.
+    for other in ("talks/", "talks/index.html"):
+        code, to = unfollowed(f"{w}/{other}")
+        if code != 301 or not to.endswith("/talks"):
+            fail("live", f"{w}/{other} answered {code} {to}: it should redirect to {w}/talks")
     # www is a redirect to the one address; urlopen follows it.
     try:
         r = urllib.request.urlopen(urllib.request.Request(
@@ -486,7 +533,8 @@ def main() -> None:
         checks = [("internal-names", check_internal_names), ("media", check_media),
                   ("events", check_events), ("talks", check_talks),
                   ("photos", check_photos), ("search", check_search),
-                  ("dither", check_dither), ("telegram", check_telegram)]
+                  ("dither", check_dither), ("telegram", check_telegram),
+                  ("venue", check_venue)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()

@@ -27,7 +27,8 @@ type TalkFile = {
   takeaways: string[];
   speakerLinks: Link[];
   mentioned: Link[];
-  video: { youtubeId: string; url: string } | null;
+  // publishedAt (when it went public) and duration (seconds) are there once the video is public.
+  video: { youtubeId: string; url: string; publishedAt?: string; duration?: number } | null;
   transcript: string | null;
 };
 
@@ -115,6 +116,7 @@ export const speakers: Speaker[] = (() => {
 })();
 
 export const talksAt = (e: Event) => talks.filter((t) => t.event.date === e.date);
+export const isUpcoming = (e: Event) => e.date >= today;
 
 // The night's gallery: web copies written by production's event_photos.py.
 const photoFiles = import.meta.glob<ImageMetadata>('@content/*/photos/*.jpg', { eager: true, import: 'default' });
@@ -159,6 +161,15 @@ export const questionsAt = (e: Event): Question[] =>
 // /events/lisbon-5: the city and the meetup number, like the Luma slugs.
 export const eventSlug = (e: Event) => `${slugify(e.city)}-${e.number}`;
 export const eventName = (e: Event) => `${e.city} #${e.number}`;
+
+// An event's description for search results and link previews: its talks, or
+// before it happens, the date and the city.
+export const eventSummary = (e: Event) => {
+  const name = `Agentic Engineering ${eventName(e)}`;
+  if (isUpcoming(e)) return `${name}: ${longDate(e.date)} in ${e.city}. Ten-minute talks on building with AI agents, then open questions.${e.free ? ' Free.' : ''}`;
+  const titles = talksAt(e).map((t) => t.title);
+  return titles.length ? `${name}: ${titles.join(', ')}.` : `${name}, ${longDate(e.date)} in ${e.city}.`;
+};
 
 
 // Rendered thumbnails, published beside each talk by production's publish_talks.py.
