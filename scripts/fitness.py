@@ -487,16 +487,16 @@ def check_live_site() -> None:
         code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")
-        elif b"<body" in body and b'rel="stylesheet" href="/_astro/' not in body.split(b"<body", 1)[0]:
+        elif b"<body" in body and b'rel="stylesheet" href="/assets/' not in body.split(b"<body", 1)[0]:
             fail("live", f"{w}/{page} loads its stylesheet after the body, so it shows unstyled first")
     # The home page's font and images are the site's own (docs/adr/0018, 0019), and answer.
     home = get(f"{w}/")[1].decode(errors="replace")
     font = re.search(r'<link rel="preload" as="font"[^>]*href="([^"]+)"', home)
-    image = re.search(r'<img[^>]+src="(/images/[^"]+)"', home)
+    image = re.search(r'<img[^>]+src="(/assets/images/[^"]+)"', home)
     if home and ("fonts.googleapis.com" in home or not font):
         fail("live", f"{w}/ does not serve its own fonts")
-    if home and (re.search(r'<img[^>]+src="/_astro/[^"]+\.(jpe?g|png|webp|avif)"', home) or not image):
-        fail("live", f"{w}/ shows photos from /_astro/, not /images/")
+    if home and ("/_astro/" in home or not image):
+        fail("live", f"{w}/ serves files from /_astro/, not /assets/ (docs/adr/0021)")
     for found in (font, image):
         if found and get(w + found.group(1))[0] != 200:
             fail("live", f"{w}{found.group(1)} does not answer")

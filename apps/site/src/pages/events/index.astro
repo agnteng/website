@@ -1,68 +1,109 @@
 ---
-// Every meetup as a calendar: the ones to come, soonest first, then the ones before,
-// each with its date, its city and the talks given there.
+// Lisbon only (this page ranks for the city; other cities have too few meetups): the next
+// meetup in the hero, then every one before it.
+import { Image } from 'astro:assets';
 import Shell from '../../layouts/Shell.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
-import TintedPhoto from '../../components/TintedPhoto.astro';
+import HeroCells from '../../components/HeroCells.astro';
+import Tone from '../../components/Tone.astro';
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
-import { events, past, nextEvent, isUpcoming, talksAt, coverAt, longDate, shortDate, eventSlug, eventName, links } from '../../lib/data';
+import Icon from '@agnteng/brand/components/Icon.astro';
+import { events, nextEvent, isUpcoming, talksAt, coverAt, galleryPhoto, shortDate, eventSlug, eventName, links } from '../../lib/data';
 import { eventNode } from '../../lib/schema';
 
-const groups = [
-  { title: 'Upcoming', events: events.filter(isUpcoming).reverse() },
-  { title: 'Previous meetups', events: past },
-].filter((g) => g.events.length > 0);
+const here = events.filter((e) => e.city === 'Lisbon');
+const upcoming = here.filter(isUpcoming).reverse();
+const next = upcoming[0];
+const later = upcoming.slice(1);
+const previous = here.filter((e) => !isUpcoming(e));
+const hero = galleryPhoto('2026-07-29', '03.jpg');
+// One tint per card, cycling; the home page's three.
+const TINTS = ['#1E2BE6', '#7C4DF5', '#ED4BA0'];
 ---
-<Shell title="AI events in Lisbon | Agentic Engineering" description="Agentic Engineering runs a monthly AI meetup in Lisbon for founders and engineers building with agents. See the next date and every previous meetup with its talks." schema={events.map(eventNode)} class="bg-soft-white text-panel-navy">
-  <SiteNav />
-  <main id="main" class="mx-auto max-w-5xl px-4 py-16 md:px-8 md:py-24">
-    <h1 class="font-sans text-4xl font-extrabold tracking-tight md:text-6xl">AI events in Lisbon</h1>
-    <p class="mt-6 max-w-[58ch] text-lg leading-relaxed text-panel-navy/80">Agentic Engineering is a monthly AI meetup in Lisbon. People show what they’ve shipped with agents in ten-minute talks, then take open questions. In English.</p>
+<Shell title="AI events in Lisbon | Agentic Engineering" description="Agentic Engineering runs a monthly AI meetup in Lisbon for founders and engineers building with agents. See the next date and every previous meetup with its talks." schema={here.map(eventNode)} class="bg-soft-white text-panel-navy">
+  <Tone />
+  {TINTS.map((color, i) => <Tone id={`events-tone-${i}`} color={color} amount={0.75} />)}
+  <section class="relative isolate overflow-hidden bg-electric-blue text-white">
+    <SiteNav onHero />
+    <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
+      <h1 class="rise font-sans text-5xl font-extrabold leading-[1.05] tracking-tight text-balance md:max-w-[40%] md:text-6xl">AI events in Lisbon</h1>
+      <p class="rise mt-6 max-w-[40ch] text-lg font-medium leading-relaxed text-white/90 md:max-w-[36%]" style="--i:1">A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions. In English.</p>
+      {next && (
+        <div class="rise mt-10 flex flex-wrap items-center gap-x-6 gap-y-4" style="--i:2">
+          <Button href={next.luma?.url ?? links.luma} class={`${next === nextEvent ? 'js-register ' : ''}!bg-white !text-electric-blue`}>{next.free ? 'Register – Free' : 'Register'}</Button>
+          <p class="font-sans leading-tight">
+            <a href={`/events/${eventSlug(next)}`} class="block text-lg font-extrabold hover:underline">Next: {eventName(next)}</a>
+            <time datetime={next.date} class="block font-mono text-sm text-white/80">{shortDate(next.date)}</time>
+          </p>
+        </div>
+      )}
+    </div>
+    <div class="dither-stage relative isolate h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
+      <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
+      <HeroCells seed={20260729} />
+    </div>
+  </section>
 
-    {groups.map((group) => (
-      <section class="mt-16">
-        <h2 class="font-sans text-2xl font-extrabold tracking-tight md:text-3xl">{group.title}</h2>
-        <ol class="mt-8 space-y-6">
-          {group.events.map((e) => {
-            const soon = isUpcoming(e);
-            const page = `/events/${eventSlug(e)}`;
-            const cover = coverAt(e);
-            return (
-              <li class="grid gap-x-6 gap-y-3 md:grid-cols-[9rem_1fr]">
-                <p class="font-mono text-sm text-panel-navy/65 md:pt-6">
-                  <time datetime={e.date} class="block font-sans text-lg font-extrabold text-panel-navy">{shortDate(e.date)}</time>
-                  {longDate(e.date).split(',')[0]}
-                </p>
-                <article class:list={['flex items-start gap-5 rounded-2xl p-5 md:p-6', soon ? 'bg-electric-blue text-white' : 'border border-panel-navy/[0.08] bg-white']}>
-                  <div class="min-w-0 flex-1">
-                    <p class:list={['font-mono text-xs uppercase tracking-wider', soon ? 'text-white/80' : 'text-electric-blue']}>{e.city}</p>
-                    <h3 class="mt-2 font-sans text-2xl font-extrabold tracking-tight"><a href={page} class="hover:underline">{eventName(e)}</a></h3>
-                    {soon
-                      ? <>
-                          <p class="mt-3 max-w-[52ch] leading-relaxed text-white/90">Ten-minute talks on building with AI agents, then open questions.</p>
-                          <div class="mt-5"><Button href={e.luma?.url ?? links.luma} class={`${e === nextEvent ? 'js-register ' : ''}!bg-white !text-electric-blue`}>{e.free ? 'Register – Free' : 'Register'}</Button></div>
-                        </>
-                      : talksAt(e).length === 0
-                      ? <p class="mt-3 text-panel-navy/70">The talks aren’t published yet.</p>
-                      : <ul class="mt-3 space-y-1.5">
-                          {talksAt(e).map((t) => (
-                            <li class="leading-snug"><a href={`/talks/${t.id}`} class="font-medium hover:text-electric-blue hover:underline">{t.title}</a><span class="max-sm:hidden"> · </span><span class="text-panel-navy/60 max-sm:block">{t.person.name}</span></li>
-                          ))}
-                        </ul>}
-                  </div>
-                  {cover && (
-                    <a href={page} tabindex="-1" aria-hidden="true" class="hidden w-44 shrink-0 sm:block md:w-52">
-                      <TintedPhoto src={cover.img} alt="" sizes="208px" class="aspect-[4/3] rounded-xl" />
-                    </a>
-                  )}
-                </article>
-              </li>
-            );
-          })}
-        </ol>
+  <main id="main" class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+    {later.length > 0 && (
+      <section class="mb-16 md:mb-24">
+        <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-4xl">Coming up</h2>
+        <ul class="mt-8 divide-y divide-panel-navy/10 border-y border-panel-navy/10">
+          {later.map((e) => (
+            <li class="flex flex-wrap items-center justify-between gap-4 py-5">
+              <p><time datetime={e.date} class="block font-mono text-sm text-electric-blue">{shortDate(e.date)}</time><a href={`/events/${eventSlug(e)}`} class="mt-1 block font-sans text-2xl font-extrabold hover:text-electric-blue">{eventName(e)}</a></p>
+              <Button variant="outline" href={e.luma?.url ?? links.luma}>{e.free ? 'Register – Free' : 'Register'}</Button>
+            </li>
+          ))}
+        </ul>
       </section>
-    ))}
+    )}
+
+    <section>
+      <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-5xl">Previous meetups</h2>
+      <ol class="mt-10 space-y-6 md:mt-14 md:space-y-8">
+        {previous.map((e, i) => {
+          const page = `/events/${eventSlug(e)}`;
+          const cover = coverAt(e);
+          const talks = talksAt(e);
+          return (
+            <li class="reveal">
+              <article class="grid overflow-hidden rounded-2xl border border-panel-navy/[0.08] bg-white md:grid-cols-12">
+                {cover && (
+                  <a href={page} tabindex="-1" aria-hidden="true" class="group relative block aspect-[16/9] overflow-hidden bg-deep-navy md:col-span-5 md:aspect-auto md:min-h-80">
+                    <Image src={cover.img} alt="" widths={[480, 960]} quality={70} sizes="(min-width: 768px) 40vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.03]" style={`filter:url(#events-tone-${i % TINTS.length})`} />
+                    <div class="dither-stage absolute inset-0">
+                      <Artifacts client:visible color={TINTS[i % TINTS.length]} seed={Number(e.date.replaceAll('-', ''))} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.1, reach: 0.45 }]} />
+                    </div>
+                  </a>
+                )}
+                <div class:list={['flex flex-col p-6 md:p-10', cover ? 'md:col-span-7' : 'md:col-span-12']}>
+                  <time datetime={e.date} class="font-mono text-sm text-electric-blue">{shortDate(e.date)}</time>
+                  <h3 class="mt-2 font-sans text-3xl font-extrabold tracking-tight md:text-4xl"><a href={page} class="hover:text-electric-blue">{eventName(e)}</a></h3>
+                  {talks.length === 0
+                    ? <p class="mt-6 text-panel-navy/70">The talks aren’t published yet.</p>
+                    : <ul class="mt-6 divide-y divide-panel-navy/10 border-t border-panel-navy/10">
+                        {talks.map((t) => (
+                          <li>
+                            <a href={`/talks/${t.id}`} class="group flex items-center justify-between gap-6 py-4">
+                              <span class="min-w-0">
+                                <span class="block font-sans text-lg font-bold leading-snug text-pretty group-hover:text-electric-blue">{t.title}</span>
+                                <span class="mt-1 block text-sm text-panel-navy/65">{t.person.name}</span>
+                              </span>
+                              <span aria-hidden="true" class="shrink-0 text-panel-navy/30 transition group-hover:translate-x-0.5 group-hover:text-electric-blue"><Icon name="ArrowRight" size={18} /></span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>}
+                </div>
+              </article>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
   </main>
   <SiteFooter />
 </Shell>

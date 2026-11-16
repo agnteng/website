@@ -1,6 +1,6 @@
 # 0017. Every event has a page; registration stays on Luma
 
-- Status: Accepted
+- Status: Accepted; what /events lists superseded by 0022
 - Date: 2026-11-16
 
 ## Context
