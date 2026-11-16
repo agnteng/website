@@ -21,6 +21,7 @@ html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 ::selection { background: var(--color-periwinkle); color: var(--color-deep-navy); }
 html { caret-color: var(--color-electric-blue); }
 p, li { text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; }
 
 /* Entry reveal: content rises in once, in order. */
 @media (prefers-reduced-motion: no-preference) {
@@ -45,8 +46,6 @@ p, li { text-wrap: pretty; }
 /* The default tint: a little less colour, pulled towards the brand's blue. */
 .photo-tint { filter: saturate(0.7) contrast(1.05); }
 .photo-tint-wash { background: linear-gradient(160deg, rgb(30 43 230 / 0.28), rgb(5 7 30 / 0.25)); mix-blend-mode: soft-light; }
-/* Or a light wash of one brand colour (--tint): the photo keeps its own colours underneath. */
-.photo-colour-wash { background: var(--tint); mix-blend-mode: color; opacity: 0.32; }
 
 /* The search box draws its own clear button. */
 input[type='search']::-webkit-search-cancel-button { appearance: none; display: none; }

@@ -1,0 +1,13 @@
+---
+// A section's h2. With `action`, the link to the whole collection sits beside it.
+import Button from '@agnteng/brand/components/Button.astro';
+interface Props { action?: { href: string; label: string }; class?: string }
+const { action, class: cls } = Astro.props;
+const heading = 'font-sans text-3xl font-extrabold leading-tight tracking-tight md:text-5xl';
+---
+{action
+  ? <div class:list={['flex flex-wrap items-center justify-between gap-x-6 gap-y-4', cls]}>
+      <h2 class={heading}><slot /></h2>
+      <Button variant="outline" href={action.href}>{action.label}</Button>
+    </div>
+  : <h2 class:list={[heading, cls]}><slot /></h2>}

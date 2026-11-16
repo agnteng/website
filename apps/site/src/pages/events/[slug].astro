@@ -1,7 +1,7 @@
 ---
 // One meetup. Before it happens: the date and the way to register on Luma. Afterwards:
 // its talks, photos and Q&A. In between, while its talks aren't published, it keeps its
-// speakers. Never the venue's name (AGENTS.md).
+// speakers. Never the venue's name (AGENTS.md). Without photos, the hero shows the dither.
 import { Image } from 'astro:assets';
 import Shell from '../../layouts/Shell.astro';
 import SiteNav from '../../components/SiteNav.astro';
@@ -11,9 +11,13 @@ import SpeakerCard from '../../components/SpeakerCard.astro';
 import Gallery from '../../components/Gallery.astro';
 import HeroCells from '../../components/HeroCells.astro';
 import Tone from '../../components/Tone.astro';
+import Animation from '@agnteng/brand/components/Animation.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
-import Icon from '@agnteng/brand/components/Icon.astro';
-import { events, past, nextEvent, talks as allTalks, talksAt, questionsAt, photosAt, coverAt, isUpcoming, longDate, shortDate, eventSlug, eventName, eventSummary, links, type Event } from '../../lib/data';
+import PageTitle from '../../components/PageTitle.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import EventDate from '../../components/EventDate.astro';
+import RegisterButton from '../../components/RegisterButton.astro';
+import { events, nextEvent, talks as allTalks, talksAt, questionsAt, photosAt, coverAt, isUpcoming, shortDate, eventSlug, eventName, eventSummary, links, pitchIn, toSpeak, type Event } from '../../lib/data';
 import { eventNode, breadcrumbs } from '../../lib/schema';
 
 export function getStaticPaths() {
@@ -25,8 +29,7 @@ const talks = talksAt(e);
 const questions = questionsAt(e);
 const photos = photosAt(e);
 const published = talks.length > 0;
-// A meetup with no photos yet borrows the cover of the latest one that has some.
-const cover = coverAt(e) ?? past.map(coverAt).find(Boolean);
+const cover = coverAt(e);
 const luma = e.luma?.url ?? links.luma;
 const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...s, href: luma }));
 ---
@@ -35,34 +38,38 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
   <section class="relative isolate overflow-hidden bg-electric-blue text-white">
     <SiteNav onHero />
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
-      <h1 class="rise font-sans text-5xl font-extrabold tracking-tight md:max-w-[40%] md:text-6xl">{eventName(e)}</h1>
-      <p class="rise mt-6 flex items-center gap-2.5 font-sans text-sm font-medium md:max-w-[40%]" style="--i:1"><Icon name="Calendar" size={16} class="shrink-0 text-periwinkle" />{longDate(e.date)}</p>
+      <PageTitle rise class="md:max-w-[40%]">{eventName(e)}</PageTitle>
+      <EventDate date={e.date} event={e} variant="hero" class="rise mt-6" style="--i:1" />
       <div class="rise mt-8 flex flex-wrap gap-3" style="--i:2">
         {upcoming
-          ? <Button href={luma} class={`${e === nextEvent ? 'js-register ' : ''}!bg-white !text-electric-blue`}>{e.free ? 'Register – Free' : 'Register'}</Button>
+          ? <RegisterButton event={e} on="blue" />
           : <>
-              {e.recap && <Button href={e.recap} class="!bg-white !text-electric-blue">Read the recap</Button>}
-              <Button variant="outline" href={links.luma} class={e.recap ? '!border-white/45 !text-white hover:!border-white' : '!border-white !bg-white !text-electric-blue'}>See upcoming events</Button>
+              {e.recap && <Button variant="inverse" href={e.recap}>Read the recap</Button>}
+              {nextEvent
+                ? <Button variant={e.recap ? 'inverse-outline' : 'inverse'} href={`/events/${eventSlug(nextEvent)}`}>Next meetup</Button>
+                : <RegisterButton on="blue" followLuma secondary={!!e.recap} />}
             </>}
       </div>
     </div>
-    {cover && (
-      <div class="dither-stage relative isolate h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
-        <Image src={cover.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
-        <!-- Each night has its own pattern. -->
-        <HeroCells seed={Number(e.date.replaceAll('-', ''))} />
-      </div>
-    )}
+    <div class="dither-stage relative isolate h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
+      {cover
+        ? <>
+            <Image src={cover.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
+            <!-- Each night has its own pattern. -->
+            <HeroCells seed={Number(e.date.replaceAll('-', ''))} />
+          </>
+        : <Animation client:load color="#3A4DFF" edge="#B5A6FF" cell={10} density={0.6} fade="left" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />}
+    </div>
   </section>
 
   <main id="main" class="mx-auto max-w-7xl px-4 md:px-8">
     {upcoming && (
       <section class="py-16 md:py-24">
         <div class="grid gap-10 md:grid-cols-12">
-          <h2 class="font-sans text-3xl font-extrabold tracking-tight md:col-span-4 md:text-4xl">The meetup</h2>
+          <SectionHeading class="md:col-span-4">The meetup</SectionHeading>
           <div class="space-y-5 text-lg md:col-span-8">
-            <p>People show what they’ve shipped with agents: ten-minute talks, then open questions. In {e.city}, in English.</p>
-            <p>To speak, register and describe your talk in the talk field. Real work, no pitches.</p>
+            <p>{pitchIn(e.city)}</p>
+            <p>{toSpeak}</p>
           </div>
         </div>
       </section>
@@ -70,7 +77,7 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
 
     {speakers.length > 0 && (
       <section class="border-t border-panel-navy/[0.08] py-16 md:py-24">
-        <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-4xl">Speakers</h2>
+        <SectionHeading>Speakers</SectionHeading>
         <ul class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">{speakers.map((s, i) => <li><SpeakerCard speaker={s} index={i} /></li>)}</ul>
       </section>
     )}
@@ -83,23 +90,21 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
 
     {published && (
       <section class="py-16 md:py-24">
-        <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-4xl">Talks</h2>
-        <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{talks.map((t, i) => <li class="reveal"><TalkTile talk={t} index={i} summary /></li>)}</ul>
+        <SectionHeading>Talks</SectionHeading>
+        <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{talks.map((t, i) => <li class="reveal"><TalkTile talk={t} index={i} summary showEvent={false} /></li>)}</ul>
       </section>
     )}
 
     {upcoming && (
       <section class="border-t border-panel-navy/[0.08] py-16 md:py-24">
-        <div class="flex flex-wrap items-end justify-between gap-6">
-          <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-4xl">Latest talks</h2>
-          <Button variant="outline" href="/talks">All talks</Button>
-        </div>
+        <SectionHeading action={{ href: '/talks', label: 'All talks' }}>Latest talks</SectionHeading>
         <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{allTalks.slice(0, 3).map((t, i) => <li class="reveal"><TalkTile talk={t} index={i} /></li>)}</ul>
       </section>
     )}
 
     {photos.length > 0 && (
-      <section class="border-t border-panel-navy/[0.08] pb-16 md:pb-24">
+      <section class="border-t border-panel-navy/[0.08] py-16 md:py-24">
+        <SectionHeading>Photos</SectionHeading>
         <Gallery photos={photos} />
       </section>
     )}
@@ -107,7 +112,7 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
     {questions.length > 0 && (
       <section class="border-t border-panel-navy/[0.08] py-16 md:py-24">
         <div class="grid gap-10 md:grid-cols-12">
-          <h2 class="font-sans text-3xl font-extrabold tracking-tight md:col-span-4 md:text-4xl">Q&A</h2>
+          <SectionHeading class="md:col-span-4">Q&A</SectionHeading>
           <div class="divide-y divide-panel-navy/10 md:col-span-8">
             {questions.map((q) => (
               <details class="group py-1">

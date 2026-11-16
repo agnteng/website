@@ -2,10 +2,11 @@
 // The home page's hero: an electric-blue block. Photos of the meetups take its blue and
 // break up into it cell by cell. The page includes <Tone /> for the photos' colour.
 import { Image } from 'astro:assets';
-import Button from '@agnteng/brand/components/Button.astro';
 import HeroCells from './HeroCells.astro';
 import SiteNav from './SiteNav.astro';
-import { nextEvent, register, galleryPhoto, shortDate } from '../lib/data';
+import PageTitle from './PageTitle.astro';
+import NextMeetup from './NextMeetup.astro';
+import { nextEvent, galleryPhoto, pitchIn } from '../lib/data';
 
 // Talks, questions and the audience take turns. `head` is where the subject's head is in
 // the photo (fractions of its width and height); every head goes to the same point of
@@ -42,17 +43,9 @@ const photos = shots.map((p, i) => {
   <!-- The skip link lands here. -->
   <div id="main" class="relative z-10 mx-auto grid max-w-7xl items-center px-4 pt-14 pb-10 md:grid-cols-12 md:px-8 md:pt-20 md:pb-28">
     <div class="md:col-span-6">
-      <h1 class="rise font-sans text-4xl font-extrabold leading-[1.05] tracking-tight text-balance md:text-5xl xl:text-6xl" style="--i:0">A community of founders and engineers building with agents.</h1>
-      <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions. In {nextEvent?.city ?? 'Lisbon'}, in English.</p>
-      {nextEvent && (
-        <div data-next-event class="rise mt-10 flex flex-wrap items-center gap-x-6 gap-y-4" style="--i:2">
-          <Button variant="secondary" href={register} class="js-register">{nextEvent.free ? 'Register – Free' : 'Register'}</Button>
-          <p class="font-sans leading-tight">
-            <span class="block text-lg font-extrabold">Next event</span>
-            <span class="block font-mono text-sm text-white/80">{shortDate(nextEvent.date)} · {nextEvent.city}</span>
-          </p>
-        </div>
-      )}
+      <PageTitle rise style="--i:0">A community of founders and engineers building with agents.</PageTitle>
+      <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">{pitchIn(nextEvent?.city ?? 'Lisbon')}</p>
+      <NextMeetup event={nextEvent} class="rise mt-10" style="--i:2" />
     </div>
   </div>
 

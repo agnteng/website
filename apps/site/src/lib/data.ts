@@ -13,7 +13,7 @@ export type Event = {
   number: number;
   venue: string;
   tonight: string;
-  luma?: { apiId: string; url: string; startAt: string };
+  luma?: { apiId: string; url: string; startAt: string; timezone?: string };
   speakers?: EventSpeaker[];
   recap?: string; // the night's Substack post
   free?: boolean; // Luma has a free ticket
@@ -71,7 +71,6 @@ export const links = {
   partners: 'mailto:partners@agnteng.com',
   sponsors: 'https://sponsors.agnteng.com',
 };
-export const register = nextEvent?.luma?.url ?? links.luma;
 
 // The deck may shorten a speaker's name ("Andy Nik" for "Andy Nikulin",
 // "Doris Hernandez" for "Doris Hernandez Argueta"): same first name, and the
@@ -201,6 +200,27 @@ const fmt = (date: string, opts: Intl.DateTimeFormatOptions) =>
 
 export const longDate = (d: string) => fmt(d, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 export const shortDate = (d: string) => fmt(d, { day: 'numeric', month: 'short', year: 'numeric' });
+// "Wed 27 Jan 2027": where people decide whether to come.
+export const dayDate = (d: string) => fmt(d, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).replace(',', '');
+
+// When a meetup starts, in its own time zone ("19:00"); nothing when Luma gave no zone.
+export const startTime = (e: Event) =>
+  e.luma?.startAt && e.luma.timezone
+    ? new Date(e.luma.startAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: e.luma.timezone })
+    : undefined;
+
+// The meetup in one line, and how to speak at one: every page says them the same way.
+export const pitch = 'A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions.';
+export const pitchIn = (city: string) => `${pitch} In ${city}, in English.`;
+export const toSpeak = 'To speak, register for the next meetup and describe your talk in the talk field. Ten minutes, real work, no pitches.';
+
+// What a meetup's Register button says. Luma's hosts approve each guest when `approval` is set.
+export const registerLabel = (e: Event) => `${e.approval ? 'Request a spot' : 'Register'}${e.free ? ' – Free' : ''}`;
+
+// Each meetup owns one of the brand's three meetup colours, by its number in its city, so a
+// new meetup never changes another's. Covers take it; the blue heroes and the gallery don't.
+export const TINTS = ['#1E2BE6', '#7C4DF5', '#ED4BA0'] as const;
+export const eventTint = (e: Event) => TINTS[(e.number - 1) % TINTS.length];
 
 // Transcript paragraphs: "**[m:ss]** text".
 export const transcriptParas = (t: Talk) =>

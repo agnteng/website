@@ -1,0 +1,14 @@
+---
+// The one Register button: label, link and look. `event` is the meetup to register for
+// (the next one by default); on the next meetup it carries js-register, which SiteNav's
+// script turns into "Follow on Luma" once that meetup has started. `followLuma` is that
+// state from the start. `secondary` is the outline look, beside another button.
+import Button from '@agnteng/brand/components/Button.astro';
+import { nextEvent, links, registerLabel, type Event } from '../lib/data';
+interface Props { event?: Event; on?: 'blue' | 'light'; size?: 'md' | 'sm'; short?: boolean; followLuma?: boolean; secondary?: boolean; class?: string }
+const { event = nextEvent, on = 'light', size = 'md', short = false, followLuma = false, secondary = false, class: cls } = Astro.props;
+const live = !followLuma && event;
+const href = live ? event.luma?.url ?? links.luma : links.luma;
+const text = !live ? 'Follow on Luma' : short ? 'Register' : registerLabel(event);
+---
+<Button variant={on === 'blue' ? (secondary ? 'inverse-outline' : 'inverse') : secondary ? 'outline' : 'primary'} size={size} href={href} class={[live && event === nextEvent && 'js-register', cls].filter(Boolean).join(' ')}>{text}</Button>

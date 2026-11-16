@@ -7,7 +7,12 @@ import Transcript from '../../components/Transcript.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Avatar from '@agnteng/brand/components/Avatar.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
-import { talks, talksAt, longDate, eventSlug, eventName, thumbnail, avatarOf, type Talk } from '../../lib/data';
+import PageTitle from '../../components/PageTitle.astro';
+import SubHeading from '../../components/SubHeading.astro';
+import EventDate from '../../components/EventDate.astro';
+import { label } from '../../lib/type';
+import NextMeetupStrip from '../../components/NextMeetupStrip.astro';
+import { talks, talksAt, eventSlug, eventName, thumbnail, avatarOf, type Talk } from '../../lib/data';
 import { videoNode, breadcrumbs } from '../../lib/schema';
 
 export function getStaticPaths() {
@@ -25,8 +30,8 @@ const linkLists = ([
   <SiteNav />
   <main id="main" class="mx-auto max-w-5xl px-4 md:px-8">
     <section class="pt-14 pb-10 md:pt-20">
-      <a href={`/events/${eventSlug(e)}`} class="rise inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-electric-blue hover:underline">{eventName(e)}, {longDate(e.date)}</a>
-      <h1 class="rise mt-4 font-sans text-3xl font-extrabold leading-[1.1] tracking-tight md:text-5xl" style="--i:1">{talk.title}</h1>
+      <EventDate date={e.date} variant="eyebrow" class="rise"><a href={`/events/${eventSlug(e)}`} class="hover:underline">{eventName(e)}</a></EventDate>
+      <PageTitle rise class="mt-4" style="--i:1">{talk.title}</PageTitle>
       <div class="rise mt-6 flex items-center gap-3" style="--i:2">
         <Avatar name={talk.person.name} src={await avatarOf(talk.person.photo)} size={48} />
         <p><span class="font-bold">{talk.person.name}</span>{talk.person.title && <span class="block text-sm text-panel-navy/60"> {talk.person.title}</span>}</p>
@@ -50,7 +55,7 @@ const linkLists = ([
       <p class="text-xl leading-relaxed md:text-2xl">{talk.summary}</p>
       {talk.takeaways.length > 0 && (
         <div class="mt-10 rounded-2xl border border-panel-navy/[0.08] bg-white p-6 md:p-8">
-          <h2 class="font-mono text-sm font-semibold uppercase tracking-wider text-electric-blue">Main takeaways</h2>
+          <h2 class:list={[label, 'text-electric-blue']}>Main takeaways</h2>
           <ul class="mt-5 space-y-3.5">
             {talk.takeaways.map((k) => <li class="flex gap-3 leading-relaxed"><Icon name="Check" size={16} class="mt-1 shrink-0 text-electric-blue" /><span>{k}</span></li>)}
           </ul>
@@ -68,10 +73,11 @@ const linkLists = ([
 
     {more.length > 0 && (
       <section class="border-t border-panel-navy/[0.08] py-16">
-        <h2 class="font-sans text-2xl font-extrabold">More from {eventName(e)}</h2>
-        <ul class="mt-8 grid gap-5 sm:grid-cols-2">{more.map((t, i) => <li><TalkTile talk={t} index={i} /></li>)}</ul>
+        <SubHeading as="h2">More from {eventName(e)}</SubHeading>
+        <ul class="mt-8 grid gap-5 sm:grid-cols-2">{more.map((t, i) => <li><TalkTile talk={t} index={i} showEvent={false} /></li>)}</ul>
       </section>
     )}
+    <NextMeetupStrip />
   </main>
   <SiteFooter />
 

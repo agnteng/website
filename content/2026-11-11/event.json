@@ -7,7 +7,8 @@
   "luma": {
     "apiId": "evt-rxhZJZbe0doEshB",
     "url": "https://luma.com/lisbon-5",
-    "startAt": "2026-11-11T18:00:00.000Z"
+    "startAt": "2026-11-11T18:00:00.000Z",
+    "timezone": "Europe/Lisbon"
   },
   "speakers": [
     {
@@ -17,7 +18,7 @@
     },
     {
       "name": "David Mihal",
-      "title": "Co-Founder, Meridian",
+      "title": "Co-founder, Meridian",
       "photo": "/assets/speakers/david-mihal.jpg"
     },
     {

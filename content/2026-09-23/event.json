@@ -7,7 +7,8 @@
   "luma": {
     "apiId": "evt-S0uIAjkttvEDJ6Z",
     "url": "https://luma.com/kqlbak7w",
-    "startAt": "2026-09-23T18:00:00.000Z"
+    "startAt": "2026-09-23T18:00:00.000Z",
+    "timezone": "Europe/Lisbon"
   },
   "speakers": [
     {
@@ -17,12 +18,12 @@
     },
     {
       "name": "Doris Hernandez Argueta",
-      "title": "Co-Founder, Altana Network",
+      "title": "Co-founder, Altana Network",
       "photo": "/assets/speakers/doris-hernandez-argueta.jpg"
     },
     {
       "name": "Jeremy Healsmith",
-      "title": "Co-Founder, Pravi",
+      "title": "Co-founder, Pravi",
       "photo": "/assets/speakers/jeremy-healsmith.jpg"
     }
   ],

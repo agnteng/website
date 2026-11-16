@@ -7,7 +7,8 @@
   "luma": {
     "apiId": "evt-CDZ2m81QOCkO2L9",
     "url": "https://luma.com/hqd7vt0v",
-    "startAt": "2026-07-29T18:00:00.000Z"
+    "startAt": "2026-07-29T18:00:00.000Z",
+    "timezone": "Europe/Lisbon"
   },
   "speakers": [
     {

@@ -1,13 +1,15 @@
 ---
 // `onHero` puts the bar on a hero's own blue, with a white Register button;
 // otherwise it is deep navy. Inside a section it still is the page's banner, hence the role.
-import Button from '@agnteng/brand/components/Button.astro';
+import RegisterButton from './RegisterButton.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
-import { register, nextEvent, links } from '../lib/data';
+import { nextEvent, links } from '../lib/data';
 interface Props { onHero?: boolean }
 const { onHero = false } = Astro.props;
 const starts = nextEvent && (nextEvent.luma?.startAt ?? `${nextEvent.date}T23:59:00Z`);
 const luma = links.luma;
+const here = Astro.url.pathname.replace(/\/$/, '');
+const sections = [{ label: 'Talks', href: '/talks' }, { label: 'Speakers', href: '/speakers' }, { label: 'Events', href: '/events' }];
 ---
 <header role="banner" class:list={['relative z-20', !onHero && 'border-b border-white/10 bg-deep-navy']}>
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 md:grid-cols-[1fr_minmax(0,28rem)_1fr] md:gap-8 md:px-8">
@@ -19,14 +21,20 @@ const luma = links.luma;
     <!-- One search box on every page. On /talks it searches in place; elsewhere it carries the search there. -->
     <form action="/talks" role="search" data-search-form class="relative w-full">
       <label for="search" class="sr-only">Search the talks</label>
-      <span aria-hidden="true" class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-panel-navy/55"><Icon name="Search" size={16} /></span>
+      <span aria-hidden="true" class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-panel-navy/70"><Icon name="Search" size={16} /></span>
       <input id="search" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search talks" aria-keyshortcuts="Meta+K Control+K /" class="peer h-10 w-full rounded-full border border-transparent bg-white pl-10 pr-10 font-sans text-base text-panel-navy outline-none transition placeholder:text-panel-navy/60 focus:border-deep-navy focus:ring-2 focus:ring-deep-navy/40 md:pr-14 md:text-sm" />
-      <kbd aria-hidden="true" data-kbd class="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-panel-navy/20 px-1.5 py-0.5 font-mono text-[10px] text-panel-navy/55 peer-focus:hidden peer-[:not(:placeholder-shown)]:hidden md:block">⌘K</kbd>
+      <kbd aria-hidden="true" data-kbd class="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-panel-navy/20 px-1.5 py-0.5 font-mono text-[10px] text-panel-navy/70 peer-focus:hidden peer-[:not(:placeholder-shown)]:hidden md:block">⌘K</kbd>
       <button type="button" data-search-clear aria-label="Clear the search" class="absolute right-2 top-1/2 hidden size-6 -translate-y-1/2 place-items-center rounded-full bg-panel-navy/10 text-panel-navy transition hover:bg-panel-navy/20 peer-[:not(:placeholder-shown)]:grid">
         <svg aria-hidden="true" viewBox="0 0 12 12" class="size-2.5"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
       </button>
     </form>
-    <Button variant="primary" href={register} class={`js-register justify-self-end !px-5 !py-3 !text-sm md:!py-2.5 ${onHero ? '!bg-white !text-electric-blue hover:!bg-soft-white hover:!brightness-100' : ''}`}>Register</Button>
+    <div class="flex items-center gap-6 justify-self-end">
+      <!-- The sections, where there is room for them; the footer has them everywhere. -->
+      <nav aria-label="Sections" class="hidden items-center gap-6 xl:flex">
+        {sections.map((s) => <a href={s.href} aria-current={here.startsWith(s.href) ? 'page' : undefined} class="text-sm font-medium text-white/90 transition hover:text-white aria-[current=page]:text-white aria-[current=page]:underline aria-[current=page]:underline-offset-8">{s.label}</a>)}
+      </nav>
+      <RegisterButton on={onHero ? 'blue' : 'light'} size="sm" short />
+    </div>
   </div>
 </header>
 <script is:inline>
@@ -65,15 +73,18 @@ const luma = links.luma;
 </script>
 <script is:inline define:vars={{ starts, luma }}>
   // The site is rebuilt only on deploy: once the next event has started, every
-  // register link and the home page's next-event card point to the Luma calendar.
+  // register link points to the Luma calendar, and the heroes' next meetup gives way.
   if (starts && Date.parse(starts) + 4 * 3600e3 < Date.now()) {
     addEventListener('DOMContentLoaded', () => {
       for (const a of document.querySelectorAll('a.js-register')) {
         a.href = luma;
         a.textContent = 'Follow on Luma';
       }
-      const card = document.querySelector('[data-next-event]');
-      if (card) card.innerHTML = `<a class="inline-flex rounded-full bg-deep-navy px-[26px] py-3.5 font-semibold text-white" href="${luma}">Follow on Luma</a><p class="font-semibold">The next date is on its way.</p>`;
+      // NextMeetup renders both states; this shows the second.
+      for (const card of document.querySelectorAll('[data-next-event]')) {
+        card.hidden = true;
+        card.nextElementSibling?.removeAttribute('hidden');
+      }
     });
   }
 </script>

@@ -1,0 +1,22 @@
+---
+// A meetup's date, the one way the site shows it: Kode Mono, "11 Nov 2026".
+// eyebrow  above a title, as the small label; anything in the slot comes first ("Lisbon #5 · ").
+// hero     with the weekday and, when Luma has it, the start time: "Wed 27 Jan 2027 · 19:00".
+import Icon from '@agnteng/brand/components/Icon.astro';
+import { shortDate, dayDate, startTime, type Event } from '../lib/data';
+import { label } from '../lib/type';
+interface Props { date: string; event?: Event; variant?: 'eyebrow' | 'hero'; class?: string; style?: string }
+const { date, event, variant = 'eyebrow', class: cls, style } = Astro.props;
+// A colour passed in `class` replaces the default one; a size or alignment doesn't.
+const colour = /(^|\s)([\w-]+:)?text-(?!(xs|sm|base|lg|\d?xl|left|right|center|justify|balance|pretty|wrap|nowrap)\b)/;
+const time = variant === 'hero' && event ? startTime(event) : undefined;
+const text = variant === 'hero' ? [dayDate(date), time].filter(Boolean).join(' · ') : shortDate(date);
+const look = {
+  eyebrow: [label, !colour.test(cls ?? '') && 'text-electric-blue'],
+  hero: 'inline-flex items-center gap-2 font-mono text-sm text-white/85',
+}[variant];
+---
+<p class:list={[look, cls]} style={style}>
+  {variant === 'hero' && <Icon name="Calendar" size={16} class="shrink-0 text-periwinkle" />}
+  {Astro.slots.has('default') && <><slot /> · </>}<time datetime={date}>{text}</time>
+</p>
