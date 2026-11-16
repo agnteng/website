@@ -8,13 +8,14 @@ import { imageNames, hashOf } from './image-names.mjs';
 // Event data and talks live in content/ at the repository root.
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
-// Images go to /images/ under the names from image-names.mjs; resized copies land beside them.
+// Everything that isn't a page is in /assets/: images in /assets/images/ under the names from
+// image-names.mjs, the build's scripts, styles and fonts in /assets/ itself.
 const names = imageNames(repoRoot);
 /** @param {{ names: string[]; source: string | Uint8Array }} asset */
 const assetFileNames = (asset) =>
   /\.(jpe?g|png|webp|avif|gif)$/i.test(asset.names[0] ?? '')
-    ? `images/${names.get(hashOf(asset.source)) || '[name]'}.[hash][extname]`
-    : '_astro/[name].[hash][extname]';
+    ? `assets/images/${names.get(hashOf(asset.source)) || '[name]'}.[hash][extname]`
+    : 'assets/[name].[hash][extname]';
 
 export default defineConfig({
   site: 'https://agnteng.com',
@@ -22,6 +23,7 @@ export default defineConfig({
   integrations: [react()],
   // Logos, speaker photos and event photos are shared with the branding app.
   publicDir: '../branding/public',
+  build: { assets: 'assets' },
   vite: {
     plugins: [tailwindcss()],
     // A font stays a file: inlined, a script nobody reads would cost every visitor.

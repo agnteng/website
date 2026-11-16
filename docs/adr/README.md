@@ -35,5 +35,6 @@ Decision, Consequences.
 | [0016](0016-one-address-per-page.md) | A page of agnteng.com has one address | Accepted |
 | [0017](0017-every-event-has-a-page.md) | Every event has a page; registration stays on Luma | Accepted |
 | [0018](0018-fonts-served-by-the-site.md) | agnteng.com serves its own fonts | Accepted |
-| [0019](0019-images-in-images-with-names.md) | Images are published in `/images/` under names that say what they show | Accepted |
+| [0019](0019-images-in-images-with-names.md) | Images are published in `/images/` under names that say what they show | Accepted; folder superseded by 0021 |
 | [0020](0020-pages-take-resized-headshots.md) | agnteng.com's pages take resized copies of speaker headshots | Accepted |
+| [0021](0021-build-files-in-assets.md) | Everything on agnteng.com that isn't a page is in `/assets/` | Accepted |
