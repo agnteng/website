@@ -37,8 +37,8 @@ const photos = shots.map((p, i) => {
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
 // The cells that hide the photos' leading edge. Whole across `solid`, which is at
-// least the edge the photos may stop short of.
-const cells = { color: '#1E2BE6', seed: 2027, cell: 10, animate: true } as const;
+// least the edge the photos may stop short of. A few of the ragged ones are magenta.
+const cells = { color: '#1E2BE6', edge: '#ED4BA0', seed: 2027, cell: 10, animate: true } as const;
 ---
 <section class="relative isolate overflow-hidden bg-electric-blue text-white">
   <SiteNav onHero />
@@ -66,7 +66,7 @@ const cells = { color: '#1E2BE6', seed: 2027, cell: 10, animate: true } as const
     {photos.map((p, i) => (
       <Image src={p.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 110vw, 150vw" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} class="hero-turn absolute left-(--l) top-(--t) h-auto w-(--w) max-w-none [filter:url(#blue-tone)] md:left-(--ld) md:top-(--td) md:w-(--wd)" style={p.style} />
     ))}
-    <!-- Blue cells cover the frame's leading edge and thin out to nothing: the photo breaks
+    <!-- Cells cover the frame's leading edge and thin out to nothing: the photo breaks
          up into the block. Above the photo that is fading in. -->
     <div class="absolute inset-0 z-2 max-md:hidden">
       <Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.22, reach: 0.52 }]} />
