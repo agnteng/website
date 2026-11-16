@@ -9,8 +9,8 @@ import SiteFooter from '../../components/SiteFooter.astro';
 import TalkTile from '../../components/TalkTile.astro';
 import SpeakerCard from '../../components/SpeakerCard.astro';
 import Gallery from '../../components/Gallery.astro';
-import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
-import BlueTone from '../../components/BlueTone.astro';
+import HeroCells from '../../components/HeroCells.astro';
+import Tone from '../../components/Tone.astro';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import { events, past, nextEvent, talks as allTalks, talksAt, questionsAt, photosAt, coverAt, isUpcoming, longDate, shortDate, eventSlug, eventName, eventSummary, links, type Event } from '../../lib/data';
@@ -29,11 +29,9 @@ const published = talks.length > 0;
 const cover = coverAt(e) ?? past.map(coverAt).find(Boolean);
 const luma = e.luma?.url ?? links.luma;
 const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...s, href: luma }));
-// The cells that hide the cover's leading edge; each night has its own pattern.
-const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell: 10, animate: true } as const;
 ---
 <Shell title={`Agentic Engineering ${eventName(e)}, ${shortDate(e.date)}`} description={eventSummary(e)} schema={[eventNode(e), breadcrumbs(['Events', '/events'], [eventName(e), `/events/${eventSlug(e)}`])]} class="bg-soft-white text-panel-navy">
-  <BlueTone />
+  <Tone />
   <section class="relative isolate overflow-hidden bg-electric-blue text-white">
     <SiteNav onHero />
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
@@ -49,10 +47,10 @@ const cells = { color: '#1E2BE6', seed: Number(e.date.replaceAll('-', '')), cell
       </div>
     </div>
     {cover && (
-      <div class="dither-stage relative h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
+      <div class="dither-stage relative isolate h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">
         <Image src={cover.img} alt="" widths={[960, 1600]} sizes="(min-width: 768px) 64vw, 100vw" loading="eager" fetchpriority="high" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
-        <div class="absolute inset-0 max-md:hidden"><Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.2, reach: 0.52 }]} /></div>
-        <div class="absolute inset-0 md:hidden"><Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45 }]} /></div>
+        <!-- Each night has its own pattern. -->
+        <HeroCells seed={Number(e.date.replaceAll('-', ''))} />
       </div>
     )}
   </section>

@@ -29,7 +29,7 @@ function jsx(b: Background): string {
     return [
       '<Artifacts', `  src="${src(b.src)}"`, `  position="${b.position}"`, `  color="${b.color}"`, ...(b.edge ? [`  edge="${b.edge}"`] : []), ...(b.tint ? [b.tintOpacity < 1 ? `  tint={${b.tintOpacity}}` : '  tint'] : []),
       `  cell={${b.cell}}`, `  rough={${b.rough}}`, `  seed={${b.seed}}`, ...(b.animate ? ['  animate'] : []),
-      '  artifacts={[', ...b.artifacts.map((a) => `    { at: '${a.at}', solid: ${a.solid}, reach: ${a.reach} },`), '  ]}', '/>',
+      '  artifacts={[', ...b.artifacts.map((a) => `    { at: '${a.at}', solid: ${a.solid}, reach: ${a.reach}${a.wave ? `, wave: ${a.wave}${a.waveLength ? `, waveLength: ${a.waveLength}` : ''}${a.waveShift ? `, waveShift: ${a.waveShift}` : ''}` : ''} },`), '  ]}', '/>',
     ].join('\n');
   }
   const props = `  animation="${b.animation}"\n  color="${b.color}"\n  edge="${b.edge}"\n  bg="${b.bg}"\n  cell={${b.cell}}\n  gap={${b.gap}}\n  density={${b.density}}\n  motion={${b.motion}}\n  fade="${b.fade}"\n  shape="${b.shape}"`;

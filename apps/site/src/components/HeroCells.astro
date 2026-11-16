@@ -1,0 +1,20 @@
+---
+// The cells over a hero's photo frame: blue ones cover its leading edge (left on desktop,
+// top on a phone) and thin out to nothing, a few of the ragged ones periwinkle, so the
+// photo breaks up into the block. Goes last in a positioned frame, above a photo that is
+// fading in.
+//
+// On desktop the cells are whole across `solid` less `wave`, 0.22 of the frame: the home
+// page's photos stop up to 0.2 short of that edge (DESK.clear in Hero.astro).
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
+interface Props {
+  seed: number; // the pattern
+}
+const cells = { color: '#1E2BE6', edge: '#B5A6FF', seed: Astro.props.seed, cell: 10, animate: true } as const;
+---
+<div class="absolute inset-0 z-2 max-md:hidden">
+  <Artifacts client:load {...cells} artifacts={[{ at: 'left', solid: 0.25, reach: 0.55, wave: 0.03, waveLength: 0.6 }]} />
+</div>
+<div class="absolute inset-0 z-2 md:hidden">
+  <Artifacts client:load {...cells} artifacts={[{ at: 'top', solid: 0.1, reach: 0.45, wave: 0.05, waveLength: 0.7 }]} />
+</div>

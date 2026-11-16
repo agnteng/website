@@ -173,6 +173,13 @@ function Photo({ b, set }: { b: PhotoBg; set: (p: Partial<PhotoBg>) => void }) {
           <Row label="Grows from"><AlignPad value={a.at} onChange={(at) => item(i, { at })} /></Row>
           <Range label="Solid" value={a.solid} min={0} max={1} onChange={(solid) => item(i, { solid, reach: Math.max(a.reach, solid) })} />
           <Range label="Reach" value={a.reach} min={0} max={1.5} onChange={(reach) => item(i, { reach, solid: Math.min(a.solid, reach) })} />
+          <Range label="Wave" value={a.wave ?? 0} min={0} max={0.15} step={0.002} onChange={(wave) => item(i, { wave })} />
+          {!!a.wave && (
+            <>
+              <Range label="Wave length" value={a.waveLength ?? 0.5} min={0.05} max={1.5} onChange={(waveLength) => item(i, { waveLength })} />
+              <Range label="Wave shift" value={a.waveShift ?? 0} min={0} max={1} onChange={(waveShift) => item(i, { waveShift })} />
+            </>
+          )}
         </div>
       ))}
       <button type="button" onClick={() => set({ artifacts: [...b.artifacts, { at: 'bottom-right', solid: 0.15, reach: 0.45 }] })} className={`${btn} w-full`}>Add an artifact</button>

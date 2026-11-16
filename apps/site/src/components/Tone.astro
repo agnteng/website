@@ -1,0 +1,19 @@
+---
+// The filter behind `filter: url(#id)`: a photo recoloured into one brand colour, shadows
+// to navy, mid-tones to `color`, highlights to soft white. `amount` (0–1) is how far the
+// photo goes from its own colours. Once per page and id; without props it is the heroes'
+// `#blue-tone`.
+interface Props {
+  id?: string;
+  color?: string;
+  amount?: number;
+}
+const { id = 'blue-tone', color = '#1E2BE6', amount = 1 } = Astro.props;
+const stops = ['#05071E', color, '#F4F5FF'].map((hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255));
+const table = (channel: number) => stops.map((s) => s[channel].toFixed(3)).join(' ');
+---
+<svg width="0" height="0" class="absolute" aria-hidden="true"><filter id={id} color-interpolation-filters="sRGB">
+  <feColorMatrix type="saturate" values="0" />
+  <feComponentTransfer><feFuncR type="table" tableValues={table(0)} /><feFuncG type="table" tableValues={table(1)} /><feFuncB type="table" tableValues={table(2)} /></feComponentTransfer>
+  {amount < 1 && <feComposite in2="SourceGraphic" operator="arithmetic" k2={amount} k3={1 - amount} />}
+</filter></svg>

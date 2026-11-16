@@ -17,5 +17,4 @@ const img = ['photo-tint absolute inset-0 size-full object-cover', zoom && 'tran
     ? <img src={src} alt={alt} loading="lazy" class:list={img} />
     : <Image src={src} alt={alt} widths={[480, 960]} sizes={sizes} loading="lazy" class:list={img} />}
   <div aria-hidden="true" class:list={[tint ? 'photo-colour-wash' : 'photo-tint-wash', 'pointer-events-none absolute inset-0']} style={tint && `--tint: ${tint}`}></div>
-  <slot />
 </div>
