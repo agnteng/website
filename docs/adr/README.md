@@ -39,3 +39,4 @@ Decision, Consequences.
 | [0020](0020-pages-take-resized-headshots.md) | agnteng.com's pages take resized copies of speaker headshots | Accepted |
 | [0021](0021-build-files-in-assets.md) | Everything on agnteng.com that isn't a page is in `/assets/` | Accepted |
 | [0022](0022-events-page-is-lisbon.md) | `/events` is the Lisbon meetups | Accepted |
+| [0023](0023-repeated-ui-is-a-component.md) | What the site repeats is a component; each meetup owns a colour | Accepted |
