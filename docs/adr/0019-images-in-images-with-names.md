@@ -15,11 +15,11 @@ person or to an image search.
 (`agentic-engineering-lisbon-5-ai-meetup-15`), a talk's still by its title and
 speaker, a headshot by the speaker's name. The hash stays in the name, so the
 files can be cached for good; nginx does that for `/images/` as for
-`/_astro/`. Pages take resized copies of speaker headshots through the same
-build, not the originals in `/assets/speakers/`.
+`/_astro/`.
 
 ## Consequences
 An image's address changes when its file or its name's source (a talk's
-title, an event's number) changes. Names come from `content/`, so they follow
-the rule for event pages: no venue. Logos, speaker masks and the share image
-stay in `/assets/`, which both apps serve as it is (ADR 0007).
+title, an event's number) changes. A name is built from the city, the
+meetup's number, a talk's title and speaker or a speaker's name, never the
+venue; `mise run fitness` checks that. Logos, speaker masks and the share
+image stay in `/assets/`, which both apps serve as it is (ADR 0007).

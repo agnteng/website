@@ -36,3 +36,4 @@ Decision, Consequences.
 | [0017](0017-every-event-has-a-page.md) | Every event has a page; registration stays on Luma | Accepted |
 | [0018](0018-fonts-served-by-the-site.md) | agnteng.com serves its own fonts | Accepted |
 | [0019](0019-images-in-images-with-names.md) | Images are published in `/images/` under names that say what they show | Accepted |
+| [0020](0020-pages-take-resized-headshots.md) | agnteng.com's pages take resized copies of speaker headshots | Accepted |

@@ -152,7 +152,7 @@ export const headshot = (photo: string) => {
 // app's, which both sites serve whole; pages here take smaller copies.
 const speakerFiles = import.meta.glob<ImageMetadata>('../../../branding/public/assets/speakers/*.jpg', { eager: true, import: 'default' });
 export const speakerImage = (photo: string): ImageMetadata => {
-  const img = Object.entries(speakerFiles).find(([path]) => path.endsWith(`/public${photo}`))?.[1];
+  const img = speakerFiles[`../../../branding/public${photo}`];
   if (!img) throw new Error(`${photo} is not in apps/branding/public/assets/speakers`);
   return img;
 };

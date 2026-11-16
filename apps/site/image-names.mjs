@@ -4,7 +4,7 @@
 // by a hash of their bytes.
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 const slug = (s) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -22,14 +22,14 @@ export function imageNames(repoRoot) {
     if (!existsSync(join(dir, 'event.json'))) continue;
     const event = json(join(dir, 'event.json'));
     const meetup = `agentic-engineering-${slug(event.city)}-${event.number}`;
-    for (const photo of jpgs(join(dir, 'photos'))) name(photo, `${meetup}-ai-meetup-${photo.match(/([^/]+)\.jpg$/)[1]}`);
+    for (const photo of jpgs(join(dir, 'photos'))) name(photo, `${meetup}-ai-meetup-${slug(basename(photo, '.jpg'))}`);
     const talks = jpgs(join(dir, 'talks')).map((still) => ({ still, ...json(still.replace(/\.jpg$/, '.json')) }));
     for (const talk of talks) name(talk.still, slug(`${talk.title} ${talk.speaker}`));
     for (const speaker of event.speakers ?? []) {
       const photo = speaker.photo && join(repoRoot, 'apps/branding/public', speaker.photo);
-      // event.json may shorten a name ("Andy Nik"); the talk has it in full.
+      // event.json may shorten a speaker's name; the talk has it in full.
       const full = talks.find((t) => t.speaker.startsWith(speaker.name))?.speaker ?? speaker.name;
-      if (photo && existsSync(photo)) name(photo, `${slug(full)}-agentic-engineering-speaker`);
+      if (photo && existsSync(photo) && slug(full)) name(photo, `${slug(full)}-agentic-engineering-speaker`);
     }
   }
   return names;
