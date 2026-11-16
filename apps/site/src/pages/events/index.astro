@@ -43,6 +43,8 @@ const groups = [
                           <p class="mt-3 max-w-[52ch] leading-relaxed text-white/90">Ten-minute talks on building with AI agents, then open questions.</p>
                           <div class="mt-5"><Button href={e.luma?.url ?? links.luma} class={`${e === nextEvent ? 'js-register ' : ''}!bg-white !text-electric-blue`}>{e.free ? 'Register – Free' : 'Register'}</Button></div>
                         </>
+                      : talksAt(e).length === 0
+                      ? <p class="mt-3 text-panel-navy/70">The talks aren’t published yet.</p>
                       : <ul class="mt-3 space-y-1.5">
                           {talksAt(e).map((t) => (
                             <li class="leading-snug"><a href={`/talks/${t.id}`} class="font-medium hover:text-electric-blue hover:underline">{t.title}</a><span class="max-sm:hidden"> · </span><span class="text-panel-navy/60 max-sm:block">{t.person.name}</span></li>

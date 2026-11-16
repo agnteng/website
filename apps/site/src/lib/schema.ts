@@ -25,7 +25,7 @@ export const eventNode = (e: Event) => ({
   location: { '@type': 'Place', name: e.city, address: { '@type': 'PostalAddress', addressLocality: e.city } },
   organizer: org,
   ...(coverAt(e) && { image: abs(coverAt(e)!.img.src) }),
-  ...(e.speakers?.length && { performer: e.speakers.map((s) => ({ '@type': 'Person', name: s.name, description: s.title })) }),
+  ...(e.speakers?.length && { performer: e.speakers.map((s) => ({ '@type': 'Person', name: s.name })) }),
   ...(isUpcoming(e) && e.free && e.luma && { offers: { '@type': 'Offer', price: 0, priceCurrency: 'EUR', url: e.luma.url, availability: 'https://schema.org/InStock' } }),
 });
 

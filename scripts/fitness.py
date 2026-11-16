@@ -324,9 +324,16 @@ def check_photos() -> None:
 
 def check_venue() -> None:
     site = ROOT / "apps" / "site" / "src"
-    for f in [*sorted((site / "pages" / "events").glob("*")), site / "lib" / "schema.ts", site / "lib" / "data.ts"]:
-        if re.search(r"\.venue\b", f.read_text()):
+    for f in [*sorted((site / "pages" / "events").glob("*.astro")), site / "lib" / "schema.ts", site / "lib" / "data.ts"]:
+        if re.search(r"\.(venue|tonight)\b", f.read_text()):
             fail("venue", f"{f.relative_to(ROOT)} uses an event's venue: event pages give the city only")
+    # A gallery's alt texts are on its event page too.
+    events = [json.loads(f.read_text()) for f in (ROOT / "content").glob("*/event.json")]
+    venues = re.compile("|".join(re.escape(e["venue"]) for e in events if e.get("venue")), re.I)
+    for f in sorted((ROOT / "content").glob("*/photos.json")):
+        for p in json.loads(f.read_text()):
+            if venues.search(p.get("alt", "")):
+                fail("venue", f"{f.relative_to(ROOT)}: the alt text of {p.get('file')} names a venue; change it in production's gallery.tsv")
 
 
 # ── a photo never shows before its dither (apps/site/src/styles/site.css) ──
@@ -491,7 +498,9 @@ def check_live_site() -> None:
             fail("live", f"{talk} answered {code} or has no share image")
     # A talk with a public video (the sitemap dates those) describes it to search engines.
     dated = re.search(r"<loc>([^<]+/talks/[^<]+)</loc><lastmod>", sitemap)
-    if dated and b'"@type":"VideoObject"' not in get(dated.group(1))[1]:
+    if not dated:
+        fail("live", f"{w}/sitemap.xml dates no talk: every video lost its publish date")
+    elif b'"@type":"VideoObject"' not in get(dated.group(1))[1]:
         fail("live", f"{dated.group(1)} has a public video and no VideoObject")
     # One address per page (docs/adr/0016): the others redirect to it.
     for other in ("talks/", "talks/index.html"):
