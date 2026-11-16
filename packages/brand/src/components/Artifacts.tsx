@@ -13,6 +13,8 @@ import { anchorFactors, type Anchor } from './anchor';
 // `edge` is a second colour that a few of the ragged cells take. Without `src` the canvas is
 // transparent and only draws the cells: lay it over images of your own.
 //
+// `wave` makes an artifact's edge swell in and out; still drawn in whole cells, so no curve shows.
+//
 // The seed fixes the pattern for a given frame size and cell size: cells sit on
 // a grid, so a frame of another size draws another pattern from the same seed.
 
@@ -20,6 +22,9 @@ export interface Artifact {
   at: Anchor; // the edge, corner or centre it grows from
   solid: number; // how far from there the cells are whole (0–1 of the frame)
   reach: number; // how far the last cells get before the artifact is gone
+  wave?: number; // how far its edge swells in and out, in the units of `solid` (0 = straight)
+  waveLength?: number; // one swell and dip, as a share of the frame along the edge
+  waveShift?: number; // where along the edge the swells fall, as a share of a wave length
 }
 
 interface Props {
@@ -60,6 +65,20 @@ function distance(at: Anchor, fx: number, fy: number) {
   const dy = a.fy === 0.5 ? null : Math.abs(fy - a.fy);
   if (dx === null && dy === null) return Math.hypot(fx - 0.5, fy - 0.5) * 2;
   return (dx ?? 0) + (dy ?? 0);
+}
+
+// How far an artifact's edge swells out at a point of the frame: a sine along the edge.
+// A corner's edge is the frame's diagonal, measured as a share of it. Around a centre
+// anchor the edge closes on itself, so it takes a whole number of waves.
+function swell(a: Artifact, fx: number, fy: number) {
+  if (!a.wave) return 0;
+  const f = anchorFactors(a.at), round = f.fx === 0.5 && f.fy === 0.5;
+  const along = round ? Math.atan2(fy - 0.5, fx - 0.5) / (2 * Math.PI)
+    : f.fx === 0.5 ? fx
+    : f.fy === 0.5 ? fy
+    : (Math.abs(fx - f.fx) - Math.abs(fy - f.fy)) / 2;
+  const waves = 1 / Math.max(0.02, a.waveLength ?? 0.5);
+  return a.wave * Math.sin(2 * Math.PI * (along * (round ? Math.max(1, Math.round(waves)) : waves) + (a.waveShift ?? 0)));
 }
 
 export default function Artifacts({
@@ -178,7 +197,7 @@ export default function Artifacts({
           let k = 0;
           for (const a of list) {
             const reach = Math.max(a.solid + 0.01, a.reach);
-            const d = distance(a.at, fx, fy);
+            const d = distance(a.at, fx, fy) - swell(a, fx, fy);
             k = Math.max(k, d <= a.solid ? 1 : clamp((reach - d - shift) / (reach - a.solid), 0, 1));
           }
           cover[j * cols + i] = k;
