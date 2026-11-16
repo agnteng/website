@@ -29,7 +29,7 @@ git config core.hooksPath .githooks   # needs: brew install gitleaks
 | `apps/site/` | [agnteng.com](https://agnteng.com) (Astro, static): the next event, every talk with its video and transcript, the speakers, past events with their Q&A, the newsletter's latest posts. |
 | `packages/brand/` | The brand, shared by both apps as raw source: tokens (`styles.css`), components, the pixel icons and the dither (`Animation`, `DuotoneField`). Logos and photos stay in `apps/branding/public/`, which the site serves too. |
 | `content/<date>/event.json` | One event's identity: city, venue, Luma ids, speakers. The decks import it as `@content/<date>/event.json`; production reads it for the write-ups. |
-| `content/<date>/talks/`, `questions.json` | Each talk and the Q&A, written by production's `publish_talks.py` (org ADR 0007). Never edited here. |
+| `content/<date>/talks/`, `questions.json`, `takeaways.json` | Each talk, the Q&A and the event's main takeaways, written by production's `publish_talks.py` (org ADRs 0007, 0020). Never edited here. |
 | `scripts/fitness.py` | The fitness checks (`docs/adr/0005`). |
 | `scripts/render_scene.py` | A brand image or animation from the animation builder's presets, as PNG, JPG, GIF or MP4 (`docs/adr/0012`; the `brand-image` skill). |
 | `docs/adr/` | Decisions about this repository, and why. Org-wide decisions live in the workspace. |

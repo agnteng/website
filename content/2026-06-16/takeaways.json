@@ -1,0 +1,22 @@
+[
+  {
+    "title": "When a coding agent fails, give it a way to see.",
+    "text": "Agents often fail because they can't observe the result, not because they lack intelligence. A check that compares their output with the target and says exactly what's off solves what hours of prompting didn't."
+  },
+  {
+    "title": "Evaluate the whole trace, then optimise.",
+    "text": "For conversational agents, check every step and tool call, not just the final answer, before working on latency and cost."
+  },
+  {
+    "title": "Context matters more than the model for support.",
+    "text": "Support bots fail because they don't know the customer. Routing each question by type and mood, with good-enough models, caching and an FAQ index, took one team from $1 to 5–15 cents a conversation."
+  },
+  {
+    "title": "Assume your agent will be tricked.",
+    "text": "Put hard stops outside the model on anything that moves money, such as refunds."
+  },
+  {
+    "title": "When agents hold money, trust nothing.",
+    "text": "On-chain, every mistake is a loss: one agent misread the digits and sent 52 million tokens. Many losses come from the systems around the model, so limit what an agent can sign with policies that reject bad transactions."
+  }
+]
