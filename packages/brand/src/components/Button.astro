@@ -27,7 +27,8 @@ const variants = {
   'inverse-outline': 'border-[1.5px] border-white/45 px-6 py-[13px] text-white hover:border-white active:translate-y-px',
 };
 // `sm` (the nav) swaps the padding and the text size.
-const small = (v: string) => v.replace(/px-\[26px\] py-3\.5|px-6 py-\[13px\]/, (m) => (m.startsWith('px-6') ? 'px-[18px] py-[8.5px]' : 'px-5 py-2.5'));
+const small = (v: string) =>
+  v.replace('px-[26px] py-3.5', 'px-5 py-2.5').replace('px-6 py-[13px]', 'px-[18px] py-[8.5px]').replace('px-2 py-[13px]', 'px-2 py-[8.5px]');
 const className = size === 'sm'
   ? `${base.replace('text-base', 'text-sm')} ${small(variants[variant])} ${cls ?? ''}`
   : `${base} ${variants[variant]} ${cls ?? ''}`;

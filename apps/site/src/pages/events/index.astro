@@ -15,7 +15,7 @@ import EventCover from '../../components/EventCover.astro';
 import NextMeetup from '../../components/NextMeetup.astro';
 import RegisterButton from '../../components/RegisterButton.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
-import { events, isUpcoming, talksAt, coverAt, galleryPhoto, eventSlug, eventName, pitch, inCity } from '../../lib/data';
+import { events, isUpcoming, talksAt, coverAt, galleryPhoto, eventSlug, eventName, pitchIn } from '../../lib/data';
 import { eventNode } from '../../lib/schema';
 
 const here = events.filter((e) => e.city === 'Lisbon');
@@ -31,7 +31,7 @@ const hero = galleryPhoto('2026-07-29', '03.jpg');
     <SiteNav onHero />
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
       <PageTitle rise class="md:max-w-[40%]">AI events in Lisbon</PageTitle>
-      <p class="rise mt-6 max-w-[40ch] text-lg font-medium leading-relaxed text-white/90 md:max-w-[36%]" style="--i:1">{pitch} {inCity('Lisbon')}</p>
+      <p class="rise mt-6 max-w-[40ch] text-lg font-medium leading-relaxed text-white/90 md:max-w-[36%]" style="--i:1">{pitchIn('Lisbon')}</p>
       <NextMeetup event={next} class="rise mt-10" style="--i:2" />
     </div>
     <div class="dither-stage relative isolate h-72 w-full overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[64%]" aria-hidden="true">

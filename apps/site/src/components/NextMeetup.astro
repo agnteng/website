@@ -1,15 +1,16 @@
 ---
 // The next meetup in a blue hero: Register, its name and when it starts. Once it has
-// started, SiteNav's script shows the second block instead until the site is rebuilt.
+// started, SiteNav's script shows the second block instead until the site is rebuilt; only
+// for the site's next meetup, the one the script watches.
 import RegisterButton from './RegisterButton.astro';
 import EventDate from './EventDate.astro';
-import { eventSlug, eventName, type Event } from '../lib/data';
+import { nextEvent, eventSlug, eventName, type Event } from '../lib/data';
 interface Props { event?: Event; class?: string; style?: string }
 const { event, class: cls, style } = Astro.props;
 ---
 {event && (
   <div class={cls} style={style}>
-    <div data-next-event class="flex flex-wrap items-center gap-x-6 gap-y-4">
+    <div data-next-event={event === nextEvent ? '' : undefined} class="flex flex-wrap items-center gap-x-6 gap-y-4">
       <RegisterButton event={event} on="blue" />
       <div class="leading-tight">
         <a href={`/events/${eventSlug(event)}`} class="block text-lg font-extrabold hover:underline">Next meetup: {eventName(event)}</a>

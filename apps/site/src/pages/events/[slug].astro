@@ -17,7 +17,7 @@ import PageTitle from '../../components/PageTitle.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import EventDate from '../../components/EventDate.astro';
 import RegisterButton from '../../components/RegisterButton.astro';
-import { events, nextEvent, talks as allTalks, talksAt, questionsAt, photosAt, coverAt, isUpcoming, shortDate, eventSlug, eventName, eventSummary, links, pitch, inCity, toSpeak, type Event } from '../../lib/data';
+import { events, nextEvent, talks as allTalks, talksAt, questionsAt, photosAt, coverAt, isUpcoming, shortDate, eventSlug, eventName, eventSummary, links, pitchIn, toSpeak, type Event } from '../../lib/data';
 import { eventNode, breadcrumbs } from '../../lib/schema';
 
 export function getStaticPaths() {
@@ -47,7 +47,7 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
               {e.recap && <Button variant="inverse" href={e.recap}>Read the recap</Button>}
               {nextEvent
                 ? <Button variant={e.recap ? 'inverse-outline' : 'inverse'} href={`/events/${eventSlug(nextEvent)}`}>Next meetup</Button>
-                : <RegisterButton on="blue" followLuma />}
+                : <RegisterButton on="blue" followLuma secondary={!!e.recap} />}
             </>}
       </div>
     </div>
@@ -68,7 +68,7 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
         <div class="grid gap-10 md:grid-cols-12">
           <SectionHeading class="md:col-span-4">The meetup</SectionHeading>
           <div class="space-y-5 text-lg md:col-span-8">
-            <p>{pitch} {inCity(e.city)}</p>
+            <p>{pitchIn(e.city)}</p>
             <p>{toSpeak}</p>
           </div>
         </div>

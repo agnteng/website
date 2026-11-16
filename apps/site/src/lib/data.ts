@@ -71,7 +71,6 @@ export const links = {
   partners: 'mailto:partners@agnteng.com',
   sponsors: 'https://sponsors.agnteng.com',
 };
-export const register = nextEvent?.luma?.url ?? links.luma;
 
 // The deck may shorten a speaker's name ("Andy Nik" for "Andy Nikulin",
 // "Doris Hernandez" for "Doris Hernandez Argueta"): same first name, and the
@@ -212,16 +211,16 @@ export const startTime = (e: Event) =>
 
 // The meetup in one line, and how to speak at one: every page says them the same way.
 export const pitch = 'A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions.';
-export const inCity = (city: string) => `In ${city}, in English.`;
+export const pitchIn = (city: string) => `${pitch} In ${city}, in English.`;
 export const toSpeak = 'To speak, register for the next meetup and describe your talk in the talk field. Ten minutes, real work, no pitches.';
 
 // What a meetup's Register button says. Luma's hosts approve each guest when `approval` is set.
 export const registerLabel = (e: Event) => `${e.approval ? 'Request a spot' : 'Register'}${e.free ? ' – Free' : ''}`;
 
-// Each meetup owns one of the brand's three meetup colours, in date order: its photos
-// take it wherever they appear.
+// Each meetup owns one of the brand's three meetup colours, by its number in its city, so a
+// new meetup never changes another's. Covers take it; the blue heroes and the gallery don't.
 export const TINTS = ['#1E2BE6', '#7C4DF5', '#ED4BA0'] as const;
-export const eventTint = (e: Event) => TINTS[[...events].reverse().findIndex((x) => x.date === e.date) % TINTS.length];
+export const eventTint = (e: Event) => TINTS[(e.number - 1) % TINTS.length];
 
 // Transcript paragraphs: "**[m:ss]** text".
 export const transcriptParas = (t: Talk) =>

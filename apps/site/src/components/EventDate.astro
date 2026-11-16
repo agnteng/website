@@ -7,10 +7,12 @@ import { shortDate, dayDate, startTime, type Event } from '../lib/data';
 import { label } from '../lib/type';
 interface Props { date: string; event?: Event; variant?: 'eyebrow' | 'hero'; class?: string; style?: string }
 const { date, event, variant = 'eyebrow', class: cls, style } = Astro.props;
+// A colour passed in `class` replaces the default one; a size or alignment doesn't.
+const colour = /(^|\s)([\w-]+:)?text-(?!(xs|sm|base|lg|\d?xl|left|right|center|justify|balance|pretty|wrap|nowrap)\b)/;
 const time = variant === 'hero' && event ? startTime(event) : undefined;
 const text = variant === 'hero' ? [dayDate(date), time].filter(Boolean).join(' · ') : shortDate(date);
 const look = {
-  eyebrow: [label, !cls?.includes('text-') && 'text-electric-blue'],
+  eyebrow: [label, !colour.test(cls ?? '') && 'text-electric-blue'],
   hero: 'inline-flex items-center gap-2 font-mono text-sm text-white/85',
 }[variant];
 ---

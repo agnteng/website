@@ -6,7 +6,7 @@ import HeroCells from './HeroCells.astro';
 import SiteNav from './SiteNav.astro';
 import PageTitle from './PageTitle.astro';
 import NextMeetup from './NextMeetup.astro';
-import { nextEvent, galleryPhoto, pitch, inCity } from '../lib/data';
+import { nextEvent, galleryPhoto, pitchIn } from '../lib/data';
 
 // Talks, questions and the audience take turns. `head` is where the subject's head is in
 // the photo (fractions of its width and height); every head goes to the same point of
@@ -44,7 +44,7 @@ const photos = shots.map((p, i) => {
   <div id="main" class="relative z-10 mx-auto grid max-w-7xl items-center px-4 pt-14 pb-10 md:grid-cols-12 md:px-8 md:pt-20 md:pb-28">
     <div class="md:col-span-6">
       <PageTitle rise style="--i:0">A community of founders and engineers building with agents.</PageTitle>
-      <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">{pitch} {inCity(nextEvent?.city ?? 'Lisbon')}</p>
+      <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">{pitchIn(nextEvent?.city ?? 'Lisbon')}</p>
       <NextMeetup event={nextEvent} class="rise mt-10" style="--i:2" />
     </div>
   </div>
