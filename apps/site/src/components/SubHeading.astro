@@ -1,0 +1,6 @@
+---
+// The heading of a card or a block inside a section.
+interface Props { as?: 'h2' | 'h3'; class?: string }
+const { as: Tag = 'h3', class: cls } = Astro.props;
+---
+<Tag class:list={['font-sans text-2xl font-extrabold leading-tight tracking-tight md:text-3xl', cls]}><slot /></Tag>

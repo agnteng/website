@@ -1,0 +1,6 @@
+---
+// A page's one h1, the same size on every page.
+interface Props { class?: string; rise?: boolean; style?: string }
+const { class: cls, rise = false, style } = Astro.props;
+---
+<h1 class:list={['font-sans text-4xl font-extrabold leading-[1.05] tracking-tight md:text-5xl xl:text-6xl', rise && 'rise', cls]} style={style}><slot /></h1>

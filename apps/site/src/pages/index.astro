@@ -4,25 +4,25 @@ import Shell from '../layouts/Shell.astro';
 import Hero from '../components/Hero.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import TalkTile from '../components/TalkTile.astro';
-import TintedPhoto from '../components/TintedPhoto.astro';
+import EventCover from '../components/EventCover.astro';
+import EventDate from '../components/EventDate.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import RegisterButton from '../components/RegisterButton.astro';
 import Tone from '../components/Tone.astro';
 import SpeakerCard from '../components/SpeakerCard.astro';
-import Animation from '@agnteng/brand/components/Animation.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
-import { nextEvent, past, talks, coverAt, galleryPhoto, speakers, links, register, shortDate, eventSlug, eventName } from '../lib/data';
+import { nextEvent, past, talks, galleryPhoto, speakers, links, eventSlug, eventName, toSpeak, TINTS } from '../lib/data';
 import { latestPosts } from '../lib/newsletter';
 import { organization, website, eventNode } from '../lib/schema';
 
 const posts = await latestPosts();
 const recent = talks.slice(0, 3);
-// Brand colours for the previous meetups' photo washes.
-const TINTS = ['#1E2BE6', '#7C4DF5', '#1FC6E6', '#ED4BA0', '#16D9A6', '#FF6E4D'];
 const night = [
-  { title: 'Connect with others', body: 'Meet the founders and engineers building with agents.', photo: galleryPhoto('2026-11-11', '08.jpg'), tint: '#1E2BE6' },
-  { title: 'Learn from experts', body: 'Hear three people show what they built, in ten minutes each.', photo: galleryPhoto('2026-11-11', '13.jpg'), tint: '#7C4DF5' },
-  { title: 'Ask your questions', body: 'Put your questions to the speakers in an open Q&A.', photo: galleryPhoto('2026-11-11', '28.jpg'), tint: '#ED4BA0' },
+  { title: 'Connect with others', body: 'Meet the founders and engineers building with agents.', photo: galleryPhoto('2026-11-11', '08.jpg'), tint: TINTS[0] },
+  { title: 'See what people built', body: 'Hear three people show what they built, in ten minutes each.', photo: galleryPhoto('2026-11-11', '13.jpg'), tint: TINTS[1] },
+  { title: 'Ask your questions', body: 'Put your questions to the speakers in an open Q&A.', photo: galleryPhoto('2026-11-11', '28.jpg'), tint: TINTS[2] },
 ];
 ---
 <Shell title="Agentic Engineering: AI agents meetup in Lisbon" schema={[organization, website, nextEvent && eventNode(nextEvent)]} class="bg-soft-white text-panel-navy">
@@ -30,22 +30,16 @@ const night = [
   <Tone />
   <Hero />
 
-  <section id="talks" class="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-32">
-    <div class="flex flex-wrap items-end justify-between gap-6">
-      <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-5xl">Latest talks</h2>
-      <Button variant="outline" href="/talks">All talks</Button>
-    </div>
+  <section id="talks" class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+    <SectionHeading action={{ href: '/talks', label: 'All talks' }}>Latest talks</SectionHeading>
     <ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {recent.map((t, i) => <li class="reveal"><TalkTile talk={t} index={i} /></li>)}
     </ul>
   </section>
 
   <section id="speakers" class="border-t border-panel-navy/[0.08] bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-32">
-      <div class="flex flex-wrap items-end justify-between gap-6">
-        <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-5xl">Speakers</h2>
-        <Button variant="outline" href="/speakers">All speakers</Button>
-      </div>
+    <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+      <SectionHeading action={{ href: '/speakers', label: 'All speakers' }}>Speakers</SectionHeading>
       <!-- Two rows on desktop; three on a phone, so the page stays short. -->
       <ul class="mt-12 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
         {speakers.slice(0, 12).map((s, i) => <li class:list={['reveal', i >= 6 && 'max-sm:hidden']}><SpeakerCard speaker={s} index={i} /></li>)}
@@ -53,8 +47,8 @@ const night = [
     </div>
   </section>
 
-  <section class="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-32">
-    <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-5xl">The meetup</h2>
+  <section class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+    <SectionHeading>The meetup</SectionHeading>
     <ol class="mt-10 grid gap-8 md:mt-14 md:grid-cols-3 md:gap-6">
       {night.map((n, i) => (
         <li class:list={['reveal', i === 1 && 'md:mt-16', i === 2 && 'md:mt-32']}>
@@ -66,46 +60,38 @@ const night = [
               <Artifacts client:visible color={n.tint} seed={i + 11} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.1, reach: 0.48 }, { at: 'top-right', solid: 0.1, reach: 0.48 }]} />
             </div>
           </div>
-          <p class="font-sans text-2xl font-extrabold md:mt-5">{n.title}</p>
+          <h3 class="font-sans text-2xl font-extrabold leading-tight tracking-tight md:mt-5 md:text-3xl">{n.title}</h3>
           <p class="mt-2 max-w-[38ch] leading-relaxed text-panel-navy/70">{n.body}</p>
         </li>
       ))}
     </ol>
   </section>
 
-  <section id="events" class="mx-auto max-w-7xl border-t border-panel-navy/[0.08] px-4 py-24 md:px-8 md:py-32">
-    <div class="flex flex-wrap items-end justify-between gap-6">
-      <h2 class="font-sans text-3xl font-extrabold tracking-tight md:text-5xl">Previous meetups</h2>
-      <Button variant="outline" href="/events">All events</Button>
-    </div>
+  <section id="events" class="mx-auto max-w-7xl border-t border-panel-navy/[0.08] px-4 py-16 md:px-8 md:py-24">
+    <SectionHeading action={{ href: '/events', label: 'All events' }}>Previous meetups</SectionHeading>
     <ul class="mt-12 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
-      {past.map((e, i) => {
-        const cover = coverAt(e);
-        return (
-          <li class="reveal">
-            <a href={`/events/${eventSlug(e)}`} class="group block">
-              {cover
-                ? <TintedPhoto src={cover.img} alt={cover.alt} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" zoom tint={TINTS[i % TINTS.length]} class="aspect-[4/3] rounded-2xl" />
-                : <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-deep-navy"><Animation client:visible paused color="#1E2BE6" edge="#B5A6FF" cell={8} density={0.6} fade="radial" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} /></div>}
-              <p class="mt-3 font-sans font-bold group-hover:text-electric-blue">{eventName(e)}</p>
-              <p class="mt-0.5 text-sm text-panel-navy/60">{shortDate(e.date)}</p>
-            </a>
-          </li>
-        );
-      })}
+      {past.map((e) => (
+        <li class="reveal">
+          <a href={`/events/${eventSlug(e)}`} class="group block">
+            <EventCover event={e} sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw" zoom class="relative aspect-[4/3] rounded-2xl" />
+            <EventDate date={e.date} variant="eyebrow" class="mt-3" />
+            <p class="mt-1 font-sans font-bold group-hover:text-electric-blue">{eventName(e)}</p>
+          </a>
+        </li>
+      ))}
     </ul>
   </section>
 
-  <section id="newsletter" class="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-32">
+  <section id="newsletter" class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
     <div class="grid gap-10 rounded-2xl bg-deep-navy p-8 text-soft-white md:grid-cols-12 md:p-12">
       <div class="md:col-span-5">
-        <h2 class="font-sans text-3xl font-extrabold leading-tight tracking-tight md:text-4xl">Newsletter</h2>
+        <SectionHeading>Newsletter</SectionHeading>
         <p class="mt-4 max-w-[40ch] leading-relaxed text-soft-white/75">Get a write-up of the talks after every meetup, and an email when the next one is announced.</p>
         <!-- Substack's own sign-up endpoint; it confirms in a new tab. -->
         <form action={`${links.substack}/api/v1/free?nojs=true`} method="post" target="_blank" class="mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
           <label for="newsletter-email" class="sr-only">Email</label>
-          <input id="newsletter-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" class="h-12 w-full min-w-0 rounded-full border border-white/15 bg-white/10 px-5 font-sans text-base text-soft-white outline-none placeholder:text-soft-white/60 focus:border-periwinkle sm:flex-1" />
-          <button type="submit" class="h-12 rounded-full bg-electric-blue px-6 font-sans font-semibold text-white transition hover:bg-bright-blue">Subscribe</button>
+          <input id="newsletter-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" class="h-[3.25rem] w-full min-w-0 rounded-full border border-white/15 bg-white/10 px-5 font-sans text-base text-soft-white outline-none placeholder:text-soft-white/60 focus:border-periwinkle sm:flex-1" />
+          <Button type="submit">Subscribe</Button>
         </form>
       </div>
       {posts.length > 0 && (
@@ -114,7 +100,7 @@ const night = [
             <li>
               <a href={p.url} class="group flex items-start justify-between gap-6 py-5 first:pt-0">
                 <div>
-                  <p class="font-mono text-[11px] uppercase tracking-wider text-periwinkle">{shortDate(p.date)}</p>
+                  <EventDate date={p.date} variant="eyebrow" class="text-periwinkle">Recap</EventDate>
                   <p class="mt-1.5 font-sans text-lg font-bold leading-snug group-hover:text-periwinkle">{p.title.replace(/^Notes from Agentic Engineering\s+/, '')}</p>
                 </div>
                 <Icon name="ExternalLink" size={18} class="mt-6 shrink-0 text-soft-white/40" />
@@ -127,12 +113,12 @@ const night = [
   </section>
 
   <section id="involved" class="bg-electric-blue text-white">
-    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-24 md:grid-cols-12 md:px-8">
-      <h2 class="font-sans text-3xl font-extrabold leading-tight tracking-tight md:col-span-6 md:text-5xl">Get involved</h2>
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-12 md:px-8 md:py-24">
+      <SectionHeading class="md:col-span-6">Get involved</SectionHeading>
       <div class="space-y-5 text-lg md:col-span-6">
-        <p>To speak, register for the next event and describe your talk in the talk field. Ten minutes, real work, no pitches.</p>
+        <p>{toSpeak}</p>
         <p>To host or sponsor a meetup, email <a href={links.partners} class="underline underline-offset-4">partners@agnteng.com</a> or read the <a href={links.sponsors} class="underline underline-offset-4">sponsor deck</a>.</p>
-        <Button variant="secondary" href={register} class="js-register">{nextEvent?.free ? 'Register – Free' : 'Register'}</Button>
+        <RegisterButton on="blue" />
       </div>
     </div>
   </section>

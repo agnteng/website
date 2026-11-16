@@ -1,0 +1,26 @@
+---
+// A meetup's cover photo in the meetup's own colour (eventTint), three quarters of the
+// way there, breaking up into cells of it. Without photos, the dither in that colour.
+// The caller positions it (`relative` with a size, or `absolute inset-0`).
+import { Image } from 'astro:assets';
+import Tone from './Tone.astro';
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
+import Animation from '@agnteng/brand/components/Animation.tsx';
+import { coverAt, eventTint, eventSlug, type Event } from '../lib/data';
+interface Props { event: Event; sizes: string; zoom?: boolean; class?: string }
+const { event: e, sizes, zoom = false, class: cls } = Astro.props;
+const cover = coverAt(e);
+const tint = eventTint(e);
+const id = `tone-${eventSlug(e)}`;
+---
+<div class:list={['overflow-hidden bg-deep-navy', cls]}>
+  {cover
+    ? <>
+        <Tone id={id} color={tint} amount={0.75} />
+        <Image src={cover.img} alt="" widths={[480, 960]} quality={70} sizes={sizes} loading="lazy" class:list={['absolute inset-0 size-full object-cover', zoom && 'transition duration-500 group-hover:scale-[1.03]']} style={`filter:url(#${id})`} />
+        <div class="dither-stage absolute inset-0" aria-hidden="true">
+          <Artifacts client:visible color={tint} seed={Number(e.date.replaceAll('-', ''))} cell={12} animate artifacts={[{ at: 'bottom-left', solid: 0.1, reach: 0.45 }]} />
+        </div>
+      </>
+    : <Animation client:visible paused color={tint} edge="#B5A6FF" cell={8} density={0.6} fade="radial" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />}
+</div>

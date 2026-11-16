@@ -7,9 +7,10 @@ const at = (ts: string) => ts.split(':').reduce((s, n) => s * 60 + Number(n), 0)
 ---
 {talk.transcript && (
   <details data-transcript class:list={['group', cls]}>
-    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-semibold [&::-webkit-details-marker]:hidden">
-      <h2 class="text-base font-semibold">Transcript</h2>
-      <span class="font-mono text-sm transition group-open:rotate-45">+</span>
+    <!-- The same disclosure as an event's Q&A. -->
+    <summary class="flex cursor-pointer list-none items-start justify-between gap-6 py-4 font-sans text-lg font-bold leading-snug [&::-webkit-details-marker]:hidden">
+      <h2 class="text-lg font-bold">Transcript</h2>
+      <span class="mt-1 font-mono text-sm text-electric-blue transition group-open:rotate-45">+</span>
     </summary>
     <div class="space-y-4 pb-6 leading-relaxed">
       {paras.map((p) => (

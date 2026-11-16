@@ -7,19 +7,20 @@ import Shell from '../../layouts/Shell.astro';
 import SiteNav from '../../components/SiteNav.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import TalkTile from '../../components/TalkTile.astro';
+import PageTitle from '../../components/PageTitle.astro';
 import { talks } from '../../lib/data';
 ---
 <Shell title="Talks on building with AI agents | Agentic Engineering" description="Every talk from the Agentic Engineering meetups: ten minutes each on something built with AI agents, with its video, main takeaways and a searchable transcript." class="bg-soft-white text-panel-navy">
   <SiteNav />
   <main id="main" class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
-    <h1 class="font-sans text-3xl font-extrabold tracking-tight md:text-4xl">Talks</h1>
+    <PageTitle>Talks</PageTitle>
 
 
     <p data-search-status aria-live="polite" class="mt-4 min-h-6 font-sans text-sm text-panel-navy/60"></p>
 
     <!-- Search filters and reorders this grid in place; nothing switches layout. -->
     <ul data-talk-grid class="mt-2 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {talks.map((t, i) => <li data-path={`/talks/${t.id}`} data-order={i}><TalkTile talk={t} index={i} /></li>)}
+      {talks.map((t, i) => <li data-path={`/talks/${t.id}`} data-order={i}><TalkTile talk={t} index={i} as="h2" /></li>)}
     </ul>
     <div data-empty hidden class="mt-6 rounded-2xl border border-dashed border-panel-navy/15 px-6 py-12 text-center">
       <p class="font-sans text-lg font-bold" aria-hidden="true">No talk mentions that.</p>

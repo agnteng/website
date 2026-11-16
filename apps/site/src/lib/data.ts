@@ -201,6 +201,26 @@ const fmt = (date: string, opts: Intl.DateTimeFormatOptions) =>
 
 export const longDate = (d: string) => fmt(d, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 export const shortDate = (d: string) => fmt(d, { day: 'numeric', month: 'short', year: 'numeric' });
+// "Wed 27 Jan 2027": where people decide whether to come.
+export const dayDate = (d: string) => fmt(d, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).replace(',', '');
+
+// When a meetup starts, in its city's time ("19:00"), from Luma's start.
+const ZONES: Record<string, string> = { Lisbon: 'Europe/Lisbon', Berlin: 'Europe/Berlin' };
+export const startTime = (e: Event) =>
+  e.luma?.startAt && new Date(e.luma.startAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: ZONES[e.city] ?? 'Europe/Lisbon' });
+
+// The meetup in one line, and how to speak at one: every page says them the same way.
+export const pitch = 'A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions.';
+export const inCity = (city: string) => `In ${city}, in English.`;
+export const toSpeak = 'To speak, register for the next meetup and describe your talk in the talk field. Ten minutes, real work, no pitches.';
+
+// What a meetup's Register button says. Luma's hosts approve each guest when `approval` is set.
+export const registerLabel = (e: Event) => `${e.approval ? 'Request a spot' : 'Register'}${e.free ? ' – Free' : ''}`;
+
+// Each meetup owns one of the brand's three meetup colours, in date order: its photos
+// take it wherever they appear.
+export const TINTS = ['#1E2BE6', '#7C4DF5', '#ED4BA0'] as const;
+export const eventTint = (e: Event) => TINTS[[...events].reverse().findIndex((x) => x.date === e.date) % TINTS.length];
 
 // Transcript paragraphs: "**[m:ss]** text".
 export const transcriptParas = (t: Talk) =>

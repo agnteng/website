@@ -2,7 +2,8 @@
 // Pill buttons, aligned to DS1's original styling (border-radius:999px,
 // Manrope 600 / 16px, generous padding). Light-context by default.
 interface Props {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'inverse' | 'inverse-outline';
+  size?: 'md' | 'sm';
   href?: string;
   type?: 'button' | 'submit';
   class?: string;
@@ -10,7 +11,7 @@ interface Props {
   target?: string;
   rel?: string;
 }
-const { variant = 'primary', href, type = 'button', class: cls, disabled, target, rel } = Astro.props;
+const { variant = 'primary', size = 'md', href, type = 'button', class: cls, disabled, target, rel } = Astro.props;
 const computedRel = rel ?? (target === '_blank' ? 'noreferrer' : undefined);
 
 const base =
@@ -21,8 +22,15 @@ const variants = {
   outline:
     'border-[1.5px] border-panel-navy/20 px-6 py-[13px] text-panel-navy hover:border-electric-blue hover:text-electric-blue active:translate-y-px',
   ghost: 'px-2 py-[13px] text-electric-blue hover:brightness-110',
+  // On an electric-blue surface.
+  inverse: 'bg-white px-[26px] py-3.5 text-electric-blue hover:bg-soft-white active:translate-y-px',
+  'inverse-outline': 'border-[1.5px] border-white/45 px-6 py-[13px] text-white hover:border-white active:translate-y-px',
 };
-const className = `${base} ${variants[variant]} ${cls ?? ''}`;
+// `sm` (the nav) swaps the padding and the text size.
+const small = (v: string) => v.replace(/px-\[26px\] py-3\.5|px-6 py-\[13px\]/, (m) => (m.startsWith('px-6') ? 'px-[18px] py-[8.5px]' : 'px-5 py-2.5'));
+const className = size === 'sm'
+  ? `${base.replace('text-base', 'text-sm')} ${small(variants[variant])} ${cls ?? ''}`
+  : `${base} ${variants[variant]} ${cls ?? ''}`;
 const Tag = href ? 'a' : 'button';
 ---
 
