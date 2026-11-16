@@ -44,10 +44,10 @@ const hero = galleryPhoto('2026-07-29', '03.jpg');
     {later.length > 0 && (
       <section class="mb-16 md:mb-24">
         <SectionHeading>Coming up</SectionHeading>
-        <ul class="mt-8 divide-y divide-panel-navy/10 border-y border-panel-navy/10">
+        <ul class="mt-8 space-y-4">
           {later.map((e) => (
-            <li class="flex flex-wrap items-center justify-between gap-4 py-5">
-              <div><EventDate date={e.date} variant="eyebrow" /><SubHeading class="mt-2"><a href={`/events/${eventSlug(e)}`} class="hover:text-electric-blue">{eventName(e)}</a></SubHeading></div>
+            <li class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-electric-blue p-6 text-white md:p-8">
+              <div><SubHeading><a href={`/events/${eventSlug(e)}`} class="hover:underline">{eventName(e)}</a></SubHeading><EventDate date={e.date} event={e} variant="hero" class="mt-2" /></div>
               <RegisterButton event={e} />
             </li>
           ))}
