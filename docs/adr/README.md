@@ -40,3 +40,4 @@ Decision, Consequences.
 | [0021](0021-build-files-in-assets.md) | Everything on agnteng.com that isn't a page is in `/assets/` | Accepted |
 | [0022](0022-events-page-is-lisbon.md) | `/events` is the Lisbon meetups | Accepted |
 | [0023](0023-repeated-ui-is-a-component.md) | What the site repeats is a component; each meetup owns a colour | Accepted |
+| [0024](0024-deploys-on-push-verified-live.md) | A merge to `main` deploys the sites; a deploy is done when the live check passes | Accepted |
