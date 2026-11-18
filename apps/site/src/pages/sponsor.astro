@@ -1,0 +1,190 @@
+---
+// For companies that want to sponsor a meetup: the pitch beside a short form, then who
+// comes. No prices and no packages: the reply carries those.
+import { Image } from 'astro:assets';
+import Shell from '../layouts/Shell.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import HeroCells from '../components/HeroCells.astro';
+import Tone from '../components/Tone.astro';
+import PageTitle from '../components/PageTitle.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import SubHeading from '../components/SubHeading.astro';
+import CommunityCells from '../components/CommunityCells.astro';
+import Animation from '@agnteng/brand/components/Animation.tsx';
+import Button from '@agnteng/brand/components/Button.astro';
+import Icon from '@agnteng/brand/components/Icon.astro';
+import Input from '@agnteng/brand/components/Input.astro';
+import SocialIcons from '@agnteng/brand/components/SocialIcons.astro';
+import { galleryPhoto, links } from '../lib/data';
+import { organization } from '../lib/schema';
+
+// SAMPLE NUMBERS for the mockup. The real ones come from Luma registrations; replace every
+// value here before this page ships.
+const community = {
+  people: 1000,
+  attendees: 70, // at an average meetup
+  roles: [
+    { label: 'Founders', share: 44, color: '#3A4DFF' },
+    { label: 'Developers', share: 36, color: '#B5A6FF' },
+    { label: 'Investors & others', share: 20, color: '#39406B' },
+  ],
+  intent: [
+    { label: 'Looking for a job', share: 21 },
+    { label: 'Looking for a co-founder', share: 9 },
+    { label: 'Hiring', share: 17 },
+    { label: 'Raising', share: 12 },
+  ],
+};
+
+const fields = [
+  { id: 'name', label: 'Name', type: 'text', autocomplete: 'name', error: 'Enter your name.' },
+  { id: 'email', label: 'Email', type: 'email', autocomplete: 'email', error: 'Enter an email address, like name@company.com.' },
+  { id: 'company', label: 'Company', type: 'text', autocomplete: 'organization', error: 'Enter your company’s name.' },
+];
+const socials = [
+  { label: 'GitHub', icon: 'github' },
+  { label: 'X', icon: 'x' },
+  { label: 'LinkedIn', icon: 'linkedin' },
+] as const;
+const photo = galleryPhoto('2026-08-26', '04.jpg');
+const label = 'font-mono text-xs uppercase tracking-[0.18em] text-periwinkle';
+---
+<Shell title="Sponsor an AI meetup in Lisbon | Agentic Engineering" description="Sponsor Agentic Engineering, a monthly meetup in Lisbon for founders and developers building with AI. See who comes, then leave your details." schema={[organization]} class="bg-soft-white text-panel-navy">
+  <Tone />
+  <section class="relative isolate overflow-hidden bg-electric-blue text-white">
+    <SiteNav onHero />
+    <div id="main" class="relative z-10 mx-auto grid max-w-7xl gap-10 px-4 pt-14 md:grid-cols-12 md:gap-8 md:px-8 md:pt-20">
+      <div class="md:col-span-6 md:pb-48">
+        <PageTitle rise style="--i:0">Connect with a community of engaged founders and developers building with AI.</PageTitle>
+        <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Agentic Engineering is a monthly meetup in Lisbon. Sponsors put their product in front of people building with AI, and meet the developers and founders they want to hire.</p>
+      </div>
+
+      <div id="sponsor" class="rise scroll-mt-6 md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:2">
+        <div data-sponsor-card class="flex flex-col rounded-2xl bg-white p-6 text-panel-navy shadow-[0_32px_64px_-24px_rgb(5_7_30/0.6)] sm:p-8">
+          <form data-sponsor-form novalidate>
+            <SubHeading as="h2">Sponsor a meetup</SubHeading>
+            <p class="mt-2 text-panel-navy/75">Leave your details and we’ll get back to you by email.</p>
+            <div class="mt-6 space-y-4">
+              {fields.map((f) => <Input id={f.id} name={f.id} label={f.label} type={f.type} autocomplete={f.autocomplete} required error={f.error} />)}
+            </div>
+            <Button type="submit" class="mt-7 w-full">Get in touch</Button>
+            <p class="mt-4 text-center text-sm text-panel-navy/70">Or email <a href={links.partners} class="font-semibold text-electric-blue underline-offset-4 hover:underline">partners@agnteng.com</a></p>
+          </form>
+          <!-- In place of the form, at the card's height. -->
+          <div data-sponsor-done hidden class="my-auto py-6 text-center">
+            <span aria-hidden="true" class="mx-auto grid size-16 place-items-center rounded-full bg-electric-blue text-white"><Icon name="Check" size={30} /></span>
+            <SubHeading as="h2" class="mt-6 outline-none"><span tabindex="-1" data-done-heading class="outline-none">Thanks, <span data-name></span></span></SubHeading>
+            <p class="mx-auto mt-3 max-w-[32ch] text-panel-navy/75">We’ll get back to you at <span data-email class="font-semibold text-panel-navy"></span>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A full meetup, breaking up into the blue at its top; the form card sits over its edge. -->
+    <div class="dither-stage relative -mt-24 h-72 w-full overflow-hidden md:-mt-48 md:h-[26rem]" aria-hidden="true">
+      <Image src={photo.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="100vw" loading="eager" class="absolute inset-0 size-full object-cover object-[50%_50%] [filter:url(#blue-tone)]" />
+      <HeroCells seed={20260826} at="top" />
+    </div>
+  </section>
+
+  <section id="community" class="relative isolate overflow-hidden bg-deep-navy text-soft-white">
+    <!-- The deck's backdrop: the live cells, dim, thickest on the left. -->
+    <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
+      <Animation client:visible animation="aurora" color="#1E2BE6" edge="#B5A6FF" bg="#05071E" cell={6} gap={1} density={0.34} motion={20} fade="left" shape="square" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.4 }} />
+    </div>
+    <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+      <SectionHeading>The community</SectionHeading>
+      <p class="mt-5 max-w-[52ch] text-lg leading-relaxed text-soft-white/75">About {community.people.toLocaleString('en')} people have registered for a meetup since May 2026. Each square is one of them.</p>
+      <CommunityCells class="mt-12 md:mt-16" people={community.people} segments={community.roles} />
+
+      <div class="mt-16 grid gap-12 border-t border-white/10 pt-12 md:mt-20 md:grid-cols-3 md:gap-8">
+        <div>
+          <h3 class={label}>Average meetup</h3>
+          <p class="mt-5 font-sans text-6xl font-extrabold leading-none tracking-tight tabular-nums">{community.attendees}</p>
+          <p class="mt-2.5 text-lg text-soft-white/70">attendees</p>
+        </div>
+        <div>
+          <h3 class={label}>What they tell us</h3>
+          <ul class="mt-3 divide-y divide-white/10">
+            {community.intent.map((i) => (
+              <li class="flex items-baseline justify-between gap-4 py-3">
+                <span class="text-lg font-semibold">{i.label}</span>
+                <span class="font-sans text-lg font-bold tabular-nums text-soft-white/70">{i.share}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 class={label}>What we collect</h3>
+          <ul class="mt-3 divide-y divide-white/10">
+            <li class="py-3 text-lg font-semibold">Company</li>
+            <li class="py-3 text-lg font-semibold">Role</li>
+            <li class="flex flex-wrap items-center gap-x-6 gap-y-2 py-3 text-lg font-semibold">
+              {socials.map((s) => <span class="inline-flex items-center gap-2.5"><SocialIcons name={s.icon} size={17} class="text-periwinkle" />{s.label}</span>)}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-electric-blue text-white">
+    <div class="mx-auto grid max-w-7xl gap-8 px-4 py-16 md:grid-cols-12 md:px-8 md:py-24">
+      <SectionHeading class="md:col-span-5">Sponsorship</SectionHeading>
+      <div class="md:col-span-7 lg:col-span-6 lg:col-start-7">
+        <p class="text-lg leading-relaxed">We keep sponsorships small and well-matched, with partners who see value in being part of this community. Sponsorship never buys stage time. Talks are selected on merit.</p>
+        <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+          <Button variant="inverse" href="#sponsor" class="js-to-form">Get in touch</Button>
+          <a href={links.partners} class="text-lg font-semibold underline underline-offset-4 hover:no-underline">partners@agnteng.com</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <SiteFooter />
+</Shell>
+
+<script>
+  // MOCKUP: nothing is sent yet. Once the form has somewhere to send to, post the three
+  // fields there and show the thanks only when it answers.
+  const form = document.querySelector<HTMLFormElement>('[data-sponsor-form]')!;
+  const done = document.querySelector<HTMLElement>('[data-sponsor-done]')!;
+  const inputs = [...form.querySelectorAll<HTMLInputElement>('input')];
+  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+  // A field is checked when it is left or sent, and again as it is fixed.
+  const check = (f: HTMLInputElement) => {
+    const ok = f.value.trim() !== '' && f.checkValidity();
+    f.setAttribute('aria-invalid', String(!ok));
+    return ok;
+  };
+  for (const f of inputs) {
+    f.addEventListener('blur', () => { if (f.value.trim()) check(f); });
+    f.addEventListener('input', () => { if (f.getAttribute('aria-invalid') === 'true') check(f); });
+  }
+
+  let sending = false;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (sending) return;
+    const wrong = inputs.filter((f) => !check(f));
+    if (wrong.length) { wrong[0].focus(); return; }
+    sending = true;
+    button.textContent = 'Sending…';
+    form.setAttribute('aria-busy', 'true');
+    await new Promise((r) => setTimeout(r, 700));
+    done.querySelector('[data-name]')!.textContent = inputs[0].value.trim().split(/\s+/)[0];
+    done.querySelector('[data-email]')!.textContent = inputs[1].value.trim();
+    const card = document.querySelector<HTMLElement>('[data-sponsor-card]')!;
+    card.style.minHeight = `${card.offsetHeight}px`;
+    form.hidden = true;
+    done.hidden = false;
+    done.querySelector<HTMLElement>('[data-done-heading]')!.focus();
+  });
+
+  // "Get in touch" further down goes back up to the form and starts it.
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('a.js-to-form')) {
+    a.addEventListener('click', () => setTimeout(() => (form.hidden ? null : inputs[0].focus({ preventScroll: true })), 450));
+  }
+</script>

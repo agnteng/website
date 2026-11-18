@@ -1,0 +1,98 @@
+---
+// The community as cells, one square per person, in the colour of what they do. Squares
+// fill column by column, so each group is one block and the whole reads as a bar divided
+// into its shares; each label sits under the start of its block. Before the bar is in
+// view every square is drawn empty; once it is, the colours sweep in from the left, once.
+// Without motion they are there at once.
+interface Segment { label: string; share: number; color: string }
+interface Props { people: number; segments: Segment[]; class?: string }
+const { people, segments, class: cls } = Astro.props;
+
+// Rows by width, the same breakpoints as the script below: a strip on desktop, a block on a phone.
+const ROWS = { base: 20, sm: 12, lg: 8 };
+const ratio = (rows: number) => `${Math.ceil(people / rows)} / ${rows}`;
+const data = JSON.stringify({ people, rows: ROWS, segments: segments.map(({ share, color }) => ({ share, color })) });
+---
+<div class={cls}>
+  <div data-cells={data} class="aspect-(--ar) w-full sm:aspect-(--ar-sm) lg:aspect-(--ar-lg)" style={`--ar:${ratio(ROWS.base)}; --ar-sm:${ratio(ROWS.sm)}; --ar-lg:${ratio(ROWS.lg)}`} aria-hidden="true">
+    <canvas class="block size-full"></canvas>
+  </div>
+  <!-- Desktop: each share under its own block. -->
+  <ul class="mt-6 flex max-md:hidden">
+    {segments.map((s) => (
+      <li class="min-w-0 pr-4" style={`width:${s.share}%`}>
+        <p class="font-sans text-5xl font-extrabold leading-none tracking-tight tabular-nums">{s.share}%</p>
+        <p class="mt-2.5 text-soft-white/70">{s.label}</p>
+      </li>
+    ))}
+  </ul>
+  <!-- Phone: a legend, one row each. -->
+  <ul class="mt-6 divide-y divide-white/10 border-y border-white/10 md:hidden">
+    {segments.map((s) => (
+      <li class="flex items-center gap-3 py-3">
+        <span class="size-3 shrink-0" style={`background:${s.color}`}></span>
+        <span class="flex-1 text-soft-white/80">{s.label}</span>
+        <span class="font-sans text-2xl font-extrabold tabular-nums">{s.share}%</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  type Data = { people: number; rows: { base: number; sm: number; lg: number }; segments: { share: number; color: string }[] };
+  const EMPTY = 'rgba(181, 166, 255, 0.1)';
+  const SWEEP = 1500; // ms for the colours to cross the bar
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // A fixed jitter per square, so the sweep's edge is ragged rather than a straight line.
+  const jitter = (i: number) => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+
+  for (const el of document.querySelectorAll<HTMLElement>('[data-cells]')) {
+    const { people, rows: R, segments }: Data = JSON.parse(el.dataset.cells!);
+    const canvas = el.querySelector('canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    // Squares per group: shares of `people`, rounded so they add up (largest remainder).
+    const exact = segments.map((s) => (s.share / 100) * people);
+    const counts = exact.map(Math.floor);
+    exact.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0])
+      .slice(0, Math.max(0, people - counts.reduce((a, b) => a + b, 0))).forEach(([, i]) => counts[i]++);
+    const colour = counts.flatMap((n, i) => Array(n).fill(segments[i].color) as string[]);
+
+    let t = still ? 1 : 0; // the sweep, 0 to 1
+    const draw = () => {
+      const rows = innerWidth >= 1024 ? R.lg : innerWidth >= 640 ? R.sm : R.base;
+      const cols = Math.ceil(people / rows);
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      const w = Math.round(el.clientWidth * dpr), h = Math.round(el.clientHeight * dpr);
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+      ctx.clearRect(0, 0, w, h);
+      const pitch = w / cols, gap = Math.max(1, Math.round(pitch * 0.2));
+      for (let i = 0; i < people; i++) {
+        const col = Math.floor(i / rows), row = i % rows;
+        const x = Math.round(col * pitch), y = Math.round(row * (h / rows));
+        const cw = Math.round((col + 1) * pitch) - x - gap, ch = Math.round((row + 1) * (h / rows)) - y - gap;
+        // Each square turns once the sweep passes its column, give or take its jitter.
+        const a = Math.min(1, Math.max(0, (t - ((col / cols) * 0.78 + jitter(i) * 0.16)) / 0.06));
+        if (a < 1) { ctx.globalAlpha = 1; ctx.fillStyle = EMPTY; ctx.fillRect(x, y, cw, ch); }
+        if (a > 0) { ctx.globalAlpha = a; ctx.fillStyle = colour[i]; ctx.fillRect(x, y, cw, ch); }
+      }
+      ctx.globalAlpha = 1;
+    };
+    draw();
+    new ResizeObserver(draw).observe(el);
+    if (!still) {
+      const seen = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        seen.disconnect();
+        const start = performance.now();
+        const step = (now: number) => {
+          const p = Math.min(1, (now - start) / SWEEP);
+          t = 1 - Math.pow(1 - p, 3); // ease out
+          draw();
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }, { threshold: 0.5 });
+      seen.observe(el);
+    }
+  }
+</script>

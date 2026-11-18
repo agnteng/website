@@ -35,3 +35,7 @@ content/**/clips/
 *.wav
 *.m4a
 *.mp3
+
+# Design-tool screenshots and caches: evidence and state, not source.
+**/.impeccable/review/
+**/.impeccable/*.cache.json
