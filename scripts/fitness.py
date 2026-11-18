@@ -408,6 +408,19 @@ def check_speakers() -> None:
             fail("speakers", f"BEST_KNOWN names {name}, and no speaker's title in event.json ends with it")
 
 
+# ── the nav sticks: SiteNav is never inside a section (it floats over the page) ──
+
+def check_nav() -> None:
+    site = ROOT / "apps" / "site" / "src"
+    for f in sorted(site.rglob("*.astro")):
+        text = f.read_text()
+        for m in re.finditer(r"<SiteNav\b", text):
+            before = text[:m.start()]
+            if before.count("<section") > before.count("</section>"):
+                fail("nav", f"{f.relative_to(ROOT)}: SiteNav inside a <section> can't stick; "
+                            "put it before the hero and give the hero under-nav")
+
+
 # ── a photo never shows before its dither (apps/site/src/styles/site.css) ──
 
 def check_dither() -> None:
@@ -618,7 +631,8 @@ def main() -> None:
                   ("photos", check_photos), ("search", check_search),
                   ("dither", check_dither), ("telegram", check_telegram),
                   ("venue", check_venue), ("register", check_register),
-                  ("companies", check_companies), ("speakers", check_speakers)]
+                  ("companies", check_companies), ("speakers", check_speakers),
+                  ("nav", check_nav)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()

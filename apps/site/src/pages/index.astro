@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Shell from '../layouts/Shell.astro';
 import Hero from '../components/Hero.astro';
+import SiteNav from '../components/SiteNav.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import TalkTile from '../components/TalkTile.astro';
 import EventCover from '../components/EventCover.astro';
@@ -27,6 +28,7 @@ const night = [
 ];
 ---
 <Shell title="Agentic Engineering: AI agents meetup in Lisbon" schema={[organization, website, nextEvent && eventNode(nextEvent)]} class="bg-soft-white text-panel-navy">
+  <SiteNav onHero />
   <main>
   <Tone />
   <Hero />

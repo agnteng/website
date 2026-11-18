@@ -36,8 +36,8 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
 ---
 <Shell title={`Agentic Engineering ${eventName(e)}, ${shortDate(e.date)}`} description={eventSummary(e)} schema={[eventNode(e), breadcrumbs(['Events', '/events'], [eventName(e), `/events/${eventSlug(e)}`])]} class="bg-soft-white text-panel-navy">
   <Tone />
-  <section class="relative isolate overflow-hidden bg-electric-blue text-white">
-    <SiteNav onHero />
+  <SiteNav onHero />
+  <section class="under-nav relative isolate overflow-hidden bg-electric-blue text-white">
     <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 pb-10 md:px-8 md:pt-20 md:pb-28">
       <PageTitle rise class="md:max-w-[40%]">{eventName(e)}</PageTitle>
       <EventDate date={e.date} variant="hero" class="rise mt-6" style="--i:1" />
