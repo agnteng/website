@@ -16,18 +16,20 @@ import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import Input from '@agnteng/brand/components/Input.astro';
 import SocialIcons from '@agnteng/brand/components/SocialIcons.astro';
-import { galleryPhoto, links } from '../lib/data';
+import { events, galleryPhoto, links, monthYear } from '../lib/data';
 import { organization } from '../lib/schema';
 
 // SAMPLE NUMBERS for the mockup. The real ones come from Luma registrations; replace every
-// value here before this page ships.
+// value here before this page ships. The sponsor deck (apps/branding/src/components/
+// slides-sponsor/content.ts) has its own, older figures: when the real ones arrive, both
+// read them from one module, so they can't drift apart.
 const community = {
   people: 1000,
   attendees: 70, // at an average meetup
   roles: [
-    { label: 'Founders', share: 44, color: '#3A4DFF' },
-    { label: 'Developers', share: 36, color: '#B5A6FF' },
-    { label: 'Investors & others', share: 20, color: '#39406B' },
+    { label: 'Founders', share: 44, color: 'var(--color-bright-blue)' },
+    { label: 'Developers', share: 36, color: 'var(--color-periwinkle)' },
+    { label: 'Investors & others', share: 20, color: 'var(--color-muted-navy)' },
   ],
   intent: [
     { label: 'Looking for a job', share: 21 },
@@ -36,6 +38,14 @@ const community = {
     { label: 'Raising', share: 12 },
   ],
 };
+
+// The first meetup, for "since".
+const since = monthYear(events.at(-1)!.date);
+
+// Where the form posts its fields (name, email, company). MOCKUP: empty, so nothing is
+// sent: the script only shows the states, and without the script the form posts to this
+// page, which turns it away, so an address never lands in a URL.
+const SPONSOR_ENDPOINT = '';
 
 const fields = [
   { id: 'name', label: 'Name', type: 'text', autocomplete: 'name', error: 'Enter your name.' },
@@ -62,13 +72,14 @@ const label = 'font-mono text-xs uppercase tracking-[0.18em] text-periwinkle';
 
       <div id="sponsor" class="rise scroll-mt-6 md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:2">
         <div data-sponsor-card class="flex flex-col rounded-2xl bg-white p-6 text-panel-navy shadow-[0_32px_64px_-24px_rgb(5_7_30/0.6)] sm:p-8">
-          <form data-sponsor-form novalidate>
+          <form data-sponsor-form data-endpoint={SPONSOR_ENDPOINT} method="post" action={SPONSOR_ENDPOINT || undefined} novalidate>
             <SubHeading as="h2">Sponsor a meetup</SubHeading>
             <p class="mt-2 text-panel-navy/75">Leave your details and we’ll get back to you by email.</p>
             <div class="mt-6 space-y-4">
               {fields.map((f) => <Input id={f.id} name={f.id} label={f.label} type={f.type} autocomplete={f.autocomplete} required error={f.error} />)}
             </div>
             <Button type="submit" class="mt-7 w-full">Get in touch</Button>
+            <p data-sponsor-failed hidden role="alert" class="mt-4 text-center text-sm font-medium text-error">That didn’t send. Try again in a moment.</p>
             <p class="mt-4 text-center text-sm text-panel-navy/70">Or email <a href={links.partners} class="font-semibold text-electric-blue underline-offset-4 hover:underline">partners@agnteng.com</a></p>
           </form>
           <!-- In place of the form, at the card's height. -->
@@ -95,7 +106,7 @@ const label = 'font-mono text-xs uppercase tracking-[0.18em] text-periwinkle';
     </div>
     <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
       <SectionHeading>The community</SectionHeading>
-      <p class="mt-5 max-w-[52ch] text-lg leading-relaxed text-soft-white/75">About {community.people.toLocaleString('en')} people have registered for a meetup since May 2026. Each square is one of them.</p>
+      <p class="mt-5 max-w-[52ch] text-lg leading-relaxed text-soft-white/75">About {community.people.toLocaleString('en')} people have registered for a meetup since {since}. Each square is one of them.</p>
       <CommunityCells class="mt-12 md:mt-16" people={community.people} segments={community.roles} />
 
       <div class="mt-16 grid gap-12 border-t border-white/10 pt-12 md:mt-20 md:grid-cols-3 md:gap-8">
@@ -146,12 +157,21 @@ const label = 'font-mono text-xs uppercase tracking-[0.18em] text-periwinkle';
 </Shell>
 
 <script>
-  // MOCKUP: nothing is sent yet. Once the form has somewhere to send to, post the three
-  // fields there and show the thanks only when it answers.
   const form = document.querySelector<HTMLFormElement>('[data-sponsor-form]')!;
   const done = document.querySelector<HTMLElement>('[data-sponsor-done]')!;
+  const failed = form.querySelector<HTMLElement>('[data-sponsor-failed]')!;
   const inputs = [...form.querySelectorAll<HTMLInputElement>('input')];
   const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const label = button.textContent;
+
+  // Sends the fields and settles once they have arrived. MOCKUP: with no endpoint it
+  // only waits, so the states can be seen.
+  async function send(data: FormData) {
+    const endpoint = form.dataset.endpoint;
+    if (!endpoint) return new Promise((r) => setTimeout(r, 700));
+    const res = await fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`The form endpoint answered ${res.status}`);
+  }
 
   // A field is checked when it is left or sent, and again as it is fixed.
   const check = (f: HTMLInputElement) => {
@@ -164,18 +184,30 @@ const label = 'font-mono text-xs uppercase tracking-[0.18em] text-periwinkle';
     f.addEventListener('input', () => { if (f.getAttribute('aria-invalid') === 'true') check(f); });
   }
 
-  let sending = false;
+  const busy = (on: boolean) => {
+    button.disabled = on;
+    button.textContent = on ? 'Sending…' : label;
+    for (const f of inputs) f.readOnly = on;
+    form.toggleAttribute('aria-busy', on);
+  };
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (sending) return;
+    if (button.disabled) return;
     const wrong = inputs.filter((f) => !check(f));
     if (wrong.length) { wrong[0].focus(); return; }
-    sending = true;
-    button.textContent = 'Sending…';
-    form.setAttribute('aria-busy', 'true');
-    await new Promise((r) => setTimeout(r, 700));
-    done.querySelector('[data-name]')!.textContent = inputs[0].value.trim().split(/\s+/)[0];
-    done.querySelector('[data-email]')!.textContent = inputs[1].value.trim();
+    const data = new FormData(form);
+    failed.hidden = true;
+    busy(true);
+    try {
+      await send(data);
+    } catch {
+      busy(false);
+      failed.hidden = false;
+      return;
+    }
+    done.querySelector('[data-name]')!.textContent = String(data.get('name')).trim().split(/\s+/)[0];
+    done.querySelector('[data-email]')!.textContent = String(data.get('email')).trim();
     const card = document.querySelector<HTMLElement>('[data-sponsor-card]')!;
     card.style.minHeight = `${card.offsetHeight}px`;
     form.hidden = true;

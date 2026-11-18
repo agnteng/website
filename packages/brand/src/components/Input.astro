@@ -21,7 +21,7 @@ const errorId = error && field ? `${field}-error` : undefined;
     id={field}
     aria-describedby={errorId}
     {...attrs}
-    class="peer rounded-[10px] border-[1.5px] border-panel-navy/15 bg-white px-3.5 py-3 font-sans text-base text-panel-navy outline-none transition-colors placeholder:text-panel-navy/60 hover:border-panel-navy/30 focus:border-electric-blue aria-[invalid=true]:border-[#C21E72]"
+    class="peer rounded-[10px] border-[1.5px] border-panel-navy/15 bg-white px-3.5 py-3 font-sans text-base text-panel-navy outline-none transition-colors placeholder:text-panel-navy/60 hover:border-panel-navy/30 focus:border-electric-blue aria-[invalid=true]:border-error"
   />
-  {errorId && <p id={errorId} class="hidden text-sm font-medium text-[#C21E72] peer-aria-[invalid=true]:block">{error}</p>}
+  {errorId && <p id={errorId} class="hidden text-sm font-medium text-error peer-aria-[invalid=true]:block">{error}</p>}
 </div>

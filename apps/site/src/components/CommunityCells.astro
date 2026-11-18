@@ -40,7 +40,10 @@ const data = JSON.stringify({ people, rows: ROWS, segments: segments.map(({ shar
 
 <script>
   type Data = { people: number; rows: { base: number; sm: number; lg: number }; segments: { share: number; color: string }[] };
-  const EMPTY = 'rgba(181, 166, 255, 0.1)';
+  // Colours may be tokens (var(--color-…)); the canvas needs their values.
+  const css = getComputedStyle(document.documentElement);
+  const resolve = (c: string) => c.match(/^var\((--[\w-]+)\)$/)?.[1] ? css.getPropertyValue(c.slice(4, -1)).trim() : c;
+  const EMPTY = resolve('var(--color-periwinkle)'); // drawn at a tenth
   const SWEEP = 1500; // ms for the colours to cross the bar
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A fixed jitter per square, so the sweep's edge is ragged rather than a straight line.
@@ -55,7 +58,7 @@ const data = JSON.stringify({ people, rows: ROWS, segments: segments.map(({ shar
     const counts = exact.map(Math.floor);
     exact.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0])
       .slice(0, Math.max(0, people - counts.reduce((a, b) => a + b, 0))).forEach(([, i]) => counts[i]++);
-    const colour = counts.flatMap((n, i) => Array(n).fill(segments[i].color) as string[]);
+    const colour = counts.flatMap((n, i) => Array(n).fill(resolve(segments[i].color)) as string[]);
 
     let t = still ? 1 : 0; // the sweep, 0 to 1
     const draw = () => {
@@ -72,7 +75,7 @@ const data = JSON.stringify({ people, rows: ROWS, segments: segments.map(({ shar
         const cw = Math.round((col + 1) * pitch) - x - gap, ch = Math.round((row + 1) * (h / rows)) - y - gap;
         // Each square turns once the sweep passes its column, give or take its jitter.
         const a = Math.min(1, Math.max(0, (t - ((col / cols) * 0.78 + jitter(i) * 0.16)) / 0.06));
-        if (a < 1) { ctx.globalAlpha = 1; ctx.fillStyle = EMPTY; ctx.fillRect(x, y, cw, ch); }
+        if (a < 1) { ctx.globalAlpha = 0.1; ctx.fillStyle = EMPTY; ctx.fillRect(x, y, cw, ch); }
         if (a > 0) { ctx.globalAlpha = a; ctx.fillStyle = colour[i]; ctx.fillRect(x, y, cw, ch); }
       }
       ctx.globalAlpha = 1;
