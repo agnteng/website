@@ -24,13 +24,12 @@ STORY: A company learns Agentic Engineering hosts events in Lisbon and other Eur
 
 FIRST VIEWPORT: Desktop: nav on blue; H1 (the user's hook) and one line in the left half, centred vertically against the white form card in the right five columns; below, a full-bleed blue-toned crowd band whose top dissolves into the blue. Phone: H1, line, card, band.
 
-FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section, per the user's edits: heading and one line that also gives the average monthly event in words (the stat panel read as AI slop, user 2026-11-18); one solid bar of the role shares with big percentages under each part; a dark panel, "Who they are", one sentence (the "What they're looking for" row was removed, user 2026-11-18). Signature interaction: the bar wipes in from the left once in view. Motion: the hero's rise-in, the live cells and dither, that wipe.
+FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section, per the user's edits: heading and one line; the average monthly event as a tall photo tile down the right, a full event breaking up into electric blue with the number large on the colour (a stat panel read as AI slop and a sentence was not enough, user 2026-11-18); one solid bar of the role shares with big percentages under each part, bottom-aligned with the tile. Nothing below: the user removed "What they're looking for" and "Who they are". Signature interaction: the bar wipes in from the left once in view. Motion: the hero's rise-in, the live cells and dither, that wipe.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Open
 
 - Real numbers: community size, role shares, average attendance.
-- "We approve every registration": true for every event?
 - Developers (this page) or Engineers (the sponsor deck).
 - The email service set up for agnteng.com, and its key on the branding service.
