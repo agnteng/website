@@ -184,8 +184,13 @@ const label = 'font-mono text-xs uppercase tracking-[0.18em] text-periwinkle';
     f.addEventListener('input', () => { if (f.getAttribute('aria-invalid') === 'true') check(f); });
   }
 
+  // While sending, the button stays at full strength, so "Sending…" can be read, but does
+  // nothing: aria-disabled rather than disabled, which the brand Button fades to 40%.
+  let sending = false;
   const busy = (on: boolean) => {
-    button.disabled = on;
+    sending = on;
+    button.setAttribute('aria-disabled', String(on));
+    button.classList.toggle('cursor-progress', on);
     button.textContent = on ? 'Sending…' : label;
     for (const f of inputs) f.readOnly = on;
     form.toggleAttribute('aria-busy', on);
@@ -193,7 +198,7 @@ const label = 'font-mono text-xs uppercase tracking-[0.18em] text-periwinkle';
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (button.disabled) return;
+    if (sending) return;
     const wrong = inputs.filter((f) => !check(f));
     if (wrong.length) { wrong[0].focus(); return; }
     const data = new FormData(form);
