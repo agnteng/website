@@ -42,3 +42,4 @@ Decision, Consequences.
 | [0023](0023-repeated-ui-is-a-component.md) | What the site repeats is a component; each meetup owns a colour | Accepted |
 | [0024](0024-deploys-on-push-verified-live.md) | A merge to `main` deploys the sites; a deploy is done when the live check passes | Accepted |
 | [0025](0025-company-logos-in-the-site.md) | Company logos are part of the site's source, in one colour | Accepted |
+| [0026](0026-best-known-companies-speakers-first.md) | Speakers from the best-known companies come first | Accepted |
