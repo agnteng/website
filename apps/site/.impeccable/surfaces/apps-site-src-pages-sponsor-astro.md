@@ -20,11 +20,11 @@ THESIS: The community is shown before anything is asked: pitch and form share th
 
 OWN-WORLD: agnteng.com as it stands. Electric-blue hero block; an event photo in the blue tone breaking up into blue cells; a deep-navy section with the dim live dither, as on the sponsor deck; Manrope only, extra-bold for headings and numbers; a white form card with the brand's fields and pill buttons; dark panels with hairlines on navy.
 
-STORY: A company learns Agentic Engineering hosts events in Lisbon and other European cities for founders and developers building with AI, sees who comes and what they're looking for, believes it reaches the people it wants, and leaves its details.
+STORY: A company learns Agentic Engineering hosts events in Lisbon and other European cities for founders and developers building with AI, sees who comes, believes it reaches the people it wants, and leaves its details.
 
 FIRST VIEWPORT: Desktop: nav on blue; H1 (the user's hook) and one line in the left half, centred vertically against the white form card in the right five columns; below, a full-bleed blue-toned crowd band whose top dissolves into the blue. Phone: H1, line, card, band.
 
-FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section, per the user's edits: heading and line with the average monthly event in a dark panel top right; one solid bar of the role shares with big percentages under each part; a dark panel of two rows, "What they're looking for" (chips) and "Who they are" (one sentence). Signature interaction: the bar wipes in from the left once in view. Motion: the hero's rise-in, the live cells and dither, that wipe.
+FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section, per the user's edits: heading and line with the average monthly event in a dark panel top right; one solid bar of the role shares with big percentages under each part; a dark panel, "Who they are", one sentence (the "What they're looking for" row was removed, user 2026-11-18). Signature interaction: the bar wipes in from the left once in view. Motion: the hero's rise-in, the live cells and dither, that wipe.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 

@@ -29,8 +29,6 @@ const community = {
     { label: 'Developers', share: 36, color: 'var(--color-periwinkle)' },
     { label: 'Investors & others', share: 20, color: 'var(--color-muted-navy)' },
   ],
-  // What people say they're looking for when they register.
-  lookingFor: ['A job', 'A co-founder', 'People to hire', 'Funding'],
 };
 // The first event, for "since".
 const since = monthYear(events.at(-1)!.date);
@@ -44,7 +42,6 @@ const fields = [
   { id: 'email', label: 'Email', type: 'email', autocomplete: 'email', error: 'Enter an email address, like name@company.com.' },
   { id: 'company', label: 'Company', type: 'text', autocomplete: 'organization', error: 'Enter your company’s name.' },
 ];
-const chip = 'inline-flex items-center rounded-full border border-white/15 bg-white/[0.05] px-4 py-2 font-semibold md:text-lg';
 const photo = galleryPhoto('2026-08-26', '04.jpg');
 ---
 <Shell title="Sponsor an event | Agentic Engineering" description="Agentic Engineering hosts events in Lisbon and other European cities for founders and developers building with AI. See who comes, then leave your details to sponsor one." schema={[organization]} class="bg-soft-white text-panel-navy">
@@ -116,14 +113,8 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
 
       <ShareBar class="mt-12 md:mt-16" segments={community.roles} />
 
-      <!-- What we know about the people who come, as rows: the question, then the answer. -->
-      <dl class="mt-14 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-panel-navy md:mt-20">
-        <div class="grid gap-4 p-6 md:grid-cols-12 md:items-center md:gap-8 md:px-8">
-          <dt class="font-semibold text-periwinkle md:col-span-3">What they’re looking for</dt>
-          <dd class="md:col-span-9"><ul class="flex flex-wrap gap-2.5">
-            {community.lookingFor.map((i) => <li class={chip}>{i}</li>)}
-          </ul></dd>
-        </div>
+      <!-- What we know about the people who come. -->
+      <dl class="mt-14 overflow-hidden rounded-2xl border border-white/10 bg-panel-navy md:mt-20">
         <div class="grid gap-4 p-6 md:grid-cols-12 md:items-center md:gap-8 md:px-8">
           <dt class="font-semibold text-periwinkle md:col-span-3">Who they are</dt>
           <dd class="text-lg leading-relaxed text-soft-white/85 md:col-span-9">We approve every registration, so we know where people work, what they do and what they’ve built.</dd>
