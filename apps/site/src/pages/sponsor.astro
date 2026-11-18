@@ -15,7 +15,7 @@ import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import Input from '@agnteng/brand/components/Input.astro';
-import { galleryPhoto, links, TINTS } from '../lib/data';
+import { galleryPhoto, TINTS } from '../lib/data';
 import { organization } from '../lib/schema';
 
 // The organizers' figures (2026-11-18). The sponsor deck
@@ -72,7 +72,6 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
             </div>
             <Button type="submit" class="mt-7 w-full">Get in touch</Button>
             <p data-sponsor-failed hidden role="alert" class="mt-4 text-center text-sm font-medium text-error">That didn’t send. Try again in a moment.</p>
-            <p class="mt-4 text-center text-sm text-panel-navy/70">Or email <a href={links.partners} class="font-semibold text-electric-blue underline-offset-4 hover:underline">partners@agnteng.com</a></p>
           </form>
           <!-- In place of the form, at the card's height. -->
           <div data-sponsor-done hidden class="my-auto py-6 text-center">

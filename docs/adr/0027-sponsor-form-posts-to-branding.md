@@ -12,8 +12,11 @@ records; the organizers already read a bot that takes webhooks.
 
 ## Decision
 The form posts to `https://branding.agnteng.com/api/sponsor`, which passes the
-enquiry on to the organizers' bot: a JSON `POST` to a webhook, with a line to
-read (`text`) and the fields (`name`, `email`, `company`, `page`, `sentAt`).
+enquiry on to the organizers' bot, a Grok Bot routine with a webhook trigger: a
+JSON `POST` that becomes the routine's input, with an `id`, a line to read
+(`text`) and the fields (`name`, `email`, `company`, `page`, `sentAt`). A server
+error is tried once more with the same `id`; an enquiry that still doesn't
+arrive is written to the service's log, so it can be passed on by hand.
 With script, the page posts with `fetch` and shows the outcome in place.
 Without it, the endpoint sends the browser back to `/sponsor#sent` or
 `/sponsor#not-sent`.
@@ -26,7 +29,10 @@ The webhook's address, the header the bot reads its key from, and the key
 come from the service's environment (`GROKBOT_WEBHOOK_URL`,
 `GROKBOT_WEBHOOK_HEADER`, `GROKBOT_WEBHOOK_KEY`, named like the items in the
 secrets manager that hold them), read when the server runs before the values
-inlined at build (0002). None of them appears in this repository or in a log. `GET /api/sponsor` answers whether the form can send, and
+inlined at build (0002). The header may be the whole line
+(`Authorization: Bearer <key>`), the line without the key, or only its name;
+the key fills in what it leaves out. None of them appears in this repository
+or in a log. `GET /api/sponsor` answers whether the form can send, and
 `mise run fitness:live` fails when it can't.
 
 ## Consequences
