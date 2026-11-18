@@ -1,6 +1,6 @@
 ---
 // Where the community works. Each logo is drawn once, as a <symbol> every copy
-// of the strip uses. Moving content needs a way to stop it (WCAG 2.2.2): the button.
+// of the strip uses.
 import Marquee from '@agnteng/brand/components/Marquee.astro';
 import { companies } from '../lib/companies';
 import { label } from '../lib/type';
@@ -8,17 +8,12 @@ interface Props { class?: string }
 const { class: cls } = Astro.props;
 ---
 <div class={cls}>
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 md:px-8">
-    <p class:list={[label, 'text-electric-blue']}>Community members from</p>
-    <button type="button" aria-controls="companies-strip" data-marquee-toggle class:list={[label, '-mr-2 inline-flex min-h-6 items-center rounded px-2 text-panel-navy/65 hover:text-electric-blue motion-reduce:hidden [@media(scripting:none)]:hidden']}>
-      <span data-word>Pause</span><span class="sr-only"> the logos</span>
-    </button>
-  </div>
+  <p class:list={[label, 'mx-auto max-w-7xl px-4 text-electric-blue md:px-8']}>Community members from</p>
   <svg aria-hidden="true" class="absolute size-0 overflow-hidden">
     {companies.map((c) => <symbol id={`company-${c.id}`} viewBox={c.viewBox} set:html={c.paths} />)}
   </svg>
   <!-- Same speed on every screen: a phone's strip is shorter. -->
-  <Marquee id="companies-strip" tone="none" class="mt-6 text-panel-navy [--ae-marquee-duration:45s] md:mt-8 md:[--ae-marquee-duration:75s]">
+  <Marquee tone="none" class="mt-6 text-panel-navy [--ae-marquee-duration:45s] md:mt-8 md:[--ae-marquee-duration:75s]">
     <ul role="list" class="flex items-center gap-x-10 pr-10 motion-reduce:mx-auto motion-reduce:w-full motion-reduce:max-w-7xl motion-reduce:flex-wrap motion-reduce:gap-y-6 motion-reduce:px-4 md:gap-x-20 md:pr-20 md:motion-reduce:gap-y-8 md:motion-reduce:px-8">
       {companies.map((c) => (
         <li class="flex shrink-0 items-center">
@@ -30,14 +25,3 @@ const { class: cls } = Astro.props;
     </ul>
   </Marquee>
 </div>
-
-<script>
-  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-marquee-toggle]')) {
-    const strip = document.getElementById(button.getAttribute('aria-controls') ?? '');
-    const word = button.querySelector('[data-word]');
-    button.addEventListener('click', () => {
-      const paused = strip?.toggleAttribute('data-paused');
-      if (word) word.textContent = paused ? 'Play' : 'Pause';
-    });
-  }
-</script>

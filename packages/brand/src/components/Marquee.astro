@@ -4,19 +4,16 @@
 // screen up to twice a copy's width. Text items by default; anything else (a
 // row of logos) goes in the slot: the first copy is read out, the other two are
 // hidden and inert. Speed: --ae-marquee-duration, one copy's trip (26s by
-// default; a class can set it per breakpoint). Pauses on hover, and while the
-// root has data-paused (a pause button). With reduced motion it stands still,
-// and slotted content shows once, wrapped.
+// default; a class can set it per breakpoint). Pauses on hover. With reduced
+// motion it stands still, and slotted content shows once, wrapped.
 interface Props {
   items?: string[];
   tone?: 'blue' | 'navy' | 'light' | 'none';
-  id?: string;
   class?: string;
 }
 const {
   items = ['agentic engineering', 'lisbon', 'build · ship · secure', 'monthly meetup'],
   tone = 'blue',
-  id,
   class: cls,
 } = Astro.props;
 
@@ -29,7 +26,7 @@ const tones = {
 const content = Astro.slots.has('default') ? await Astro.slots.render('default') : undefined;
 ---
 
-<div id={id} class={`ae-marquee overflow-hidden ${tones} ${cls ?? ''}`} data-content={content ? '' : undefined}>
+<div class={`ae-marquee overflow-hidden ${tones} ${cls ?? ''}`} data-content={content ? '' : undefined}>
   <div class:list={['ae-marquee-track', !content && 'py-3']}>
     {
       [0, 1, 2].map((i) =>
