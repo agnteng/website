@@ -67,7 +67,6 @@
   flex-shrink: 0;
   animation: ae-marquee var(--ae-marquee-duration, 26s) linear infinite;
 }
-.ae-marquee[data-paused] .ae-marquee-copy { animation-play-state: paused; }
 /* Only where hover is real: on a touch screen a tap would leave it stuck paused. */
 @media (hover: hover) {
   .ae-marquee:hover .ae-marquee-copy { animation-play-state: paused; }
