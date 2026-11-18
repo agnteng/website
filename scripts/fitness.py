@@ -389,6 +389,25 @@ def check_companies() -> None:
                               "(fill-rule and fill-opacity allowed): no fill or stroke colour, no other element")
 
 
+# ── speakers from the best-known companies come first (docs/adr/0026) ──
+
+def check_speakers() -> None:
+    data = (ROOT / "apps" / "site" / "src" / "lib" / "data.ts").read_text()
+    listed = re.search(r"const BEST_KNOWN = \[([^\]]*)\]", data)
+    if not listed:
+        fail("speakers", "lib/data.ts lost BEST_KNOWN, the companies whose speakers come first")
+        return
+    companies = set()
+    for f in (ROOT / "content").glob("*/event.json"):
+        for sp in json.loads(f.read_text()).get("speakers", []):
+            m = re.search(r"(?:,| at) ([^,]+)$", sp.get("title", ""))
+            if m:
+                companies.add(m.group(1).lower())
+    for name in re.findall(r"'([^']+)'", listed.group(1)):
+        if name.lower() not in companies:
+            fail("speakers", f"BEST_KNOWN names {name}, and no speaker's title in event.json ends with it")
+
+
 # ── a photo never shows before its dither (apps/site/src/styles/site.css) ──
 
 def check_dither() -> None:
@@ -599,7 +618,7 @@ def main() -> None:
                   ("photos", check_photos), ("search", check_search),
                   ("dither", check_dither), ("telegram", check_telegram),
                   ("venue", check_venue), ("register", check_register),
-                  ("companies", check_companies)]
+                  ("companies", check_companies), ("speakers", check_speakers)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()

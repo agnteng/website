@@ -100,6 +100,15 @@ export const talks: Talk[] = Object.entries(talkFiles)
   })
   .sort((a, b) => b.event.date.localeCompare(a.event.date) || a.order - b.order);
 
+// Speakers at these companies lead, best known first (docs/adr/0026). A
+// speaker's company ends their title: "Product Engineer, PostHog" or "… at PostHog".
+const BEST_KNOWN = ['Nokia', 'Coinbase', 'Delivery Hero', 'Columbia University', 'PostHog'];
+const rank = (s: Speaker) => {
+  const company = s.title?.match(/(?:,| at) ([^,]+)$/)?.[1].toLowerCase();
+  const i = BEST_KNOWN.findIndex((c) => c.toLowerCase() === company);
+  return i < 0 ? BEST_KNOWN.length : i;
+};
+
 // Everyone who has given a talk: from the published talks, then anyone listed
 // in a past event.json whose talk isn't published yet.
 export const speakers: Speaker[] = (() => {
@@ -113,7 +122,7 @@ export const speakers: Speaker[] = (() => {
       if (!known(sp.name)) out.push({ slug: slugify(sp.name), ...sp, href: e.luma?.url ?? links.luma });
     }
   }
-  return out;
+  return out.sort((a, b) => rank(a) - rank(b));
 })();
 
 export const talksAt = (e: Event) => talks.filter((t) => t.event.date === e.date);
