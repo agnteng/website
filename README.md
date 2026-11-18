@@ -27,7 +27,8 @@ git config core.hooksPath .githooks   # needs: brew install gitleaks
 | `apps/branding/src/components/slides/` | The deck engine and primitives; `slides/meetup/` holds the slides every meetup deck shares, `slides-<date>/` one meetup's own. |
 | `apps/branding/src/lib/luma.ts` | Server-only Luma client. Import it only from `.astro` frontmatter or `src/pages/api/`, so `LUMA_API_KEY` stays out of the browser bundle. |
 | `apps/site/` | [agnteng.com](https://agnteng.com) (Astro, static): the next event, every talk with its video and transcript, the speakers, past events with their Q&A, the newsletter's latest posts. |
-| `packages/brand/` | The brand, shared by both apps as raw source: tokens (`styles.css`), components, the pixel icons and the dither (`Animation`, `DuotoneField`). Logos and photos stay in `apps/branding/public/`, which the site serves too. |
+| `apps/site/src/companies/` | The logos of the companies community members work at, in one colour; `apps/site/src/lib/companies.ts` lists them with their sizes (`docs/adr/0025`). |
+| `packages/brand/` | The brand, shared by both apps as raw source: tokens (`styles.css`), components, the pixel icons and the dither (`Animation`, `DuotoneField`). The brand's logos and the photos stay in `apps/branding/public/`, which the site serves too. |
 | `content/<date>/event.json` | One event's identity: city, venue, Luma ids, speakers. The decks import it as `@content/<date>/event.json`; production reads it for the write-ups. |
 | `content/<date>/talks/`, `questions.json`, `takeaways.json` | Each talk, the Q&A and the event's main takeaways, written by production's `publish_talks.py` (org ADRs 0007, 0020). Never edited here. |
 | `scripts/fitness.py` | The fitness checks (`docs/adr/0005`). |

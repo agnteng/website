@@ -51,18 +51,32 @@
 }
 @keyframes ae-marquee {
   from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  to { transform: translateX(-100%); }
 }
 .ae-cursor {
   display: inline-block;
   animation: ae-blink 1.1s steps(1) infinite;
 }
 .ae-marquee-track {
-  display: inline-flex;
+  display: flex;
+  width: max-content;
   white-space: nowrap;
-  animation: ae-marquee 26s linear infinite;
+}
+.ae-marquee-copy {
+  display: flex;
+  flex-shrink: 0;
+  animation: ae-marquee var(--ae-marquee-duration, 26s) linear infinite;
+}
+.ae-marquee[data-paused] .ae-marquee-copy { animation-play-state: paused; }
+/* Only where hover is real: on a touch screen a tap would leave it stuck paused. */
+@media (hover: hover) {
+  .ae-marquee:hover .ae-marquee-copy { animation-play-state: paused; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ae-cursor,
-  .ae-marquee-track { animation: none; }
+  .ae-marquee-copy { animation: none; }
+  /* Slotted content stands still as one wrapped copy instead of running off the edge. */
+  .ae-marquee[data-content] .ae-marquee-track { width: auto; }
+  .ae-marquee[data-content] .ae-marquee-copy { flex-shrink: 1; width: 100%; }
+  .ae-marquee[data-content] .ae-marquee-copy + .ae-marquee-copy { display: none; }
 }

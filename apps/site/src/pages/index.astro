@@ -10,6 +10,7 @@ import SectionHeading from '../components/SectionHeading.astro';
 import RegisterButton from '../components/RegisterButton.astro';
 import Tone from '../components/Tone.astro';
 import SpeakerCard from '../components/SpeakerCard.astro';
+import CompanyLogos from '../components/CompanyLogos.astro';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
@@ -38,13 +39,15 @@ const night = [
   </section>
 
   <section id="speakers" class="border-t border-panel-navy/[0.08] bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+    <div class="mx-auto max-w-7xl px-4 pt-16 md:px-8 md:pt-24">
       <SectionHeading action={{ href: '/speakers', label: 'All speakers' }}>Speakers</SectionHeading>
       <!-- Two rows on desktop; three on a phone, so the page stays short. -->
       <ul class="mt-12 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
         {speakers.slice(0, 12).map((s, i) => <li class:list={['reveal', i >= 6 && 'max-sm:hidden']}><SpeakerCard speaker={s} index={i} /></li>)}
       </ul>
     </div>
+    <!-- Full width, so the logos come in and leave at the screen's edges. -->
+    <CompanyLogos class="pb-16 pt-16 md:pb-24 md:pt-20" />
   </section>
 
   <section class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
