@@ -8,31 +8,31 @@ import SiteFooter from '../components/SiteFooter.astro';
 import HeroCells from '../components/HeroCells.astro';
 import Tone from '../components/Tone.astro';
 import PageTitle from '../components/PageTitle.astro';
-import SectionHeading from '../components/SectionHeading.astro';
 import SubHeading from '../components/SubHeading.astro';
-import ShareBar from '../components/ShareBar.astro';
+import CompanyLogos from '../components/CompanyLogos.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
 import Input from '@agnteng/brand/components/Input.astro';
-import { events, galleryPhoto, links, monthYear } from '../lib/data';
+import { galleryPhoto, links, TINTS } from '../lib/data';
 import { organization } from '../lib/schema';
 
 // SAMPLE NUMBERS until the real ones come from Luma registrations. The sponsor deck
 // (apps/branding/src/components/slides-sponsor/content.ts) has its own, older figures:
 // when the real ones arrive, both read them from one module, so they can't drift apart.
 const community = {
-  people: 1000,
+  members: 1000,
+  foundersAndDevelopers: 80, // 44% founders and 36% developers, the sponsor deck's mix
   attendees: 70, // at an average monthly event
-  roles: [
-    { label: 'Founders', share: 44, color: 'var(--color-bright-blue)' },
-    { label: 'Developers', share: 36, color: 'var(--color-periwinkle)' },
-    { label: 'Investors & others', share: 20, color: 'var(--color-muted-navy)' },
-  ],
 };
-// The first event, for "since".
-const since = monthYear(events.at(-1)!.date);
+// The three figures, each a block in one of the brand's three meetup colours; a few of
+// the cells where a block breaks up take the next block's colour.
+const figures = [
+  { value: community.members.toLocaleString('en'), label: 'community members' },
+  { value: `${community.foundersAndDevelopers}%`, label: 'founders and developers' },
+  { value: String(community.attendees), label: 'attendees on average' },
+].map((f, i) => ({ ...f, color: TINTS[i], edge: TINTS[(i + 1) % TINTS.length] }));
 
 // The form posts to the branding app, which has a server and emails the enquiry
 // (docs/adr/0027). A development server points it elsewhere with PUBLIC_SPONSOR_ENDPOINT.
@@ -44,8 +44,6 @@ const fields = [
   { id: 'company', label: 'Company', type: 'text', autocomplete: 'organization', error: 'Enter your company’s name.' },
 ];
 const photo = galleryPhoto('2026-08-26', '04.jpg');
-// The average monthly event's tile: a full event, a different night from the hero's.
-const crowd = galleryPhoto('2026-07-29', '03.jpg');
 ---
 <Shell title="Sponsor an event | Agentic Engineering" description="Agentic Engineering hosts events in Lisbon and other European cities for founders and developers building with AI. See who comes, then leave your details to sponsor one." schema={[organization]} class="bg-soft-white text-panel-navy">
   <Tone />
@@ -54,7 +52,7 @@ const crowd = galleryPhoto('2026-07-29', '03.jpg');
     <div id="main" class="relative z-10 mx-auto grid max-w-7xl gap-10 px-4 pt-14 md:grid-cols-12 md:items-center md:gap-8 md:px-8 md:pt-20">
       <div class="md:col-span-6">
         <PageTitle rise style="--i:0">Connect with a community of engaged founders and developers building with AI.</PageTitle>
-        <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Agentic Engineering hosts events in Lisbon and other European cities. Sponsors put their product in front of people building with AI, and meet the developers and founders they want to hire.</p>
+        <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Agentic Engineering hosts events in Lisbon and other European cities. Sponsors get access to a community of people building with AI, and meet the developers and founders they want to hire.</p>
       </div>
 
       <div id="sponsor" class="rise scroll-mt-6 md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:2">
@@ -94,36 +92,32 @@ const crowd = galleryPhoto('2026-07-29', '03.jpg');
     </div>
   </section>
 
+  <section class="bg-white">
+    <CompanyLogos class="py-12 md:py-16" />
+  </section>
+
   <section id="community" class="relative isolate overflow-hidden bg-deep-navy text-soft-white">
     <!-- The deck's backdrop: the live cells, dim, thickest on the left. -->
     <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
       <Animation client:visible animation="aurora" color="#1E2BE6" edge="#B5A6FF" bg="#05071E" cell={6} gap={1} density={0.34} motion={20} fade="left" shape="square" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.4 }} />
     </div>
     <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
-      <!-- Desktop: the heading and the bar on the left, the average monthly event as a tile
-           down the right. Phone: heading, tile, bar. -->
-      <div class="grid gap-10 lg:grid-cols-12 lg:gap-x-8 lg:gap-y-12">
-        <div class="lg:col-span-8">
-          <SectionHeading>The community</SectionHeading>
-          <p class="mt-5 max-w-[46ch] text-lg leading-relaxed text-soft-white/75">About {community.people.toLocaleString('en')} people have registered for our events since {since}.</p>
-        </div>
-        <!-- A full event breaking up into the blue, cell by cell, as on the heroes; the number
-             stands on the colour. -->
-        <figure class="flex aspect-[4/5] flex-col overflow-hidden rounded-2xl bg-electric-blue text-white sm:aspect-[16/10] lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1 lg:aspect-auto lg:min-h-[30rem]">
-          <!-- Zoomed onto the rows of people: the photo is mostly ceiling above them. -->
-          <div class="relative min-h-0 flex-1 overflow-hidden">
-            <Image src={crowd.img} alt="" widths={[640, 1024]} quality={60} sizes="(min-width: 1024px) 50vw, 160vw" loading="lazy" class="absolute inset-0 size-full origin-[50%_74%] scale-[1.7] object-cover [filter:url(#blue-tone)]" />
-            <div class="dither-stage absolute inset-0" aria-hidden="true">
-              <Artifacts client:visible color="#1E2BE6" edge="#B5A6FF" seed={70} cell={10} animate artifacts={[{ at: 'bottom', solid: 0.1, reach: 0.5, wave: 0.05, waveLength: 0.6 }]} />
+      <!-- No heading on screen (user, 2026-11-18); screen readers still get one. -->
+      <h2 class="sr-only">The community</h2>
+      <!-- Three square blocks, the number large on the colour. Each breaks up at its top-right
+           corner into the page, cell by cell. The captions are large text: white on the
+           magenta passes AA only from 18.7px bold. -->
+      <ul class="grid gap-4 md:grid-cols-3 md:gap-6">
+        {figures.map((f, i) => (
+          <li class="relative isolate flex min-h-52 flex-col justify-end overflow-hidden p-6 text-white md:min-h-64 lg:min-h-72 lg:p-8" style={`background:${f.color}`}>
+            <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
+              <Artifacts client:visible color="#05071E" edge={f.edge} seed={1000 + i * 37} cell={12} animate artifacts={[{ at: 'top-right', solid: 0.06, reach: 0.46 }]} />
             </div>
-          </div>
-          <figcaption class="px-6 pb-6 md:px-8 md:pb-8">
-            <span class="block font-sans text-8xl font-extrabold leading-[0.85] tracking-tight tabular-nums md:text-9xl">{community.attendees}</span>
-            <span class="mt-3 block text-lg font-semibold text-white/90">people at an average monthly event</span>
-          </figcaption>
-        </figure>
-        <ShareBar class="lg:col-span-8 lg:row-start-2 lg:self-end" segments={community.roles} />
-      </div>
+            <span class="font-sans text-7xl font-extrabold leading-[0.85] tracking-tight md:text-5xl lg:text-7xl xl:text-8xl">{f.value}</span>
+            <span class="mt-3 text-xl font-bold">{f.label}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
