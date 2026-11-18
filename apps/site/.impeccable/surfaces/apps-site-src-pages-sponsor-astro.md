@@ -32,4 +32,4 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 - Real numbers: community size, role shares, average attendance.
 - Developers (this page) or Engineers (the sponsor deck).
-- The bot's webhook set on the branding service (SPONSOR_WEBHOOK_URL).
+- The bot's webhook set on the branding service (GROKBOT_WEBHOOK_URL, _HEADER, _KEY).

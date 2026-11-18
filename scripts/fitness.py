@@ -559,7 +559,7 @@ def check_live() -> None:
     except json.JSONDecodeError:
         ready = False
     if not ready:
-        fail("live", "api/sponsor can't send: the branding service lacks SPONSOR_WEBHOOK_URL")
+        fail("live", "api/sponsor can't send: the branding service lacks GROKBOT_WEBHOOK_URL, _HEADER or _KEY")
     if get(f"{s}/")[0] != 200:
         fail("live", f"{s}/ is not serving the sponsor deck")
     if get(f"{s}/brand-guidelines/")[0] != 404:

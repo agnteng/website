@@ -22,10 +22,11 @@ Only agnteng.com may post; `SPONSOR_ORIGINS` adds others for development. A
 field people never see catches bots, and one address can send five enquiries
 in fifteen minutes.
 
-The webhook's address is a credential: it comes from the service's
-environment (`SPONSOR_WEBHOOK_URL`), read when the server runs before the
-value inlined at build (0002), and never appears in this repository or in a
-log. `GET /api/sponsor` answers whether the form can send, and
+The webhook's address, the header the bot reads its key from, and the key
+come from the service's environment (`GROKBOT_WEBHOOK_URL`,
+`GROKBOT_WEBHOOK_HEADER`, `GROKBOT_WEBHOOK_KEY`, named like the items in the
+secrets manager that hold them), read when the server runs before the values
+inlined at build (0002). None of them appears in this repository or in a log. `GET /api/sponsor` answers whether the form can send, and
 `mise run fitness:live` fails when it can't.
 
 ## Consequences

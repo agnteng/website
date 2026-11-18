@@ -2,9 +2,12 @@
 // and this app is the one with a server. An enquiry is passed on to the organizers' bot by
 // webhook, as JSON: a line to read, then the fields.
 //
-// Its settings come from the service's environment, never from this repository:
-//   SPONSOR_WEBHOOK_URL   where enquiries go; it is a credential, so it stays out of the code
-//   SPONSOR_ORIGINS       more sites allowed to post, comma-separated (development)
+// Its settings come from the service's environment, never from this repository; the three
+// webhook values are named like the items that hold them:
+//   GROKBOT_WEBHOOK_URL      where enquiries go
+//   GROKBOT_WEBHOOK_HEADER   the header the bot reads its key from
+//   GROKBOT_WEBHOOK_KEY      the key, a credential: it stays out of the code and the logs
+//   SPONSOR_ORIGINS          more sites allowed to post, comma-separated (development)
 // Each is read when the server runs, else as inlined at build (docs/adr/0002).
 //
 // GET answers whether the form can send, so the live check catches a deploy that lost
@@ -15,11 +18,13 @@ import type { APIRoute } from 'astro';
 
 const SITE = 'https://agnteng.com';
 
-const webhook = process.env.SPONSOR_WEBHOOK_URL || import.meta.env.SPONSOR_WEBHOOK_URL;
+const webhook = process.env.GROKBOT_WEBHOOK_URL || import.meta.env.GROKBOT_WEBHOOK_URL;
+const keyHeader = process.env.GROKBOT_WEBHOOK_HEADER || import.meta.env.GROKBOT_WEBHOOK_HEADER;
+const key = process.env.GROKBOT_WEBHOOK_KEY || import.meta.env.GROKBOT_WEBHOOK_KEY;
 const origins = [SITE, ...String(process.env.SPONSOR_ORIGINS || import.meta.env.SPONSOR_ORIGINS || '').split(',')]
   .map((o) => o.trim().replace(/\/+$/, ''))
   .filter(Boolean);
-const ready = Boolean(webhook);
+const ready = Boolean(webhook && keyHeader && key);
 
 // At most five enquiries from one address in fifteen minutes; the form needs one.
 const WINDOW = 15 * 60_000;
@@ -96,18 +101,18 @@ export const POST: APIRoute = async ({ request }) => {
       console.info('[sponsor] no webhook set; this would go out: %s', enquiry.text);
       return answer(request, true, 200);
     }
-    console.error('[sponsor] SPONSOR_WEBHOOK_URL is not set');
+    console.error('[sponsor] GROKBOT_WEBHOOK_URL, GROKBOT_WEBHOOK_HEADER or GROKBOT_WEBHOOK_KEY is not set');
     return answer(request, false, 503, 'The form can’t send right now.');
   }
 
   try {
     const res = await fetch(String(webhook), {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', [String(keyHeader).trim()]: String(key).trim() },
       body: JSON.stringify(enquiry),
       signal: AbortSignal.timeout(10_000),
     });
-    // Its address is a credential: only the status goes in the log.
+    // The address and the key stay out of the log: only the status goes in.
     if (!res.ok) {
       console.error('[sponsor] the webhook answered %d', res.status);
       return answer(request, false, 502, 'The form can’t send right now.');
