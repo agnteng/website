@@ -17,18 +17,18 @@ web
 
 ## Product Purpose
 
-agnteng.com is the archive and front door of Agentic Engineering, a monthly meetup in
-Lisbon where people show what they've shipped with agents: ten-minute talks, then open
-questions. The site holds every talk with its video and transcript, the speakers, and each
+agnteng.com is the archive and front door of Agentic Engineering, which hosts events in
+Lisbon and other European cities, first among them a monthly meetup where people show
+what they've shipped with agents: ten-minute talks, then open questions. The site holds every talk with its video and transcript, the speakers, and each
 meetup with its photos and Q&A. Substack stays the newsletter; the site shows its latest
 posts and doesn't mirror them.
 
 ## Positioning
 
 Talks are real work, technical, never pitches, and sponsorship never buys stage time.
-Every registration says who the person is (role, company, socials) and what they're
-looking for (a job, a co-founder, people to hire, money to raise), so a sponsor knows
-who they'll meet.
+Registration asks who people are and what they're looking for (a job, a co-founder,
+people to hire, funding), so a sponsor knows who they'll meet. Say it as knowing the
+audience, never as collecting data (user, 2026-11-18).
 
 ## Operating Context
 
@@ -39,7 +39,7 @@ static and rebuilt on every deploy.
 
 - Static pages: a form needs an outside endpoint to send anything.
 - Event pages never name the venue. Lisbon-targeted pages show Lisbon only.
-- Undecided: where the sponsor form's messages go.
+- The sponsor form posts to the branding app, which emails it (docs/adr/0027).
 
 ## Brand Commitments
 

@@ -2,7 +2,8 @@
 // Text input, aligned to DS1: 1.5px border, 10px radius, Manrope. Light-context by default.
 // In a form, `name` and any other input attribute (required, autocomplete…) go on the field,
 // and `error` is the message under it, shown while the field has aria-invalid="true".
-// 16px text: iOS zooms into a field set smaller. Label and placeholder pass AA on white.
+// 16px text: iOS zooms into a field set smaller. The label is Manrope, like the field;
+// label and placeholder pass AA on white.
 import type { HTMLAttributes } from 'astro/types';
 interface Props extends Omit<HTMLAttributes<'input'>, 'class'> {
   label?: string;
@@ -15,7 +16,7 @@ const errorId = error && field ? `${field}-error` : undefined;
 ---
 
 <div class={`flex flex-col gap-2 ${cls ?? ''}`}>
-  {label && <label for={field} class="font-mono text-[11px] uppercase tracking-wider text-panel-navy/70">{label}</label>}
+  {label && <label for={field} class="font-sans text-sm font-semibold text-panel-navy/80">{label}</label>}
   <input
     type={type}
     id={field}

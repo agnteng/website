@@ -552,6 +552,14 @@ def check_live() -> None:
         guests = 0
     if not guests:
         fail("live", "api/audience.json reports no guests: the build lost LUMA_API_KEY")
+    # The sponsor form can send: the deploy kept the email service's key (docs/adr/0027).
+    code, body = get(f"{b}/api/sponsor")
+    try:
+        ready = json.loads(body).get("ready") if code == 200 else False
+    except json.JSONDecodeError:
+        ready = False
+    if not ready:
+        fail("live", "api/sponsor can't send: the branding service lacks PLUNK_API_URL or PLUNK_API_KEY")
     if get(f"{s}/")[0] != 200:
         fail("live", f"{s}/ is not serving the sponsor deck")
     if get(f"{s}/brand-guidelines/")[0] != 404:
@@ -565,7 +573,7 @@ def check_live() -> None:
 
 def check_live_site() -> None:
     w = "https://agnteng.com"
-    for page in ("", "talks", "speakers", "events", "robots.txt", "search.json", "favicon.ico"):
+    for page in ("", "talks", "speakers", "events", "sponsor", "robots.txt", "search.json", "favicon.ico"):
         code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")
