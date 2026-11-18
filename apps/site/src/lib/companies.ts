@@ -26,7 +26,6 @@ const list: Company[] = [
   { id: 'apify', name: 'Apify', size: 0.59 }, // apify.com
   { id: 'posthog', name: 'PostHog', size: 0.5 }, // posthog.com/brand, black
   { id: 'coinbase', name: 'Coinbase', size: 0.44 }, // Wikimedia Commons
-  { id: 'spaceandtime', name: 'Space and Time', size: 0.78 }, // spaceandtime.io
   { id: 'deliveryhero', name: 'Delivery Hero', size: 0.54 }, // Wikimedia Commons
   { id: 'deepl', name: 'DeepL', size: 0.74 }, // Wikimedia Commons
   { id: 'near', name: 'NEAR', size: 0.54 }, // docs.near.org
