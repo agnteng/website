@@ -24,7 +24,8 @@ import type { APIRoute } from 'astro';
 
 const SITE = 'https://agnteng.com';
 
-const webhook = process.env.GROKBOT_WEBHOOK_URL || import.meta.env.GROKBOT_WEBHOOK_URL;
+// Values read out of a secrets manager can end in a newline; trimmed, they can't break the request.
+const webhook = String(process.env.GROKBOT_WEBHOOK_URL || import.meta.env.GROKBOT_WEBHOOK_URL || '').trim();
 const keyHeader = process.env.GROKBOT_WEBHOOK_HEADER || import.meta.env.GROKBOT_WEBHOOK_HEADER;
 const key = process.env.GROKBOT_WEBHOOK_KEY || import.meta.env.GROKBOT_WEBHOOK_KEY;
 const origins = [SITE, ...String(process.env.SPONSOR_ORIGINS || import.meta.env.SPONSOR_ORIGINS || '').split(',')]
@@ -130,7 +131,7 @@ export const POST: APIRoute = async ({ request }) => {
   let failure = '';
   for (const attempt of [1, 2]) {
     try {
-      const res = await fetch(String(webhook), {
+      const res = await fetch(webhook, {
         method: 'POST',
         headers: { 'content-type': 'application/json', [auth!.name]: auth!.value },
         body: JSON.stringify(enquiry),
