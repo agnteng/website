@@ -34,7 +34,7 @@ const figures = [
   { value: String(community.attendees), label: 'attendees on average' },
 ].map((f, i) => ({ ...f, color: TINTS[i], edge: TINTS[(i + 1) % TINTS.length] }));
 
-// The form posts to the branding app, which has a server and emails the enquiry
+// The form posts to the branding app, which has a server and passes the enquiry on
 // (docs/adr/0027). A development server points it elsewhere with PUBLIC_SPONSOR_ENDPOINT.
 const endpoint = import.meta.env.PUBLIC_SPONSOR_ENDPOINT || 'https://branding.agnteng.com/api/sponsor';
 

@@ -10,7 +10,7 @@ related_targets: []
 Mode: Persuade. A company decides to sponsor an event and leaves its details.
 
 - Audience: AI and dev-tool companies (want developers and founders on their product), companies hiring and talent agencies (want to meet engineers and founders). Investors second.
-- Action: the form (name, email, company); it emails the organizers through the branding app's endpoint (docs/adr/0027). No prices, no package list.
+- Action: the form (name, email, company); it reaches the organizers' bot by webhook through the branding app's endpoint (docs/adr/0027). No prices, no package list.
 - Proof: the community's numbers from Luma registrations (samples until supplied), a real event photo.
 - Constraints: name Lisbon, and "events", not only meetups ("Lisbon and other European cities"). No Kode Mono anywhere on the page (user, 2026-11-18). Say that we know the audience, never that we collect data. Site copy rules; brand parts only.
 
@@ -32,4 +32,4 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 - Real numbers: community size, role shares, average attendance.
 - Developers (this page) or Engineers (the sponsor deck).
-- The email service set up for agnteng.com, and its key on the branding service.
+- The bot's webhook set on the branding service (SPONSOR_WEBHOOK_URL).

@@ -39,7 +39,7 @@ static and rebuilt on every deploy.
 
 - Static pages: a form needs an outside endpoint to send anything.
 - Event pages never name the venue. Lisbon-targeted pages show Lisbon only.
-- The sponsor form posts to the branding app, which emails it (docs/adr/0027).
+- The sponsor form posts to the branding app, which passes it on to the organizers' bot by webhook (docs/adr/0027).
 
 ## Brand Commitments
 

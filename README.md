@@ -23,7 +23,7 @@ git config core.hooksPath .githooks   # needs: brew install gitleaks
 
 | Path | What |
 |---|---|
-| `apps/branding/` | [branding.agnteng.com](https://branding.agnteng.com) (Astro): brand guidelines, playground, website mockups, the `slides/<city>-<date>` decks, `sponsorship`, `api/audience.json` (live Luma numbers for tonight's deck) and `api/sponsor` (where agnteng.com's sponsor form posts; it emails the enquiry, `docs/adr/0027`). Also builds [sponsors.agnteng.com](https://sponsors.agnteng.com). |
+| `apps/branding/` | [branding.agnteng.com](https://branding.agnteng.com) (Astro): brand guidelines, playground, website mockups, the `slides/<city>-<date>` decks, `sponsorship`, `api/audience.json` (live Luma numbers for tonight's deck) and `api/sponsor` (where agnteng.com's sponsor form posts; it passes the enquiry on by webhook, `docs/adr/0027`). Also builds [sponsors.agnteng.com](https://sponsors.agnteng.com). |
 | `apps/branding/src/components/slides/` | The deck engine and primitives; `slides/meetup/` holds the slides every meetup deck shares, `slides-<date>/` one meetup's own. |
 | `apps/branding/src/lib/luma.ts` | Server-only Luma client. Import it only from `.astro` frontmatter or `src/pages/api/`, so `LUMA_API_KEY` stays out of the browser bundle. |
 | `apps/site/` | [agnteng.com](https://agnteng.com) (Astro, static): the next event, every talk with its video and transcript, the speakers, past events with their Q&A, the newsletter's latest posts, and `/sponsor` for companies. |

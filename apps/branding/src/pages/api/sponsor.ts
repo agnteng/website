@@ -1,29 +1,25 @@
 // The sponsor form on agnteng.com/sponsor posts here (docs/adr/0027): that site is static,
-// and this app is the one with a server. An enquiry is emailed to the partners address
-// through the transactional email service (Plunk), with the sponsor's address to reply to.
+// and this app is the one with a server. An enquiry is passed on to the organizers' bot by
+// webhook, as JSON: a line to read, then the fields.
 //
 // Its settings come from the service's environment, never from this repository:
-//   PLUNK_API_URL, PLUNK_API_KEY   the email service, and this site's key for it
-//   SPONSOR_MAIL_TO                where enquiries go; partners@agnteng.com if unset
-//   SPONSOR_ORIGINS                more sites allowed to post, comma-separated (development)
+//   SPONSOR_WEBHOOK_URL   where enquiries go; it is a credential, so it stays out of the code
+//   SPONSOR_ORIGINS       more sites allowed to post, comma-separated (development)
 // Each is read when the server runs, else as inlined at build (docs/adr/0002).
 //
 // GET answers whether the form can send, so the live check catches a deploy that lost
-// the key: everything else would still answer 200.
+// the webhook: everything else would still answer 200.
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
 const SITE = 'https://agnteng.com';
-const FROM = { address: 'partners@agnteng.com', name: 'Agentic Engineering' };
 
-const plunkUrl = process.env.PLUNK_API_URL || import.meta.env.PLUNK_API_URL;
-const plunkKey = process.env.PLUNK_API_KEY || import.meta.env.PLUNK_API_KEY;
-const mailTo = process.env.SPONSOR_MAIL_TO || import.meta.env.SPONSOR_MAIL_TO || 'partners@agnteng.com';
+const webhook = process.env.SPONSOR_WEBHOOK_URL || import.meta.env.SPONSOR_WEBHOOK_URL;
 const origins = [SITE, ...String(process.env.SPONSOR_ORIGINS || import.meta.env.SPONSOR_ORIGINS || '').split(',')]
   .map((o) => o.trim().replace(/\/+$/, ''))
   .filter(Boolean);
-const ready = Boolean(plunkUrl && plunkKey);
+const ready = Boolean(webhook);
 
 // At most five enquiries from one address in fifteen minutes; the form needs one.
 const WINDOW = 15 * 60_000;
@@ -38,7 +34,6 @@ const tooMany = (who: string) => {
 };
 
 const field = (v: FormDataEntryValue | null, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
-const html = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // The script asks for JSON. A form posted without it goes back to the page it came from,
@@ -87,36 +82,38 @@ export const POST: APIRoute = async ({ request }) => {
   const company = field(data.get('company'), 200);
   if (!name || !company || !EMAIL.test(email)) return answer(request, false, 400, 'A name, an email address and a company are needed.');
 
-  const subject = `Sponsor enquiry: ${company}`;
-  const body = [
-    `<p><strong>${html(name)}</strong> from <strong>${html(company)}</strong> would like to talk about sponsoring an event.</p>`,
-    `<p>Email: <a href="mailto:${html(email)}">${html(email)}</a></p>`,
-    `<p style="color:#666">Sent from the form on agnteng.com/sponsor. Reply to this email to answer them.</p>`,
-  ].join('\n');
+  const enquiry = {
+    text: `New sponsor enquiry: ${name} (${email}) from ${company}, via agnteng.com/sponsor`,
+    name,
+    email,
+    company,
+    page: `${SITE}/sponsor`,
+    sentAt: new Date().toISOString(),
+  };
 
   if (!ready) {
     if (import.meta.env.DEV) {
-      console.info('[sponsor] no email service set up; this would go to %s: %s (%s, %s)', mailTo, subject, name, email);
+      console.info('[sponsor] no webhook set; this would go out: %s', enquiry.text);
       return answer(request, true, 200);
     }
-    console.error('[sponsor] PLUNK_API_URL or PLUNK_API_KEY is not set');
+    console.error('[sponsor] SPONSOR_WEBHOOK_URL is not set');
     return answer(request, false, 503, 'The form can’t send right now.');
   }
 
   try {
-    const res = await fetch(`${String(plunkUrl).replace(/\/+$/, '')}/v1/send`, {
+    const res = await fetch(String(webhook), {
       method: 'POST',
-      headers: { authorization: `Bearer ${plunkKey}`, 'content-type': 'application/json' },
-      // subscribed: false, or every sender would become a newsletter contact.
-      body: JSON.stringify({ to: mailTo, from: FROM.address, name: FROM.name, subject, body, reply: email, subscribed: false }),
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(enquiry),
       signal: AbortSignal.timeout(10_000),
     });
+    // Its address is a credential: only the status goes in the log.
     if (!res.ok) {
-      console.error('[sponsor] the email service answered %d', res.status);
+      console.error('[sponsor] the webhook answered %d', res.status);
       return answer(request, false, 502, 'The form can’t send right now.');
     }
   } catch (e) {
-    console.error('[sponsor] the email service did not answer: %s', (e as Error).message);
+    console.error('[sponsor] the webhook did not answer: %s', (e as Error).name);
     return answer(request, false, 502, 'The form can’t send right now.');
   }
   return answer(request, true, 200);
