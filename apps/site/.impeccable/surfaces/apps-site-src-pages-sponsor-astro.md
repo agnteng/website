@@ -24,7 +24,7 @@ STORY: A company learns Agentic Engineering hosts events in Lisbon and other Eur
 
 FIRST VIEWPORT: Desktop: nav on blue; H1 (the user's hook) and one line in the left half, centred vertically against the white form card in the right five columns; below, a full-bleed blue-toned crowd band whose top dissolves into the blue. Phone: H1, line, card, band.
 
-FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section, per the user's edits: heading and line with the average monthly event in a dark panel top right; one solid bar of the role shares with big percentages under each part; a dark panel, "Who they are", one sentence (the "What they're looking for" row was removed, user 2026-11-18). Signature interaction: the bar wipes in from the left once in view. Motion: the hero's rise-in, the live cells and dither, that wipe.
+FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section, per the user's edits: heading and one line that also gives the average monthly event in words (the stat panel read as AI slop, user 2026-11-18); one solid bar of the role shares with big percentages under each part; a dark panel, "Who they are", one sentence (the "What they're looking for" row was removed, user 2026-11-18). Signature interaction: the bar wipes in from the left once in view. Motion: the hero's rise-in, the live cells and dither, that wipe.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 

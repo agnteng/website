@@ -97,19 +97,8 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
       <Animation client:visible animation="aurora" color="#1E2BE6" edge="#B5A6FF" bg="#05071E" cell={6} gap={1} density={0.34} motion={20} fade="left" shape="square" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.4 }} />
     </div>
     <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
-      <div class="grid gap-8 md:grid-cols-12 md:items-end">
-        <div class="md:col-span-7 lg:col-span-8">
-          <SectionHeading>The community</SectionHeading>
-          <p class="mt-5 max-w-[46ch] text-lg leading-relaxed text-soft-white/75">About {community.people.toLocaleString('en')} people have registered for our events since {since}.</p>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-panel-navy p-6 md:col-span-5 md:p-8 lg:col-span-4">
-          <p class="font-semibold text-periwinkle">Average monthly event</p>
-          <p class="mt-4 flex items-baseline gap-3">
-            <span class="font-sans text-6xl font-extrabold leading-none tracking-tight tabular-nums">{community.attendees}</span>
-            <span class="text-lg text-soft-white/75">attendees</span>
-          </p>
-        </div>
-      </div>
+      <SectionHeading>The community</SectionHeading>
+      <p class="mt-5 max-w-[52ch] text-lg leading-relaxed text-soft-white/75">About {community.people.toLocaleString('en')} people have registered for our events since {since}. Around {community.attendees} come to each monthly event.</p>
 
       <ShareBar class="mt-12 md:mt-16" segments={community.roles} />
 
