@@ -17,6 +17,10 @@
 .video-player.is-floating [data-video-close] { display: grid; }
 
 html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-behavior: smooth; }
+/* SiteNav floats over the page: anything scrolled to, an anchor or a focused element, stops
+   below it, and .under-nav runs a hero up beneath its h-14 bar. */
+html { scroll-padding-top: 5.5rem; }
+.under-nav { margin-top: -3.5rem; padding-top: 4rem; }
 :focus-visible { outline: 2px solid var(--color-bright-blue); outline-offset: 3px; }
 ::selection { background: var(--color-periwinkle); color: var(--color-deep-navy); }
 html { caret-color: var(--color-electric-blue); }

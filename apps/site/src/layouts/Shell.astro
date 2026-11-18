@@ -39,7 +39,7 @@ const shareImage = new URL(image, Astro.site).href;
     <link rel="preload" as="font" type="font/woff2" href={manrope} crossorigin />
   </head>
   <body class:list={['font-sans', cls]}>
-    <a href="#main" class="sr-only rounded-full bg-white px-5 py-3 font-semibold text-panel-navy shadow-lg focus:not-sr-only focus:fixed focus:px-5 focus:py-3 focus:left-4 focus:top-4 focus:z-50">Skip to content</a>
+    <a href="#main" class="sr-only rounded-full bg-white px-5 py-3 font-semibold text-panel-navy shadow-lg focus:not-sr-only focus:fixed focus:px-5 focus:py-3 focus:left-4 focus:top-4 focus:z-[60]">Skip to content</a>
     <slot />
   </body>
 </html>

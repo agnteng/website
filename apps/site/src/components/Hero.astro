@@ -3,7 +3,6 @@
 // break up into it cell by cell. The page includes <Tone /> for the photos' colour.
 import { Image } from 'astro:assets';
 import HeroCells from './HeroCells.astro';
-import SiteNav from './SiteNav.astro';
 import PageTitle from './PageTitle.astro';
 import NextMeetup from './NextMeetup.astro';
 import { nextEvent, galleryPhoto, pitchIn } from '../lib/data';
@@ -38,8 +37,7 @@ const photos = shots.map((p, i) => {
   return { img: p.img, style: `--n:${i}; aspect-ratio:${p.img.width}/${p.img.height}; --w:${w}; --l:${l}; --t:${t}; --wd:${wd}; --ld:${ld}; --td:${td}` };
 });
 ---
-<section class="relative isolate overflow-hidden bg-electric-blue text-white">
-  <SiteNav onHero />
+<section class="under-nav relative isolate overflow-hidden bg-electric-blue text-white">
   <!-- The skip link lands here. -->
   <div id="main" class="relative z-10 mx-auto grid max-w-7xl items-center px-4 pt-14 pb-10 md:grid-cols-12 md:px-8 md:pt-20 md:pb-28">
     <div class="md:col-span-6">
