@@ -1,14 +1,22 @@
 ---
-// Infinite scrolling strip, inspired by DS2's marquee. Two copies of the item
-// list animate -50% for a seamless loop. Pauses for reduced-motion.
+// Infinite scrolling strip, inspired by DS2's marquee. Three copies sit side
+// by side, each moving left by its own width, so the loop is seamless on any
+// screen up to twice a copy's width. Text items by default; anything else (a
+// row of logos) goes in the slot: the first copy is read out, the other two are
+// hidden and inert. Speed: --ae-marquee-duration, one copy's trip (26s by
+// default; a class can set it per breakpoint). Pauses on hover, and while the
+// root has data-paused (a pause button). With reduced motion it stands still,
+// and slotted content shows once, wrapped.
 interface Props {
   items?: string[];
-  tone?: 'blue' | 'navy' | 'light';
+  tone?: 'blue' | 'navy' | 'light' | 'none';
+  id?: string;
   class?: string;
 }
 const {
   items = ['agentic engineering', 'lisbon', 'build · ship · secure', 'monthly meetup'],
   tone = 'blue',
+  id,
   class: cls,
 } = Astro.props;
 
@@ -16,22 +24,30 @@ const tones = {
   blue: 'bg-electric-blue text-white',
   navy: 'bg-deep-navy text-periwinkle',
   light: 'bg-soft-white text-electric-blue',
+  none: '',
 }[tone];
+const content = Astro.slots.has('default') ? await Astro.slots.render('default') : undefined;
 ---
 
-<div class={`overflow-hidden ${tones} ${cls ?? ''}`}>
-  <div class="ae-marquee-track py-3">
+<div id={id} class={`ae-marquee overflow-hidden ${tones} ${cls ?? ''}`} data-content={content ? '' : undefined}>
+  <div class:list={['ae-marquee-track', !content && 'py-3']}>
     {
-      [0, 1].map(() => (
-        <div class="flex shrink-0 items-center" aria-hidden={true}>
-          {items.map((it) => (
-            <span class="mx-6 flex items-center gap-6 font-mono text-sm font-semibold uppercase tracking-[0.18em]">
-              {it}
-              <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-50" />
-            </span>
-          ))}
-        </div>
-      ))
+      [0, 1, 2].map((i) =>
+        content ? (
+          <div class="ae-marquee-copy" aria-hidden={i > 0 ? 'true' : undefined} inert={i > 0}>
+            <Fragment set:html={content} />
+          </div>
+        ) : (
+          <div class="ae-marquee-copy items-center" aria-hidden="true">
+            {items.map((it) => (
+              <span class="mx-6 flex items-center gap-6 font-mono text-sm font-semibold uppercase tracking-[0.18em]">
+                {it}
+                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-50" />
+              </span>
+            ))}
+          </div>
+        ),
+      )
     }
   </div>
 </div>

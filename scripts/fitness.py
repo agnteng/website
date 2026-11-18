@@ -367,6 +367,28 @@ def check_register() -> None:
             fail("register", f"{f.relative_to(ROOT)} writes its own Register button; use RegisterButton")
 
 
+# ── company logos are one colour and listed once (apps/site/src/lib/companies.ts, docs/adr/0025) ──
+
+LOGO = re.compile(r'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 [\d.]+ 100">'
+                  r'(<path( fill-rule="evenodd")?( fill-opacity="0?\.\d+")? d="[a-zA-Z\d .,+-]+"/>)+</svg>\s*')
+
+
+def check_companies() -> None:
+    site = ROOT / "apps" / "site" / "src"
+    listed = re.findall(r"\bid: '([a-z0-9-]+)', name:", (site / "lib" / "companies.ts").read_text())
+    files = {f.stem: f for f in sorted((site / "companies").glob("*.svg"))}
+    for name in sorted({n for n in listed if listed.count(n) > 1}):
+        fail("companies", f"companies.ts lists {name} more than once, so the strip shows it twice")
+    for name in sorted(set(listed) - set(files)):
+        fail("companies", f"companies.ts lists {name}, and src/companies/{name}.svg is missing")
+    for name in sorted(set(files) - set(listed)):
+        fail("companies", f"src/companies/{name}.svg is not listed in companies.ts")
+    for f in files.values():
+        if not LOGO.fullmatch(f.read_text()):
+            fail("companies", f"{f.relative_to(ROOT)}: a logo is <svg viewBox=\"0 0 W 100\"> holding only <path d> "
+                              "(fill-rule and fill-opacity allowed): no fill or stroke colour, no other element")
+
+
 # ── a photo never shows before its dither (apps/site/src/styles/site.css) ──
 
 def check_dither() -> None:
@@ -576,7 +598,8 @@ def main() -> None:
                   ("events", check_events), ("talks", check_talks),
                   ("photos", check_photos), ("search", check_search),
                   ("dither", check_dither), ("telegram", check_telegram),
-                  ("venue", check_venue), ("register", check_register)]
+                  ("venue", check_venue), ("register", check_register),
+                  ("companies", check_companies)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()
