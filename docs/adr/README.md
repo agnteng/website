@@ -44,3 +44,4 @@ Decision, Consequences.
 | [0025](0025-company-logos-in-the-site.md) | Company logos are part of the site's source, in one colour | Accepted |
 | [0026](0026-best-known-companies-speakers-first.md) | Speakers from the best-known companies come first | Accepted |
 | [0027](0027-sponsor-form-posts-to-branding.md) | The sponsor form posts to the branding app, which passes it on by webhook | Accepted |
+| [0028](0028-talk-form-goes-the-same-way.md) | The talk form goes to the organizers' bot like the sponsor form | Accepted |

@@ -8,6 +8,7 @@ import TalkTile from '../components/TalkTile.astro';
 import EventCover from '../components/EventCover.astro';
 import EventDate from '../components/EventDate.astro';
 import SectionHeading from '../components/SectionHeading.astro';
+import ToSpeak from '../components/ToSpeak.astro';
 import RegisterButton from '../components/RegisterButton.astro';
 import Tone from '../components/Tone.astro';
 import SpeakerCard from '../components/SpeakerCard.astro';
@@ -15,7 +16,7 @@ import CompanyLogos from '../components/CompanyLogos.astro';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import Icon from '@agnteng/brand/components/Icon.astro';
-import { nextEvent, past, talks, galleryPhoto, speakers, links, eventSlug, eventName, toSpeak, TINTS } from '../lib/data';
+import { nextEvent, past, talks, galleryPhoto, speakers, links, eventSlug, eventName, TINTS } from '../lib/data';
 import { latestPosts } from '../lib/newsletter';
 import { organization, website, eventNode } from '../lib/schema';
 
@@ -121,7 +122,7 @@ const night = [
     <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-12 md:px-8 md:py-24">
       <SectionHeading class="md:col-span-6">Get involved</SectionHeading>
       <div class="space-y-5 text-lg md:col-span-6">
-        <p>{toSpeak}</p>
+        <ToSpeak />
         <p>To host or sponsor a meetup, email <a href={links.partners} class="underline underline-offset-4">partners@agnteng.com</a> or read the <a href={links.sponsors} class="underline underline-offset-4">sponsor deck</a>.</p>
         <RegisterButton />
       </div>

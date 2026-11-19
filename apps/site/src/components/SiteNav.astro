@@ -19,7 +19,7 @@ const sections = [
   { label: 'Events', href: '/events' },
   { label: 'Sponsor', href: sponsorPage ? '/sponsor' : links.sponsors },
 ];
-const speak = { label: 'Apply to speak', href: '/#involved' };
+const speak = { label: 'Apply to speak', href: '/speak' };
 ---
 <header data-sticky-nav class="group pointer-events-none sticky top-3 z-50 mx-auto max-w-7xl px-4 text-white md:top-4 md:px-8">
   <div class:list={['pointer-events-auto relative grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-full border pl-4 pr-2 shadow-[0_12px_32px_-12px_rgb(5_7_30/0.35)] backdrop-blur-xl transition-colors duration-300 md:grid-cols-[1fr_minmax(0,22rem)_1fr] md:gap-5', onHero ? 'border-white/20 bg-white/12 group-data-[scrolled]:border-white/10 group-data-[scrolled]:bg-deep-navy/85 [@media(scripting:none)]:border-white/10 [@media(scripting:none)]:bg-deep-navy/85' : 'border-white/10 bg-deep-navy/85']}>

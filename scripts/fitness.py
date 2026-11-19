@@ -563,19 +563,20 @@ def check_live() -> None:
         ready = False
     if not ready:
         fail("live", "api/sponsor can't send: GROKBOT_WEBHOOK_* didn't resolve at start; start.sh's summary is in the service log")
-    # The form's cross-site post reaches the endpoint, which refuses an empty one itself (400).
-    # Astro's own origin check would answer 403 before it (docs/adr/0027).
-    req = urllib.request.Request(f"{b}/api/sponsor", data=b"name=&email=&company=", method="POST", headers={
-        "Origin": "https://agnteng.com", "Accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "agnteng-fitness"})
-    try:
-        code = urllib.request.urlopen(req, timeout=20).status
-    except urllib.error.HTTPError as e:
-        code = e.code
-    except (urllib.error.URLError, OSError):
-        code = 0
-    if code != 400:
-        fail("live", f"api/sponsor answered agnteng.com's form with {code}, not 400: the form can't reach it")
+    # Each form's cross-site post reaches its endpoint, which refuses an empty one itself (400).
+    # Astro's own origin check would answer 403 before it (docs/adr/0027, 0028).
+    for form in ("sponsor", "speak"):
+        req = urllib.request.Request(f"{b}/api/{form}", data=b"name=&email=", method="POST", headers={
+            "Origin": "https://agnteng.com", "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "agnteng-fitness"})
+        try:
+            code = urllib.request.urlopen(req, timeout=20).status
+        except urllib.error.HTTPError as e:
+            code = e.code
+        except (urllib.error.URLError, OSError):
+            code = 0
+        if code != 400:
+            fail("live", f"api/{form} answered agnteng.com's form with {code}, not 400: the form can't reach it")
     if get(f"{s}/")[0] != 200:
         fail("live", f"{s}/ is not serving the sponsor deck")
     if get(f"{s}/brand-guidelines/")[0] != 404:
@@ -589,7 +590,7 @@ def check_live() -> None:
 
 def check_live_site() -> None:
     w = "https://agnteng.com"
-    for page in ("", "talks", "speakers", "events", "sponsor", "robots.txt", "search.json", "favicon.ico"):
+    for page in ("", "talks", "speakers", "events", "sponsor", "speak", "robots.txt", "search.json", "favicon.ico"):
         code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")

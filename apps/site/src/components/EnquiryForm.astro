@@ -1,0 +1,121 @@
+---
+// A form in a white card that posts to the branding app (docs/adr/0027, 0028). With script it checks the
+// fields and shows the outcome in place; without, the endpoint sends the visitor back to
+// #sent or #not-sent.
+import type { ComponentProps } from 'astro/types';
+import Button from '@agnteng/brand/components/Button.astro';
+import Icon from '@agnteng/brand/components/Icon.astro';
+import Input from '@agnteng/brand/components/Input.astro';
+import SubHeading from './SubHeading.astro';
+
+// A field is the brand Input's props. `id` is also the name it posts under; `half` puts it
+// beside the next field where the form is wide enough.
+type Field = ComponentProps<typeof Input> & { id: string; label: string; error: string; half?: boolean };
+interface Props {
+  action: string; // the endpoint
+  heading: string;
+  intro: string;
+  fields: Field[];
+  submit: string; // the button
+  notSent?: string; // a post without script that didn't go
+}
+const { action, heading, intro, fields, submit, notSent = 'That didn’t send. Try again in a moment.' } = Astro.props;
+---
+<div data-enquiry-card class="flex flex-col rounded-2xl bg-white p-6 text-panel-navy shadow-[0_32px_64px_-24px_rgb(5_7_30/0.6)] sm:p-8">
+  <p id="sent" class="mb-6 hidden rounded-[10px] bg-electric-blue/[0.08] px-4 py-3 font-semibold text-electric-blue target:block">Thanks, we got your message. We’ll get back to you by email.</p>
+  <p id="not-sent" class="mb-6 hidden rounded-[10px] bg-error/[0.08] px-4 py-3 font-semibold text-error target:block">{notSent}</p>
+  <form data-enquiry-form method="post" action={action} class="@container relative">
+    <SubHeading as="h2">{heading}</SubHeading>
+    <p class="mt-2 text-panel-navy/75">{intro}</p>
+    <div class="mt-6 grid gap-4 @sm:grid-cols-2">
+      {fields.map(({ half, ...f }) => <Input {...f} name={f.id} required class={half ? undefined : '@sm:col-span-2'} />)}
+    </div>
+    <!-- Left empty by people, who never see it; bots fill it in. -->
+    <div class="absolute -left-[200vw] top-0 size-px overflow-hidden" aria-hidden="true">
+      <label>Leave this empty <input type="text" name="x_leave_blank" tabindex="-1" autocomplete="off" /></label>
+    </div>
+    <Button type="submit" class="mt-7 w-full">{submit}</Button>
+    <p data-enquiry-failed hidden role="alert" class="mt-4 text-center text-sm font-medium text-error">That didn’t send. Try again in a moment.</p>
+  </form>
+  <!-- In place of the form, at the card's height. -->
+  <div data-enquiry-done hidden class="my-auto py-6 text-center">
+    <span aria-hidden="true" class="mx-auto grid size-16 place-items-center rounded-full bg-electric-blue text-white"><Icon name="Check" size={30} /></span>
+    <SubHeading as="h2" class="mt-6"><span tabindex="-1" data-done-heading class="outline-none">Thanks, <span data-name></span></span></SubHeading>
+    <p class="mx-auto mt-3 max-w-[32ch] text-panel-navy/75">We’ll get back to you at <span data-email class="font-semibold text-panel-navy"></span>.</p>
+  </div>
+</div>
+
+<script>
+  type Field = HTMLInputElement | HTMLTextAreaElement;
+  // An email address needs a dot after the @, as the endpoint does.
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  for (const card of document.querySelectorAll<HTMLElement>('[data-enquiry-card]')) {
+    const form = card.querySelector<HTMLFormElement>('[data-enquiry-form]')!;
+    const done = card.querySelector<HTMLElement>('[data-enquiry-done]')!;
+    const failed = form.querySelector<HTMLElement>('[data-enquiry-failed]')!;
+    const inputs = [...form.querySelectorAll<Field>('input[required], textarea[required]')];
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const label = button.textContent;
+    const fallback = failed.textContent;
+    // With script, the page checks the fields itself; without, the browser does.
+    form.noValidate = true;
+
+    // Posts the fields where the form points. Answers nothing once sent, or what to say: the
+    // endpoint's own words, or the fallback when there are none (no answer, a proxy's page).
+    const send = async (data: FormData) => {
+      const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } }).catch(() => null);
+      if (res?.ok) return '';
+      return ((await res?.json().catch(() => null))?.error as string | undefined) || fallback;
+    };
+
+    // A field is checked when it is left or sent, and again as it is fixed. Runs of spaces
+    // count once, as the endpoint counts them; `data-match` is a pattern in any case.
+    const check = (f: Field) => {
+      const v = f.value.trim();
+      const ok = v !== '' && f.checkValidity() && v.replace(/\s+/g, ' ').length >= f.minLength
+        && (f.type !== 'email' || EMAIL.test(v)) && (!f.dataset.match || new RegExp(f.dataset.match, 'i').test(v));
+      f.setAttribute('aria-invalid', String(!ok));
+      return ok;
+    };
+    for (const f of inputs) {
+      f.addEventListener('blur', () => { if (f.value.trim()) check(f); });
+      f.addEventListener('input', () => { if (f.getAttribute('aria-invalid') === 'true') check(f); });
+    }
+
+    // While sending, the button stays at full strength, so "Sending…" can be read, but does
+    // nothing: aria-disabled rather than disabled, which the brand Button fades to 40%.
+    let sending = false;
+    const busy = (on: boolean) => {
+      sending = on;
+      button.setAttribute('aria-disabled', String(on));
+      button.classList.toggle('cursor-progress', on);
+      button.textContent = on ? 'Sending…' : label;
+      for (const f of inputs) f.readOnly = on;
+      form.toggleAttribute('aria-busy', on);
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (sending) return;
+      const wrong = inputs.filter((f) => !check(f));
+      if (wrong.length) { wrong[0].focus(); return; }
+      const data = new FormData(form);
+      failed.hidden = true;
+      busy(true);
+      const error = await send(data);
+      if (error) {
+        busy(false);
+        failed.textContent = error;
+        failed.hidden = false;
+        return;
+      }
+      done.querySelector('[data-name]')!.textContent = String(data.get('name')).trim().split(/\s+/)[0];
+      done.querySelector('[data-email]')!.textContent = String(data.get('email')).trim();
+      card.style.minHeight = `${card.offsetHeight}px`;
+      form.hidden = true;
+      done.hidden = false;
+      done.querySelector<HTMLElement>('[data-done-heading]')!.focus();
+    });
+  }
+</script>

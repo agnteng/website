@@ -8,14 +8,11 @@ import SiteFooter from '../components/SiteFooter.astro';
 import HeroCells from '../components/HeroCells.astro';
 import Tone from '../components/Tone.astro';
 import PageTitle from '../components/PageTitle.astro';
-import SubHeading from '../components/SubHeading.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
 import CompanyLogos from '../components/CompanyLogos.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
-import Button from '@agnteng/brand/components/Button.astro';
-import Icon from '@agnteng/brand/components/Icon.astro';
-import Input from '@agnteng/brand/components/Input.astro';
-import { galleryPhoto, TINTS } from '../lib/data';
+import { formsOrigin, galleryPhoto, hostLine, TINTS } from '../lib/data';
 import { organization } from '../lib/schema';
 
 // The organizers' figures. The sponsor deck (apps/branding/src/components/slides-sponsor/
@@ -33,14 +30,11 @@ const figures = [
   { value: String(community.attendees), label: 'attendees on average' },
 ].map((f, i) => ({ ...f, color: TINTS[i], edge: TINTS[(i + 1) % TINTS.length] }));
 
-// The form posts to the branding app, which has a server and passes the enquiry on
-// (docs/adr/0027). A development server points it elsewhere with PUBLIC_SPONSOR_ENDPOINT.
-const endpoint = import.meta.env.PUBLIC_SPONSOR_ENDPOINT || 'https://branding.agnteng.com/api/sponsor';
-
 const fields = [
-  { id: 'name', label: 'Name', type: 'text', autocomplete: 'name', error: 'Enter your name.' },
+  { id: 'name', label: 'Name', autocomplete: 'name', error: 'Enter your name.' },
   { id: 'email', label: 'Email', type: 'email', autocomplete: 'email', error: 'Enter an email address, like name@company.com.' },
-  { id: 'company', label: 'Company', type: 'text', autocomplete: 'organization', error: 'Enter your company’s name.' },
+  { id: 'company', label: 'Company', autocomplete: 'organization', error: 'Enter your company’s name.' },
+  { id: 'role', label: 'Role', autocomplete: 'organization-title', error: 'Enter your role.' },
 ];
 const photo = galleryPhoto('2026-08-26', '04.jpg');
 ---
@@ -51,34 +45,11 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
     <div id="main" class="relative z-10 mx-auto grid max-w-7xl gap-10 px-4 pt-14 md:grid-cols-12 md:items-center md:gap-8 md:px-8 md:pt-20">
       <div class="md:col-span-6">
         <PageTitle rise style="--i:0">Connect with a community of engaged founders and developers building with AI.</PageTitle>
-        <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Agentic Engineering hosts events in Lisbon and other European cities. Sponsors get access to a community of people building with AI, and meet the developers and founders they want to hire.</p>
+        <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">{hostLine} Sponsors get access to a community of people building with AI, and meet the developers and founders they want to hire.</p>
       </div>
 
-      <div id="sponsor" class="rise scroll-mt-6 md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:2">
-        <div data-sponsor-card class="flex flex-col rounded-2xl bg-white p-6 text-panel-navy shadow-[0_32px_64px_-24px_rgb(5_7_30/0.6)] sm:p-8">
-          <!-- Where a form posted without script comes back to (the endpoint adds the hash). -->
-          <p id="sent" class="mb-6 hidden rounded-[10px] bg-electric-blue/[0.08] px-4 py-3 font-semibold text-electric-blue target:block">Thanks, we got your message. We’ll get back to you by email.</p>
-          <p id="not-sent" class="mb-6 hidden rounded-[10px] bg-error/[0.08] px-4 py-3 font-semibold text-error target:block">That didn’t send. Email partners@agnteng.com instead.</p>
-          <form data-sponsor-form method="post" action={endpoint} class="relative">
-            <SubHeading as="h2">Sponsor an event</SubHeading>
-            <p class="mt-2 text-panel-navy/75">Leave your details and we’ll get back to you by email.</p>
-            <div class="mt-6 space-y-4">
-              {fields.map((f) => <Input id={f.id} name={f.id} label={f.label} type={f.type} autocomplete={f.autocomplete} required error={f.error} />)}
-            </div>
-            <!-- Left empty by people, who never see it; bots fill it in. -->
-            <div class="absolute -left-[200vw] top-0 size-px overflow-hidden" aria-hidden="true">
-              <label>Leave this empty <input type="text" name="x_leave_blank" tabindex="-1" autocomplete="off" /></label>
-            </div>
-            <Button type="submit" class="mt-7 w-full">Get in touch</Button>
-            <p data-sponsor-failed hidden role="alert" class="mt-4 text-center text-sm font-medium text-error">That didn’t send. Try again in a moment.</p>
-          </form>
-          <!-- In place of the form, at the card's height. -->
-          <div data-sponsor-done hidden class="my-auto py-6 text-center">
-            <span aria-hidden="true" class="mx-auto grid size-16 place-items-center rounded-full bg-electric-blue text-white"><Icon name="Check" size={30} /></span>
-            <SubHeading as="h2" class="mt-6"><span tabindex="-1" data-done-heading class="outline-none">Thanks, <span data-name></span></span></SubHeading>
-            <p class="mx-auto mt-3 max-w-[32ch] text-panel-navy/75">We’ll get back to you at <span data-email class="font-semibold text-panel-navy"></span>.</p>
-          </div>
-        </div>
+      <div class="rise md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:2">
+        <EnquiryForm action={`${formsOrigin}/api/sponsor`} heading="Sponsor an event" intro="Leave your details and we’ll get back to you by email." fields={fields} submit="Get in touch" notSent="That didn’t send. Email partners@agnteng.com instead." />
       </div>
     </div>
 
@@ -118,72 +89,3 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
 
   <SiteFooter />
 </Shell>
-
-<script>
-  const form = document.querySelector<HTMLFormElement>('[data-sponsor-form]')!;
-  const done = document.querySelector<HTMLElement>('[data-sponsor-done]')!;
-  const failed = form.querySelector<HTMLElement>('[data-sponsor-failed]')!;
-  const inputs = [...form.querySelectorAll<HTMLInputElement>('input[required]')];
-  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
-  const label = button.textContent;
-  const fallback = failed.textContent;
-  // With script, the page checks the fields itself; without, the browser does.
-  form.noValidate = true;
-
-  // Posts the fields where the form points; a refusal carries the endpoint's own words.
-  async function send(data: FormData) {
-    const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? '');
-  }
-
-  // A field is checked when it is left or sent, and again as it is fixed. An email address
-  // needs a dot after the @, as the endpoint does.
-  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const check = (f: HTMLInputElement) => {
-    const v = f.value.trim();
-    const ok = v !== '' && f.checkValidity() && (f.type !== 'email' || EMAIL.test(v));
-    f.setAttribute('aria-invalid', String(!ok));
-    return ok;
-  };
-  for (const f of inputs) {
-    f.addEventListener('blur', () => { if (f.value.trim()) check(f); });
-    f.addEventListener('input', () => { if (f.getAttribute('aria-invalid') === 'true') check(f); });
-  }
-
-  // While sending, the button stays at full strength, so "Sending…" can be read, but does
-  // nothing: aria-disabled rather than disabled, which the brand Button fades to 40%.
-  let sending = false;
-  const busy = (on: boolean) => {
-    sending = on;
-    button.setAttribute('aria-disabled', String(on));
-    button.classList.toggle('cursor-progress', on);
-    button.textContent = on ? 'Sending…' : label;
-    for (const f of inputs) f.readOnly = on;
-    form.toggleAttribute('aria-busy', on);
-  };
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (sending) return;
-    const wrong = inputs.filter((f) => !check(f));
-    if (wrong.length) { wrong[0].focus(); return; }
-    const data = new FormData(form);
-    failed.hidden = true;
-    busy(true);
-    try {
-      await send(data);
-    } catch (err) {
-      busy(false);
-      failed.textContent = (err as Error).message || fallback;
-      failed.hidden = false;
-      return;
-    }
-    done.querySelector('[data-name]')!.textContent = String(data.get('name')).trim().split(/\s+/)[0];
-    done.querySelector('[data-email]')!.textContent = String(data.get('email')).trim();
-    const card = document.querySelector<HTMLElement>('[data-sponsor-card]')!;
-    card.style.minHeight = `${card.offsetHeight}px`;
-    form.hidden = true;
-    done.hidden = false;
-    done.querySelector<HTMLElement>('[data-done-heading]')!.focus();
-  });
-</script>

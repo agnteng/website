@@ -15,9 +15,10 @@ import Animation from '@agnteng/brand/components/Animation.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
 import PageTitle from '../../components/PageTitle.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
+import ToSpeak from '../../components/ToSpeak.astro';
 import EventDate from '../../components/EventDate.astro';
 import RegisterButton from '../../components/RegisterButton.astro';
-import { events, nextEvent, talks as allTalks, talksAt, takeawaysAt, questionsAt, photosAt, coverAt, isUpcoming, shortDate, eventSlug, eventName, eventSummary, links, pitchIn, toSpeak, type Event } from '../../lib/data';
+import { events, nextEvent, talks as allTalks, talksAt, takeawaysAt, questionsAt, photosAt, coverAt, isUpcoming, shortDate, eventSlug, eventName, eventSummary, links, pitchIn, type Event } from '../../lib/data';
 import { eventNode, breadcrumbs } from '../../lib/schema';
 
 export function getStaticPaths() {
@@ -70,7 +71,7 @@ const speakers = published ? [] : (e.speakers ?? []).map((s) => ({ slug: '', ...
           <SectionHeading class="md:col-span-4">The meetup</SectionHeading>
           <div class="space-y-5 text-lg md:col-span-8">
             <p>{pitchIn(e.city)}</p>
-            <p>{toSpeak}</p>
+            <ToSpeak />
           </div>
         </div>
       </section>

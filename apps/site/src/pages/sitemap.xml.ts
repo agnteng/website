@@ -11,6 +11,7 @@ export const GET = ({ site }: { site: URL }) => {
     ['/speakers'],
     ['/events'],
     ['/sponsor'],
+    ['/speak'],
     ...events.map((e): [string, string?] => [`/events/${eventSlug(e)}`, latest(talksAt(e))]),
     ...talks.map((t): [string, string?] => [`/talks/${t.id}`, latest([t])]),
   ];
