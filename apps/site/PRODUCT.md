@@ -27,8 +27,7 @@ posts and doesn't mirror them.
 
 Talks are real work, technical, never pitches, and sponsorship never buys stage time.
 Registration asks who people are and what they're looking for (a job, a co-founder,
-people to hire, funding), so a sponsor knows who they'll meet. Say it as knowing the
-audience, never as collecting data (user, 2026-11-18).
+people to hire, funding), so a sponsor knows who they'll meet.
 
 ## Operating Context
 
@@ -55,8 +54,8 @@ static and rebuilt on every deploy.
 
 - Meetup photos (`content/<date>/photos/`), every published talk with video and
   transcript, speaker headshots, and the sponsor deck's figures.
-- Community numbers come from Luma registrations. On `/sponsor` they are samples until
-  the real ones are supplied; never invent others.
+- Community numbers come from Luma registrations, as the organizers give them; never
+  invent others.
 
 ## Product Principles
 

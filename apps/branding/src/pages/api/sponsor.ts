@@ -1,23 +1,14 @@
-// The sponsor form on agnteng.com/sponsor posts here (docs/adr/0027): that site is static,
-// and this app is the one with a server. An enquiry is passed on to the organizers' bot (a
-// Grok Bot routine with a webhook trigger) as a JSON object, which becomes the routine's
-// input: an id, a line to read, then the fields. Grok Bot answers 200 at once with the run's
-// id; it has had outages, so a server error is tried once more with the same id, and an
-// enquiry that still doesn't arrive goes in this service's log so it isn't lost.
-//
-// Its settings are read from the environment when the server runs, never at build, so no
-// secret is inlined into the build. varlock puts the three webhook values there from the
-// project's 1Password vault (apps/branding/.env.schema); they are named like their items:
+// agnteng.com/sponsor's form posts here, and the enquiry goes on to the organizers' Grok Bot
+// routine as JSON (docs/adr/0027). start.sh resolves the webhook's settings from 1Password
+// when the container starts; they are read from the environment at run time, never at build:
 //   GROKBOT_WEBHOOK_URL      where enquiries go
 //   GROKBOT_WEBHOOK_HEADER   the header the bot reads its key from: the whole line
 //                            ("Authorization: Bearer <key>"), the line without the key, or
-//                            only the header's name
+//                            only its name
 //   GROKBOT_WEBHOOK_KEY      the key, when the header line leaves it out
 //   SPONSOR_ORIGINS          more sites allowed to post, comma-separated (development)
-// The key is a credential: it stays out of the code and the logs.
-//
-// GET answers whether the form can send, so the live check catches a deploy that lost
-// the webhook: everything else would still answer 200.
+// The address and the key never go in a log. GET says whether the form can send, for the
+// live check: a start that didn't resolve them still answers 200 everywhere else.
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
@@ -44,9 +35,9 @@ const auth = (() => {
   } else if (!value) value = k;
   return name && value ? { name, value } : null;
 })();
-const ready = Boolean(webhook && auth);
+const ready = Boolean(URL.canParse(webhook) && auth);
 
-// At most five enquiries from one address in fifteen minutes; the form needs one.
+// Five enquiries from one address in fifteen minutes; the form needs one.
 const WINDOW = 15 * 60_000;
 const recent = new Map<string, number[]>();
 const tooMany = (who: string) => {
@@ -59,10 +50,10 @@ const tooMany = (who: string) => {
 };
 
 const field = (v: FormDataEntryValue | null, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // the page checks the same
 
-// The script asks for JSON. A form posted without it goes back to the page it came from,
-// whose #sent or #not-sent says how it went.
+// The script asks for JSON and shows `error`. A form posted without it goes back to the page
+// it came from, whose #sent or #not-sent says how it went.
 function answer(request: Request, ok: boolean, status: number, error?: string) {
   const origin = request.headers.get('origin');
   const allowed = origin && origins.includes(origin) ? origin : null;
@@ -76,15 +67,12 @@ function answer(request: Request, ok: boolean, status: number, error?: string) {
   return new Response(null, { status: 303, headers });
 }
 
+// An enquiry that can't be passed on goes in the log in full, to pass on by hand.
+const keep = (why: string, enquiry: object) =>
+  console.error('[sponsor] %s; the enquiry, to pass on by hand: %s', why, JSON.stringify(enquiry));
+
 export const GET: APIRoute = () =>
   new Response(JSON.stringify({ ready }), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
-
-export const OPTIONS: APIRoute = ({ request }) => {
-  const origin = request.headers.get('origin');
-  const headers = new Headers({ vary: 'Origin', 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'content-type, accept', 'access-control-max-age': '86400' });
-  if (origin && origins.includes(origin)) headers.set('access-control-allow-origin', origin);
-  return new Response(null, { status: 204, headers });
-};
 
 export const POST: APIRoute = async ({ request }) => {
   const origin = request.headers.get('origin');
@@ -96,20 +84,18 @@ export const POST: APIRoute = async ({ request }) => {
   } catch {
     return answer(request, false, 400, 'Send the form’s fields.');
   }
-  // The field people never see: a bot filled it in. It is told the message went.
-  if (field(data.get('website'), 200)) return answer(request, true, 200);
+  const name = field(data.get('name'), 200);
+  const email = field(data.get('email'), 254);
+  const company = field(data.get('company'), 200);
+  if (!name || !company || !EMAIL.test(email)) return answer(request, false, 400, 'Enter your name, an email address like name@company.com, and your company.');
 
   const who = request.headers.get('cf-connecting-ip') ?? request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
   if (tooMany(who)) return answer(request, false, 429, 'Too many messages. Try again later.');
 
-  const name = field(data.get('name'), 200);
-  const email = field(data.get('email'), 254);
-  const company = field(data.get('company'), 200);
-  if (!name || !company || !EMAIL.test(email)) return answer(request, false, 400, 'A name, an email address and a company are needed.');
-
+  // The bot reads `text` as its instruction, so the visitor's own words stay in the fields.
   const enquiry = {
     id: crypto.randomUUID(), // the same on a retry, so the bot can tell a repeat
-    text: `New sponsor enquiry: ${name} (${email}) from ${company}, via agnteng.com/sponsor`,
+    text: 'New sponsor enquiry from the form on agnteng.com/sponsor; name, email and company are what the visitor typed.',
     name,
     email,
     company,
@@ -117,17 +103,24 @@ export const POST: APIRoute = async ({ request }) => {
     sentAt: new Date().toISOString(),
   };
 
+  // The field people never see, filled in: most likely a bot, which is told it went. Kept
+  // in the log in case it was a person's autofill.
+  if (field(data.get('x_leave_blank'), 200)) {
+    keep('the hidden field was filled', enquiry);
+    return answer(request, true, 200);
+  }
+
   if (!ready) {
     if (import.meta.env.DEV) {
-      console.info('[sponsor] no webhook set; this would go out: %s', enquiry.text);
+      console.info('[sponsor] no webhook set; this would go out: %s', JSON.stringify(enquiry));
       return answer(request, true, 200);
     }
-    console.error('[sponsor] GROKBOT_WEBHOOK_URL or the key (GROKBOT_WEBHOOK_HEADER, GROKBOT_WEBHOOK_KEY) is not set');
+    keep('the webhook settings did not resolve at start', enquiry);
     return answer(request, false, 503, 'The form can’t send right now.');
   }
 
-  // The address and the key never go in the log; the answer's own message does (Grok Bot
-  // says "is disabled" for a paused routine, "Invalid API key" for a wrong key).
+  // Grok Bot answers 200 at once. A 5xx is tried once more, with the same id; its message
+  // goes in the log ("is disabled" for a paused routine, "Invalid API key").
   let failure = '';
   for (const attempt of [1, 2]) {
     try {
@@ -146,6 +139,6 @@ export const POST: APIRoute = async ({ request }) => {
     }
     if (attempt === 1) await new Promise((r) => setTimeout(r, 1_000));
   }
-  console.error('[sponsor] the webhook %s; the enquiry, to pass on by hand: %s', failure, JSON.stringify(enquiry));
+  keep(`the webhook ${failure}`, enquiry);
   return answer(request, false, 502, 'The form can’t send right now.');
 };

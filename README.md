@@ -62,9 +62,14 @@ mise run fitness        # the repository checks CI runs
 mise tasks              # everything else
 ```
 
-The deck pages and `api/audience.json` render on demand. For `api/sponsor` to send locally, put `OP_TOKEN=varlock(prompt)` in `apps/branding/.env.local`, run `varlock load` there once, and start the app with `varlock run -- pnpm dev`. `LUMA_API_KEY` is read
+The deck pages and `api/audience.json` render on demand. `LUMA_API_KEY` is read
 from `.env` at the repository root and inlined at build time
 (`docs/adr/0002`); without it they render with no Luma data.
+
+`api/sponsor` sends only with its secrets from 1Password (`docs/adr/0027`): put
+`OP_TOKEN=varlock(prompt)` in `apps/branding/.env.local`, run
+`pnpm --filter branding exec varlock load` there once to enter the token, then start
+the app with `pnpm --filter branding exec varlock run -- astro dev`.
 
 ## Deploy
 

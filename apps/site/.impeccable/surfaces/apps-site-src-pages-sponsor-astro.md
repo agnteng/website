@@ -11,8 +11,8 @@ Mode: Persuade. A company decides to sponsor an event and leaves its details.
 
 - Audience: AI and dev-tool companies (want developers and founders on their product), companies hiring and talent agencies (want to meet engineers and founders). Investors second.
 - Action: the form (name, email, company); it reaches the organizers' bot by webhook through the branding app's endpoint (docs/adr/0027). No prices, no package list.
-- Proof: the community's numbers from Luma registrations (samples until supplied), a real event photo.
-- Constraints: name Lisbon, and "events", not only meetups ("Lisbon and other European cities"). No Kode Mono anywhere on the page (user, 2026-11-18). Say that we know the audience, never that we collect data. Site copy rules; brand parts only.
+- Proof: the organizers' figures from Luma registrations, a real event photo, where the community works.
+- Constraints: name Lisbon, and "events", not only meetups ("Lisbon and other European cities"). No Kode Mono anywhere on the page. Site copy rules; brand parts only.
 
 ## Direction contract
 
@@ -22,14 +22,12 @@ OWN-WORLD: agnteng.com as it stands. Electric-blue hero block; an event photo in
 
 STORY: A company learns Agentic Engineering hosts events in Lisbon and other European cities for founders and developers building with AI, sees how many come and who they are, believes it reaches the people it wants, and leaves its details.
 
-FIRST VIEWPORT: Desktop: nav on blue; H1 (the user's hook) and one line in the left half, centred vertically against the white form card in the right five columns; below, a full-bleed blue-toned crowd band whose top dissolves into the blue. Phone: H1, line, card, band.
+FIRST VIEWPORT: Desktop: nav on blue; H1 (the hook) and one line in the left half, centred vertically against the white form card in the right five columns; below, a full-bleed blue-toned crowd band whose top dissolves into the blue. Phone: H1, line, card, band.
 
-FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section, per the user's edits: the company-logo strip (white) before it; no heading on screen (removed by the user; sr-only for screen readers), then three equal square blocks in the brand's three meetup colours (electric blue, violet, magenta), each breaking up at its top-right corner into the navy in cells, a big number on the colour with a caption under it: 1,000 community members, 80% founders and developers, 70 attendees on average. No bar, no photos (the photo tile duplicated the hero; too many photos), nothing below. Motion: the hero's rise-in, the live cells on the hero band and the dim dither behind the community.
+FORM: Code-led, no image generation. A precisely specified surface inside the established world, so no concept roll and no seed key. Community section: the company-logo strip (white) before it; no heading on screen (sr-only), then three equal square blocks in the brand's three meetup colours (electric blue, violet, magenta), each breaking up at its top-right corner into the navy in cells, a big number on the colour with a caption under it: 1,000 community members, 80% founders and developers, 70 attendees on average. No bar and no photos, nothing below. Motion: the hero's rise-in, the live cells on the hero band and the dim dither behind the community.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Open
 
-- Real numbers: community size, role shares, average attendance.
 - Developers (this page) or Engineers (the sponsor deck).
-- The bot's webhook set on the branding service (GROKBOT_WEBHOOK_URL, _HEADER, _KEY).

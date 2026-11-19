@@ -18,9 +18,8 @@ import Input from '@agnteng/brand/components/Input.astro';
 import { galleryPhoto, TINTS } from '../lib/data';
 import { organization } from '../lib/schema';
 
-// The organizers' figures (2026-11-18). The sponsor deck
-// (apps/branding/src/components/slides-sponsor/content.ts) has its own, older ones: when
-// these change, move both onto one module, so they can't drift apart.
+// The organizers' figures. The sponsor deck (apps/branding/src/components/slides-sponsor/
+// content.ts) has its own, older ones: when these change, move both onto one module.
 const community = {
   members: 1000,
   foundersAndDevelopers: 80, // 44% founders and 36% developers, the sponsor deck's mix
@@ -60,7 +59,7 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
           <!-- Where a form posted without script comes back to (the endpoint adds the hash). -->
           <p id="sent" class="mb-6 hidden rounded-[10px] bg-electric-blue/[0.08] px-4 py-3 font-semibold text-electric-blue target:block">Thanks, we got your message. We’ll get back to you by email.</p>
           <p id="not-sent" class="mb-6 hidden rounded-[10px] bg-error/[0.08] px-4 py-3 font-semibold text-error target:block">That didn’t send. Email partners@agnteng.com instead.</p>
-          <form data-sponsor-form method="post" action={endpoint} novalidate class="relative">
+          <form data-sponsor-form method="post" action={endpoint} class="relative">
             <SubHeading as="h2">Sponsor an event</SubHeading>
             <p class="mt-2 text-panel-navy/75">Leave your details and we’ll get back to you by email.</p>
             <div class="mt-6 space-y-4">
@@ -68,7 +67,7 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
             </div>
             <!-- Left empty by people, who never see it; bots fill it in. -->
             <div class="absolute -left-[200vw] top-0 size-px overflow-hidden" aria-hidden="true">
-              <label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+              <label>Leave this empty <input type="text" name="x_leave_blank" tabindex="-1" autocomplete="off" /></label>
             </div>
             <Button type="submit" class="mt-7 w-full">Get in touch</Button>
             <p data-sponsor-failed hidden role="alert" class="mt-4 text-center text-sm font-medium text-error">That didn’t send. Try again in a moment.</p>
@@ -101,11 +100,8 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
       <Animation client:visible animation="aurora" color="#1E2BE6" edge="#B5A6FF" bg="#05071E" cell={6} gap={1} density={0.34} motion={20} fade="left" shape="square" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.4 }} />
     </div>
     <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
-      <!-- No heading on screen (user, 2026-11-18); screen readers still get one. -->
       <h2 class="sr-only">The community</h2>
-      <!-- Three square blocks, the number large on the colour. Each breaks up at its top-right
-           corner into the page, cell by cell. The captions are large text: white on the
-           magenta passes AA only from 18.7px bold. -->
+      <!-- The captions are large text: white on the magenta passes AA only from 18.7px bold. -->
       <ul class="grid gap-4 md:grid-cols-3 md:gap-6">
         {figures.map((f, i) => (
           <li class="relative isolate flex min-h-52 flex-col justify-end overflow-hidden p-6 text-white md:min-h-64 lg:min-h-72 lg:p-8" style={`background:${f.color}`}>
@@ -130,16 +126,22 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
   const inputs = [...form.querySelectorAll<HTMLInputElement>('input[required]')];
   const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
   const label = button.textContent;
+  const fallback = failed.textContent;
+  // With script, the page checks the fields itself; without, the browser does.
+  form.noValidate = true;
 
-  // Posts the fields where the form points and settles once they have arrived.
+  // Posts the fields where the form points; a refusal carries the endpoint's own words.
   async function send(data: FormData) {
     const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error(`The form endpoint answered ${res.status}`);
+    if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? '');
   }
 
-  // A field is checked when it is left or sent, and again as it is fixed.
+  // A field is checked when it is left or sent, and again as it is fixed. An email address
+  // needs a dot after the @, as the endpoint does.
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const check = (f: HTMLInputElement) => {
-    const ok = f.value.trim() !== '' && f.checkValidity();
+    const v = f.value.trim();
+    const ok = v !== '' && f.checkValidity() && (f.type !== 'email' || EMAIL.test(v));
     f.setAttribute('aria-invalid', String(!ok));
     return ok;
   };
@@ -170,8 +172,9 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
     busy(true);
     try {
       await send(data);
-    } catch {
+    } catch (err) {
       busy(false);
+      failed.textContent = (err as Error).message || fallback;
       failed.hidden = false;
       return;
     }
