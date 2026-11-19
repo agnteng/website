@@ -30,8 +30,11 @@ WORKDIR /app
 COPY --from=build /out/package.json ./
 COPY --from=build /out/node_modules ./node_modules
 COPY --from=build /repo/apps/branding/dist ./dist
+# start.sh resolves .env.schema's secrets, then starts the server (docs/adr/0027).
+COPY --from=build /repo/apps/branding/.env.schema /repo/apps/branding/start.sh ./
 ENV HOST=0.0.0.0
 # Port 80, which the service's existing port mapping expects.
 ENV PORT=80
+ENV APP_ENV=production
 EXPOSE 80
-CMD ["node", "./dist/server/entry.mjs"]
+CMD ["sh", "./start.sh"]

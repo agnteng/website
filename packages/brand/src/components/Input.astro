@@ -1,20 +1,27 @@
 ---
-// Text input, aligned to DS1: 1.5px border, 10px radius, Manrope 15px.
-// Light-context by default.
-interface Props {
+// Text input, aligned to DS1: 1.5px border, 10px radius, Manrope. Light-context by default.
+// In a form, `name` and any other input attribute (required, autocomplete…) go on the field,
+// and `error` is the message under it, shown while the field has aria-invalid="true".
+// 16px text: iOS zooms into a field set smaller. Label and placeholder pass AA on white.
+import type { HTMLAttributes } from 'astro/types';
+interface Props extends Omit<HTMLAttributes<'input'>, 'class'> {
   label?: string;
-  placeholder?: string;
-  type?: string;
+  error?: string;
   class?: string;
 }
-const { label, placeholder, type = 'text', class: cls } = Astro.props;
+const { label, error, type = 'text', id, class: cls, ...attrs } = Astro.props;
+const field = id ?? (label ? `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}` : undefined);
+const errorId = error && field ? `${field}-error` : undefined;
 ---
 
-<label class={`flex flex-col gap-2 ${cls ?? ''}`}>
-  {label && <span class="font-mono text-[11px] uppercase tracking-wider text-panel-navy/45">{label}</span>}
+<div class={`flex flex-col gap-2 ${cls ?? ''}`}>
+  {label && <label for={field} class="font-sans text-sm font-semibold text-panel-navy/80">{label}</label>}
   <input
     type={type}
-    placeholder={placeholder}
-    class="rounded-[10px] border-[1.5px] border-panel-navy/15 bg-white px-3.5 py-3 font-sans text-[15px] text-panel-navy outline-none transition-colors placeholder:text-panel-navy/35 focus:border-electric-blue"
+    id={field}
+    aria-describedby={errorId}
+    {...attrs}
+    class="peer rounded-[10px] border-[1.5px] border-panel-navy/15 bg-white px-3.5 py-3 font-sans text-base text-panel-navy outline-none transition-colors placeholder:text-panel-navy/60 hover:border-panel-navy/30 focus:border-electric-blue aria-[invalid=true]:border-error"
   />
-</label>
+  {errorId && <p id={errorId} class="hidden text-sm font-medium text-error peer-aria-[invalid=true]:block">{error}</p>}
+</div>

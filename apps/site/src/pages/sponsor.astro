@@ -1,0 +1,189 @@
+---
+// For companies that want to sponsor an event: the pitch beside a short form, then who
+// comes. No prices and no packages: the reply carries those.
+import { Image } from 'astro:assets';
+import Shell from '../layouts/Shell.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import HeroCells from '../components/HeroCells.astro';
+import Tone from '../components/Tone.astro';
+import PageTitle from '../components/PageTitle.astro';
+import SubHeading from '../components/SubHeading.astro';
+import CompanyLogos from '../components/CompanyLogos.astro';
+import Animation from '@agnteng/brand/components/Animation.tsx';
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
+import Button from '@agnteng/brand/components/Button.astro';
+import Icon from '@agnteng/brand/components/Icon.astro';
+import Input from '@agnteng/brand/components/Input.astro';
+import { galleryPhoto, TINTS } from '../lib/data';
+import { organization } from '../lib/schema';
+
+// The organizers' figures. The sponsor deck (apps/branding/src/components/slides-sponsor/
+// content.ts) has its own, older ones: when these change, move both onto one module.
+const community = {
+  members: 1000,
+  foundersAndDevelopers: 80, // 44% founders and 36% developers, the sponsor deck's mix
+  attendees: 70, // at an average monthly event
+};
+// The three figures, each a block in one of the brand's three meetup colours; a few of
+// the cells where a block breaks up take the next block's colour.
+const figures = [
+  { value: community.members.toLocaleString('en'), label: 'community members' },
+  { value: `${community.foundersAndDevelopers}%`, label: 'founders and developers' },
+  { value: String(community.attendees), label: 'attendees on average' },
+].map((f, i) => ({ ...f, color: TINTS[i], edge: TINTS[(i + 1) % TINTS.length] }));
+
+// The form posts to the branding app, which has a server and passes the enquiry on
+// (docs/adr/0027). A development server points it elsewhere with PUBLIC_SPONSOR_ENDPOINT.
+const endpoint = import.meta.env.PUBLIC_SPONSOR_ENDPOINT || 'https://branding.agnteng.com/api/sponsor';
+
+const fields = [
+  { id: 'name', label: 'Name', type: 'text', autocomplete: 'name', error: 'Enter your name.' },
+  { id: 'email', label: 'Email', type: 'email', autocomplete: 'email', error: 'Enter an email address, like name@company.com.' },
+  { id: 'company', label: 'Company', type: 'text', autocomplete: 'organization', error: 'Enter your company’s name.' },
+];
+const photo = galleryPhoto('2026-08-26', '04.jpg');
+---
+<Shell title="Sponsor an event | Agentic Engineering" description="Agentic Engineering hosts events in Lisbon and other European cities for founders and developers building with AI. See who comes, then leave your details to sponsor one." schema={[organization]} class="bg-soft-white text-panel-navy">
+  <Tone />
+  <SiteNav onHero />
+  <section class="under-nav relative isolate overflow-hidden bg-electric-blue text-white">
+    <div id="main" class="relative z-10 mx-auto grid max-w-7xl gap-10 px-4 pt-14 md:grid-cols-12 md:items-center md:gap-8 md:px-8 md:pt-20">
+      <div class="md:col-span-6">
+        <PageTitle rise style="--i:0">Connect with a community of engaged founders and developers building with AI.</PageTitle>
+        <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Agentic Engineering hosts events in Lisbon and other European cities. Sponsors get access to a community of people building with AI, and meet the developers and founders they want to hire.</p>
+      </div>
+
+      <div id="sponsor" class="rise scroll-mt-6 md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:2">
+        <div data-sponsor-card class="flex flex-col rounded-2xl bg-white p-6 text-panel-navy shadow-[0_32px_64px_-24px_rgb(5_7_30/0.6)] sm:p-8">
+          <!-- Where a form posted without script comes back to (the endpoint adds the hash). -->
+          <p id="sent" class="mb-6 hidden rounded-[10px] bg-electric-blue/[0.08] px-4 py-3 font-semibold text-electric-blue target:block">Thanks, we got your message. We’ll get back to you by email.</p>
+          <p id="not-sent" class="mb-6 hidden rounded-[10px] bg-error/[0.08] px-4 py-3 font-semibold text-error target:block">That didn’t send. Email partners@agnteng.com instead.</p>
+          <form data-sponsor-form method="post" action={endpoint} class="relative">
+            <SubHeading as="h2">Sponsor an event</SubHeading>
+            <p class="mt-2 text-panel-navy/75">Leave your details and we’ll get back to you by email.</p>
+            <div class="mt-6 space-y-4">
+              {fields.map((f) => <Input id={f.id} name={f.id} label={f.label} type={f.type} autocomplete={f.autocomplete} required error={f.error} />)}
+            </div>
+            <!-- Left empty by people, who never see it; bots fill it in. -->
+            <div class="absolute -left-[200vw] top-0 size-px overflow-hidden" aria-hidden="true">
+              <label>Leave this empty <input type="text" name="x_leave_blank" tabindex="-1" autocomplete="off" /></label>
+            </div>
+            <Button type="submit" class="mt-7 w-full">Get in touch</Button>
+            <p data-sponsor-failed hidden role="alert" class="mt-4 text-center text-sm font-medium text-error">That didn’t send. Try again in a moment.</p>
+          </form>
+          <!-- In place of the form, at the card's height. -->
+          <div data-sponsor-done hidden class="my-auto py-6 text-center">
+            <span aria-hidden="true" class="mx-auto grid size-16 place-items-center rounded-full bg-electric-blue text-white"><Icon name="Check" size={30} /></span>
+            <SubHeading as="h2" class="mt-6"><span tabindex="-1" data-done-heading class="outline-none">Thanks, <span data-name></span></span></SubHeading>
+            <p class="mx-auto mt-3 max-w-[32ch] text-panel-navy/75">We’ll get back to you at <span data-email class="font-semibold text-panel-navy"></span>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- An event, full, breaking up into the blue at its top. On wide screens the card sits
+         over its edge, and the text beside it stays on the solid cells. -->
+    <div class="dither-stage relative -mt-24 h-72 w-full overflow-hidden md:mt-12 md:h-80 lg:-mt-16 lg:h-[26rem]" aria-hidden="true">
+      <Image src={photo.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="100vw" loading="eager" class="absolute inset-0 size-full object-cover object-[50%_50%] [filter:url(#blue-tone)]" />
+      <HeroCells seed={20260826} at="top" />
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <CompanyLogos class="py-12 md:py-16" />
+  </section>
+
+  <section id="community" class="relative isolate overflow-hidden bg-deep-navy text-soft-white">
+    <!-- The deck's backdrop: the live cells, dim, thickest on the left. -->
+    <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
+      <Animation client:visible animation="aurora" color="#1E2BE6" edge="#B5A6FF" bg="#05071E" cell={6} gap={1} density={0.34} motion={20} fade="left" shape="square" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.4 }} />
+    </div>
+    <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+      <h2 class="sr-only">The community</h2>
+      <!-- The captions are large text: white on the magenta passes AA only from 18.7px bold. -->
+      <ul class="grid gap-4 md:grid-cols-3 md:gap-6">
+        {figures.map((f, i) => (
+          <li class="relative isolate flex min-h-52 flex-col justify-end overflow-hidden p-6 text-white md:min-h-64 lg:min-h-72 lg:p-8" style={`background:${f.color}`}>
+            <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
+              <Artifacts client:visible color="#05071E" edge={f.edge} seed={1000 + i * 37} cell={12} animate artifacts={[{ at: 'top-right', solid: 0.06, reach: 0.46 }]} />
+            </div>
+            <span class="font-sans text-7xl font-extrabold leading-[0.85] tracking-tight md:text-5xl lg:text-7xl xl:text-8xl">{f.value}</span>
+            <span class="mt-3 text-xl font-bold">{f.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <SiteFooter />
+</Shell>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-sponsor-form]')!;
+  const done = document.querySelector<HTMLElement>('[data-sponsor-done]')!;
+  const failed = form.querySelector<HTMLElement>('[data-sponsor-failed]')!;
+  const inputs = [...form.querySelectorAll<HTMLInputElement>('input[required]')];
+  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const label = button.textContent;
+  const fallback = failed.textContent;
+  // With script, the page checks the fields itself; without, the browser does.
+  form.noValidate = true;
+
+  // Posts the fields where the form points; a refusal carries the endpoint's own words.
+  async function send(data: FormData) {
+    const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? '');
+  }
+
+  // A field is checked when it is left or sent, and again as it is fixed. An email address
+  // needs a dot after the @, as the endpoint does.
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const check = (f: HTMLInputElement) => {
+    const v = f.value.trim();
+    const ok = v !== '' && f.checkValidity() && (f.type !== 'email' || EMAIL.test(v));
+    f.setAttribute('aria-invalid', String(!ok));
+    return ok;
+  };
+  for (const f of inputs) {
+    f.addEventListener('blur', () => { if (f.value.trim()) check(f); });
+    f.addEventListener('input', () => { if (f.getAttribute('aria-invalid') === 'true') check(f); });
+  }
+
+  // While sending, the button stays at full strength, so "Sending…" can be read, but does
+  // nothing: aria-disabled rather than disabled, which the brand Button fades to 40%.
+  let sending = false;
+  const busy = (on: boolean) => {
+    sending = on;
+    button.setAttribute('aria-disabled', String(on));
+    button.classList.toggle('cursor-progress', on);
+    button.textContent = on ? 'Sending…' : label;
+    for (const f of inputs) f.readOnly = on;
+    form.toggleAttribute('aria-busy', on);
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (sending) return;
+    const wrong = inputs.filter((f) => !check(f));
+    if (wrong.length) { wrong[0].focus(); return; }
+    const data = new FormData(form);
+    failed.hidden = true;
+    busy(true);
+    try {
+      await send(data);
+    } catch (err) {
+      busy(false);
+      failed.textContent = (err as Error).message || fallback;
+      failed.hidden = false;
+      return;
+    }
+    done.querySelector('[data-name]')!.textContent = String(data.get('name')).trim().split(/\s+/)[0];
+    done.querySelector('[data-email]')!.textContent = String(data.get('email')).trim();
+    const card = document.querySelector<HTMLElement>('[data-sponsor-card]')!;
+    card.style.minHeight = `${card.offsetHeight}px`;
+    form.hidden = true;
+    done.hidden = false;
+    done.querySelector<HTMLElement>('[data-done-heading]')!.focus();
+  });
+</script>

@@ -76,9 +76,12 @@ def denylist() -> list[str]:
 
 def check_internal_names() -> None:
     rx = re.compile("|".join(f"(?:{p})" for p in GENERIC + denylist()), re.I)
+    # An app's .env.schema names its secrets by reference to its own vault (org ADR 0025):
+    # there, and only there, an op:// reference is allowed.
+    schema_rx = re.compile("|".join(f"(?:{p})" for p in GENERIC + denylist() if p != r"op://"), re.I)
 
     def scan(where: str, text: str) -> None:
-        for m in rx.finditer(text):
+        for m in (schema_rx if where.endswith(".env.schema") else rx).finditer(text):
             line = text.count("\n", 0, m.start()) + 1
             # Report where, never the matched text: CI logs are public.
             fail("internal-names", f"{where}:{line} matches a denylisted pattern")
@@ -552,6 +555,27 @@ def check_live() -> None:
         guests = 0
     if not guests:
         fail("live", "api/audience.json reports no guests: the build lost LUMA_API_KEY")
+    # The sponsor form can send: the server resolved its webhook at start (docs/adr/0027).
+    code, body = get(f"{b}/api/sponsor")
+    try:
+        ready = json.loads(body).get("ready") if code == 200 else False
+    except json.JSONDecodeError:
+        ready = False
+    if not ready:
+        fail("live", "api/sponsor can't send: GROKBOT_WEBHOOK_* didn't resolve at start; start.sh's summary is in the service log")
+    # The form's cross-site post reaches the endpoint, which refuses an empty one itself (400).
+    # Astro's own origin check would answer 403 before it (docs/adr/0027).
+    req = urllib.request.Request(f"{b}/api/sponsor", data=b"name=&email=&company=", method="POST", headers={
+        "Origin": "https://agnteng.com", "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "agnteng-fitness"})
+    try:
+        code = urllib.request.urlopen(req, timeout=20).status
+    except urllib.error.HTTPError as e:
+        code = e.code
+    except (urllib.error.URLError, OSError):
+        code = 0
+    if code != 400:
+        fail("live", f"api/sponsor answered agnteng.com's form with {code}, not 400: the form can't reach it")
     if get(f"{s}/")[0] != 200:
         fail("live", f"{s}/ is not serving the sponsor deck")
     if get(f"{s}/brand-guidelines/")[0] != 404:
@@ -565,7 +589,7 @@ def check_live() -> None:
 
 def check_live_site() -> None:
     w = "https://agnteng.com"
-    for page in ("", "talks", "speakers", "events", "robots.txt", "search.json", "favicon.ico"):
+    for page in ("", "talks", "speakers", "events", "sponsor", "robots.txt", "search.json", "favicon.ico"):
         code, body = get(f"{w}/{page}")
         if code != 200:
             fail("live", f"{w}/{page} answered {code}")
