@@ -10,15 +10,18 @@ describe their talk in the registration form's talk field. An application
 needs more: who they are, a GitHub or LinkedIn link, and the talk itself.
 
 ## Decision
-agnteng.com/speak has a form (name, company, role, GitHub or LinkedIn, email,
-the talk) that posts to the branding app's `api/speak` and reaches the same
-Grok Bot routine as the sponsor form, marked `kind: "talk"`; the sponsor
-form's posts are `kind: "sponsor"`, and it now asks for a role too. Both pages
-draw the form with one component (`EnquiryForm`), and both endpoints go
-through one module (`apps/branding/src/lib/forms.ts`), so the checks, the
-retry and the log are the same. The site says how to speak in one place
-(`ToSpeak`), which points at the form.
+agnteng.com/speak has a form (name, email, company, role, GitHub or LinkedIn,
+the talk) that posts to the branding app's `api/speak`, which passes it to the
+same Grok Bot routine as the sponsor form. Every post names its form,
+`form: "speaker"` or `form: "sponsor"`, and the sponsor form now asks for a
+role too. Both pages draw the form with one component (`EnquiryForm`), and
+both endpoints go through one module (`apps/branding/src/lib/forms.ts`).
+
+Two things in 0027 change. `api/sponsor` is no longer the app's only `POST`
+endpoint: Astro's origin check stays off for both, and each checks the origin
+itself. One address can send ten posts in fifteen minutes across both forms,
+not five: people at an event share its network.
 
 ## Consequences
-The routine tells the two kinds apart by `kind`. Another form is a page, its
+The routine tells the forms apart by `form`. Another form is a page, its
 fields, and an endpoint of a dozen lines.

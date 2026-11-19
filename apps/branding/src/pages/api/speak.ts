@@ -1,12 +1,12 @@
-// agnteng.com/speak's form (docs/adr/0028): who is applying, and their talk, passed on to
-// the organizers' bot by src/lib/forms.ts.
+// agnteng.com/speak's form, passed on to the organizers' bot by src/lib/forms.ts (docs/adr/0028).
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { EMAIL, field, handle, readiness } from '../../lib/forms';
 
-// A link to a GitHub or LinkedIn profile, with or without https://; the page checks the same.
-const PROFILE = /^(https?:\/\/)?(www\.)?(github\.com|linkedin\.com)\/\S+$/i;
+// A link to a GitHub or LinkedIn profile, with or without https://, on any of their hosts
+// (www., pt.linkedin.com); the page checks the same.
+const PROFILE = /^(https?:\/\/)?([\w-]+\.)?(github\.com|linkedin\.com)\/\S+$/i;
 const TALK_MIN = 30; // characters: a few sentences, as the page asks
 
 export const GET: APIRoute = readiness;
@@ -14,8 +14,8 @@ export const GET: APIRoute = readiness;
 export const POST: APIRoute = ({ request }) =>
   handle(request, {
     page: '/speak',
-    kind: 'talk',
-    text: 'New talk application from the form on agnteng.com/speak; name, company, role, profile, email and talk are what the applicant typed.',
+    name: 'speaker',
+    text: 'New speaker application from the form on agnteng.com/speak; name, company, role, profile, email and talk are what the applicant typed.',
     read: (data) => {
       const profile = field(data.get('profile'), 300);
       const f = {

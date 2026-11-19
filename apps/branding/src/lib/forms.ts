@@ -1,4 +1,4 @@
-// agnteng.com's forms (sponsor, talk) post to this app, and each one goes on to the
+// agnteng.com's forms (sponsor, speaker) post to this app, and each one goes on to the
 // organizers' Grok Bot routine as JSON (docs/adr/0027, 0028). start.sh resolves the
 // webhook's settings from 1Password when the container starts; they are read from the
 // environment at run time, never at build:
@@ -45,7 +45,8 @@ export const field = (v: FormDataEntryValue | null, max: number, lines = false) 
 };
 export const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // the page checks the same
 
-// Five posts from one address in fifteen minutes, across the forms; a form needs one.
+// Ten posts from one address in fifteen minutes, across the forms: people at an event
+// share its network (docs/adr/0028).
 const WINDOW = 15 * 60_000;
 const recent = new Map<string, number[]>();
 const tooMany = (who: string) => {
@@ -54,7 +55,7 @@ const tooMany = (who: string) => {
   hits.push(now);
   if (recent.size > 10_000) recent.clear();
   recent.set(who, hits);
-  return hits.length > 5;
+  return hits.length > 10;
 };
 
 // The script asks for JSON and shows `error`. A form posted without it goes back to its
@@ -77,7 +78,7 @@ const keep = (why: string, post: object) => console.error('[forms] %s; to pass o
 
 export interface Form {
   page: string; // where the form is, for the redirect without script
-  kind: string; // which form, for the bot
+  name: string; // the form, as the bot reads it: "sponsor" or "speaker"
   text: string; // the bot's instruction; the visitor's own words stay in the fields
   read: (data: FormData) => Record<string, string> | string; // the fields, or why they're refused
 }
@@ -101,7 +102,7 @@ export async function handle(request: Request, form: Form): Promise<Response> {
 
   const post = {
     id: crypto.randomUUID(), // the same on a retry, so the bot can tell a repeat
-    kind: form.kind,
+    form: form.name,
     text: form.text,
     ...fields,
     page: `${SITE}${form.page}`,

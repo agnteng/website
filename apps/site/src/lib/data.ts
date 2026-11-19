@@ -222,6 +222,8 @@ export const dayDate = (d: string) => fmt(d, { weekday: 'short', day: 'numeric',
 export const pitch = 'A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions.';
 export const pitchIn = (city: string) => `${pitch} In ${city}, in English.`;
 export const toSpeak = 'Talks are ten minutes, on real work, for a technical audience: never a product pitch.';
+// How the sponsor and speak pages begin (docs/adr/0023).
+export const hostLine = 'Agentic Engineering hosts events in Lisbon and other European cities.';
 
 // Where the site's forms post: the branding app, which has a server (docs/adr/0027, 0028).
 // A development server points them elsewhere with PUBLIC_FORMS_ORIGIN.

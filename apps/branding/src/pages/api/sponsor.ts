@@ -1,5 +1,4 @@
-// agnteng.com/sponsor's form (docs/adr/0027): name, email, company and role, passed on to
-// the organizers' bot by src/lib/forms.ts.
+// agnteng.com/sponsor's form, passed on to the organizers' bot by src/lib/forms.ts (docs/adr/0027).
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
@@ -10,7 +9,7 @@ export const GET: APIRoute = readiness;
 export const POST: APIRoute = ({ request }) =>
   handle(request, {
     page: '/sponsor',
-    kind: 'sponsor',
+    name: 'sponsor',
     text: 'New sponsor enquiry from the form on agnteng.com/sponsor; name, email, company and role are what the visitor typed.',
     read: (data) => {
       const f = {
