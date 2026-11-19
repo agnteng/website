@@ -5,16 +5,16 @@
 // id; it has had outages, so a server error is tried once more with the same id, and an
 // enquiry that still doesn't arrive goes in this service's log so it isn't lost.
 //
-// Its settings come from the service's environment, never from this repository; the three
-// webhook values are named like the items that hold them:
+// Its settings are read from the environment when the server runs, never at build, so no
+// secret is inlined into the build. varlock puts the three webhook values there from the
+// project's 1Password vault (apps/branding/.env.schema); they are named like their items:
 //   GROKBOT_WEBHOOK_URL      where enquiries go
 //   GROKBOT_WEBHOOK_HEADER   the header the bot reads its key from: the whole line
 //                            ("Authorization: Bearer <key>"), the line without the key, or
 //                            only the header's name
 //   GROKBOT_WEBHOOK_KEY      the key, when the header line leaves it out
-// The key is a credential: it stays out of the code and the logs.
 //   SPONSOR_ORIGINS          more sites allowed to post, comma-separated (development)
-// Each is read when the server runs, else as inlined at build (docs/adr/0002).
+// The key is a credential: it stays out of the code and the logs.
 //
 // GET answers whether the form can send, so the live check catches a deploy that lost
 // the webhook: everything else would still answer 200.
@@ -25,10 +25,10 @@ import type { APIRoute } from 'astro';
 const SITE = 'https://agnteng.com';
 
 // Values read out of a secrets manager can end in a newline; trimmed, they can't break the request.
-const webhook = String(process.env.GROKBOT_WEBHOOK_URL || import.meta.env.GROKBOT_WEBHOOK_URL || '').trim();
-const keyHeader = process.env.GROKBOT_WEBHOOK_HEADER || import.meta.env.GROKBOT_WEBHOOK_HEADER;
-const key = process.env.GROKBOT_WEBHOOK_KEY || import.meta.env.GROKBOT_WEBHOOK_KEY;
-const origins = [SITE, ...String(process.env.SPONSOR_ORIGINS || import.meta.env.SPONSOR_ORIGINS || '').split(',')]
+const webhook = String(process.env.GROKBOT_WEBHOOK_URL ?? '').trim();
+const keyHeader = process.env.GROKBOT_WEBHOOK_HEADER;
+const key = process.env.GROKBOT_WEBHOOK_KEY;
+const origins = [SITE, ...String(process.env.SPONSOR_ORIGINS ?? '').split(',')]
   .map((o) => o.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 // The header to send, from the line and the key. Authorization takes the key as a bearer

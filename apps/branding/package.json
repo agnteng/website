@@ -12,17 +12,19 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@agnteng/brand": "workspace:*",
     "@astrojs/node": "^9.5.0",
     "@astrojs/react": "^4.4.2",
     "@tailwindcss/vite": "^4.3.1",
-    "@agnteng/brand": "workspace:*",
+    "@varlock/1password-plugin": "2.0.4",
     "astro": "^5.18.2",
     "gifenc": "^1.0.3",
     "qrcode-generator": "^2.0.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tailwindcss": "^4.3.1",
-    "three": "^0.170.0"
+    "three": "^0.170.0",
+    "varlock": "1.21.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

@@ -21,6 +21,11 @@ export default defineConfig({
   // one node process is the whole app; no nginx needed in front of it.
   adapter: node({ mode: 'standalone' }),
 
+  // agnteng.com's sponsor form posts to api/sponsor from another origin (docs/adr/0027).
+  // Astro's own check refuses every cross-site form post in the built server, so it is
+  // off; api/sponsor, the app's only POST endpoint, allows agnteng.com itself.
+  security: { checkOrigin: false },
+
   // Tailwind v4 is wired in as a Vite plugin (no separate config file needed).
   vite: {
     plugins: [tailwindcss()],

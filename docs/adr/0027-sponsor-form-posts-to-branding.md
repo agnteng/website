@@ -26,17 +26,24 @@ field people never see catches bots, and one address can send five enquiries
 in fifteen minutes.
 
 The webhook's address, the header the bot reads its key from, and the key
-come from the service's environment (`GROKBOT_WEBHOOK_URL`,
-`GROKBOT_WEBHOOK_HEADER`, `GROKBOT_WEBHOOK_KEY`, named like the items in the
-secrets manager that hold them), read when the server runs before the values
-inlined at build (0002). The header may be the whole line
-(`Authorization: Bearer <key>`), the line without the key, or only its name;
-the key fills in what it leaves out. None of them appears in this repository
-or in a log. `GET /api/sponsor` answers whether the form can send, and
-`mise run fitness:live` fails when it can't.
+(`GROKBOT_WEBHOOK_URL`, `GROKBOT_WEBHOOK_HEADER`, `GROKBOT_WEBHOOK_KEY`) resolve
+from the project's 1Password vault, as on every app of the platform (org ADR
+0025): `apps/branding/.env.schema` names the items, the service carries the
+token, and `start.sh` resolves them with varlock when the container starts and
+hands them to the server's environment. The endpoint reads them there, never
+at build, so no secret is inlined into the image. If they don't resolve, the
+server starts anyway and the form says it can't send. The header may be the
+whole line (`Authorization: Bearer <key>`), the line without the key, or only
+its name; the key fills in what it leaves out. None of the values appears in
+this repository or in a log. `GET /api/sponsor` answers whether the form can
+send, and `mise run fitness:live` fails when it can't.
+
+Astro's built server refuses every cross-site form post, so the branding app
+turns that check off (`security.checkOrigin`); `api/sponsor`, its only `POST`
+endpoint, allows agnteng.com itself.
 
 ## Consequences
 The site stays static and nothing sends email. One feature spans two apps: a
 change to the form's fields changes both. A deploy that loses the webhook
 fails the live check instead of passing silently, as a lost `LUMA_API_KEY`
-once did.
+once did. Rotating the key is a 1Password edit and a restart of the service.

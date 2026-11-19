@@ -30,8 +30,13 @@ WORKDIR /app
 COPY --from=build /out/package.json ./
 COPY --from=build /out/node_modules ./node_modules
 COPY --from=build /repo/apps/branding/dist ./dist
+# The schema varlock resolves when the server starts: the secrets come from the project's
+# 1Password vault with the service's OP_TOKEN, into the server process only. start.sh
+# starts the server even when they can't be resolved (docs/adr/0027).
+COPY --from=build /repo/apps/branding/.env.schema /repo/apps/branding/start.sh ./
 ENV HOST=0.0.0.0
 # Port 80, which the service's existing port mapping expects.
 ENV PORT=80
+ENV APP_ENV=production
 EXPOSE 80
-CMD ["node", "./dist/server/entry.mjs"]
+CMD ["sh", "./start.sh"]

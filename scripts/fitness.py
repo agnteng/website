@@ -76,9 +76,12 @@ def denylist() -> list[str]:
 
 def check_internal_names() -> None:
     rx = re.compile("|".join(f"(?:{p})" for p in GENERIC + denylist()), re.I)
+    # An app's .env.schema names its secrets by reference to its own vault (org ADR 0025):
+    # there, and only there, an op:// reference is allowed.
+    schema_rx = re.compile("|".join(f"(?:{p})" for p in GENERIC + denylist() if p != r"op://"), re.I)
 
     def scan(where: str, text: str) -> None:
-        for m in rx.finditer(text):
+        for m in (schema_rx if where.endswith(".env.schema") else rx).finditer(text):
             line = text.count("\n", 0, m.start()) + 1
             # Report where, never the matched text: CI logs are public.
             fail("internal-names", f"{where}:{line} matches a denylisted pattern")
@@ -552,14 +555,14 @@ def check_live() -> None:
         guests = 0
     if not guests:
         fail("live", "api/audience.json reports no guests: the build lost LUMA_API_KEY")
-    # The sponsor form can send: the deploy kept its webhook (docs/adr/0027).
+    # The sponsor form can send: the server resolved its webhook at start (docs/adr/0027).
     code, body = get(f"{b}/api/sponsor")
     try:
         ready = json.loads(body).get("ready") if code == 200 else False
     except json.JSONDecodeError:
         ready = False
     if not ready:
-        fail("live", "api/sponsor can't send: the branding service lacks GROKBOT_WEBHOOK_URL or the key (GROKBOT_WEBHOOK_HEADER, _KEY)")
+        fail("live", "api/sponsor can't send: the branding service didn't resolve GROKBOT_WEBHOOK_* from 1Password (its OP_TOKEN, or the items; the deploy log has start.sh's summary)")
     if get(f"{s}/")[0] != 200:
         fail("live", f"{s}/ is not serving the sponsor deck")
     if get(f"{s}/brand-guidelines/")[0] != 404:
