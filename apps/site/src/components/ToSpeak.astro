@@ -1,0 +1,6 @@
+---
+// How to speak at a meetup, the same on every page: the rule, then the way in.
+import { toSpeak } from '../lib/data';
+interface Props { class?: string }
+---
+<p class={Astro.props.class}>{toSpeak} <a href="/speak" class="font-semibold underline underline-offset-4">Apply to speak</a>.</p>

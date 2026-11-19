@@ -221,7 +221,11 @@ export const dayDate = (d: string) => fmt(d, { weekday: 'short', day: 'numeric',
 // The meetup in one line, and how to speak at one: every page says them the same way.
 export const pitch = 'A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions.';
 export const pitchIn = (city: string) => `${pitch} In ${city}, in English.`;
-export const toSpeak = 'To speak, register for the next meetup and describe your talk in the talk field. Ten minutes, real work, no pitches.';
+export const toSpeak = 'Talks are ten minutes, on real work, for a technical audience: never a product pitch.';
+
+// Where the site's forms post: the branding app, which has a server (docs/adr/0027, 0028).
+// A development server points them elsewhere with PUBLIC_FORMS_ORIGIN.
+export const formsOrigin = import.meta.env.PUBLIC_FORMS_ORIGIN || 'https://branding.agnteng.com';
 
 
 // Each meetup owns one of the brand's three meetup colours, by its number in its city, so a

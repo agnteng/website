@@ -1,0 +1,57 @@
+---
+// For people who want to give a talk: what a talk here is, beside the form to apply.
+import { Image } from 'astro:assets';
+import Shell from '../layouts/Shell.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import HeroCells from '../components/HeroCells.astro';
+import Tone from '../components/Tone.astro';
+import PageTitle from '../components/PageTitle.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
+import { formsOrigin, galleryPhoto } from '../lib/data';
+import { organization } from '../lib/schema';
+
+const rules = [
+  { lead: 'Ten minutes,', rest: 'then open questions from the audience.' },
+  { lead: 'For a technical audience:', rest: 'the real work, how it works and what you learned.' },
+  { lead: 'No product pitch.', rest: 'Talks are chosen on merit, and sponsorship never buys one.' },
+];
+const fields = [
+  { id: 'name', label: 'Name', autocomplete: 'name', error: 'Enter your name.' },
+  { id: 'company', label: 'Company', autocomplete: 'organization', error: 'Enter your company’s name.' },
+  { id: 'role', label: 'Role', autocomplete: 'organization-title', error: 'Enter your role.' },
+  // The endpoint checks the same; it adds https:// when it's left out.
+  { id: 'profile', label: 'GitHub or LinkedIn', autocomplete: 'url', inputmode: 'url' as const, autocapitalize: 'off', placeholder: 'github.com/you', pattern: '(https?://)?(www\\.)?(github\\.com|linkedin\\.com)/\\S+', error: 'Enter a link to your GitHub or LinkedIn, like github.com/you.' },
+  { id: 'email', label: 'Email', type: 'email', autocomplete: 'email', error: 'Enter an email address, like name@company.com.' },
+  { id: 'talk', label: 'Your talk', rows: 6, minlength: 30, hint: 'What will you show, and what will people learn? A technical talk on real work, not a product pitch.', error: 'Describe your talk in a few sentences.' },
+];
+const photo = galleryPhoto('2026-08-26', '14.jpg');
+---
+<Shell title="Apply to speak | Agentic Engineering" description="Give a ten-minute talk at Agentic Engineering, in Lisbon or another European city: real work with AI, for a technical audience, never a product pitch." schema={[organization]} class="bg-soft-white text-panel-navy">
+  <Tone />
+  <SiteNav onHero />
+  <section class="under-nav relative isolate overflow-hidden bg-electric-blue text-white">
+    <!-- The form is long, so the text starts level with it rather than centred on it. -->
+    <div id="main" class="relative z-10 mx-auto grid max-w-7xl gap-10 px-4 pt-14 md:grid-cols-12 md:items-start md:gap-8 md:px-8 md:pt-20">
+      <div class="md:col-span-6 md:pt-8">
+        <PageTitle rise style="--i:0">Show what you’ve built with AI.</PageTitle>
+        <p class="rise mt-7 max-w-[44ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Agentic Engineering hosts events in Lisbon and other European cities. Each one has three talks by people building with AI.</p>
+        <ul class="rise mt-6 max-w-[44ch] space-y-3 text-lg leading-relaxed text-white/90" style="--i:2">
+          {rules.map((r) => <li><strong class="font-bold text-white">{r.lead}</strong> {r.rest}</li>)}
+        </ul>
+      </div>
+
+      <div id="speak" class="rise scroll-mt-6 md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:3">
+        <EnquiryForm action={`${formsOrigin}/api/speak`} heading="Apply to speak" intro="Tell us who you are and what you’d show. We’ll get back to you by email." fields={fields} submit="Apply to speak" />
+      </div>
+    </div>
+
+    <!-- A talk on real work, breaking up into the blue at its top, as on the sponsor page. -->
+    <div class="dither-stage relative -mt-24 h-72 w-full overflow-hidden md:mt-12 md:h-80 lg:-mt-16 lg:h-[26rem]" aria-hidden="true">
+      <Image src={photo.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="100vw" loading="eager" class="absolute inset-0 size-full object-cover object-[50%_45%] [filter:url(#blue-tone)]" />
+      <HeroCells seed={20260814} at="top" />
+    </div>
+  </section>
+
+  <SiteFooter />
+</Shell>
