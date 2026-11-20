@@ -100,11 +100,13 @@ export const talks: Talk[] = Object.entries(talkFiles)
   })
   .sort((a, b) => b.event.date.localeCompare(a.event.date) || a.order - b.order);
 
-// Speakers at these companies lead, best known first (docs/adr/0026). A
-// speaker's company ends their title: "Product Engineer, PostHog" or "… at PostHog".
+// A speaker's company ends their title: "Product Engineer, PostHog" or "… at PostHog".
+export const companyOf = (title?: string) => title?.match(/(?:,| at) ([^,]+)$/)?.[1];
+
+// Speakers at these companies lead, best known first (docs/adr/0026).
 const BEST_KNOWN = ['Nokia', 'Coinbase', 'Delivery Hero', 'Columbia University', 'PostHog'];
 const rank = (s: Speaker) => {
-  const company = s.title?.match(/(?:,| at) ([^,]+)$/)?.[1].toLowerCase();
+  const company = companyOf(s.title)?.toLowerCase();
   const i = BEST_KNOWN.findIndex((c) => c.toLowerCase() === company);
   return i < 0 ? BEST_KNOWN.length : i;
 };
