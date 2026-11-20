@@ -29,14 +29,18 @@ export function useLogoAssets(): OverlayAssets {
   return assets;
 }
 
-// Wait for Kode Mono so pill/text metrics are correct (LumaCoverBuilder pattern).
+// Every weight a text layer can ask for. A canvas never fetches a font itself: one that no
+// page text uses (Manrope, on the bare render page) is drawn in the fallback until loaded.
+const FACES = ['"Kode Mono"', '"Manrope"'].flatMap((f) => [400, 500, 600, 700, 800].map((w) => `${w} 22px ${f}`));
+
+// Wait for the brand fonts so text is drawn in them, at their metrics.
 export function useFontsReady(): boolean {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const d = (document as Document & { fonts?: { load: (s: string) => Promise<unknown>; ready: Promise<unknown> } }).fonts;
     if (d && d.load) {
-      d.load('600 22px "Kode Mono"').then(() => d.ready).then(() => setReady(true)).catch(() => setReady(true));
-      const id = setTimeout(() => setReady(true), 1500);
+      Promise.all(FACES.map((f) => d.load(f))).then(() => d.ready).then(() => setReady(true)).catch(() => setReady(true));
+      const id = setTimeout(() => setReady(true), 3000);
       return () => clearTimeout(id);
     }
     setReady(true);
