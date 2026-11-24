@@ -1,0 +1,29 @@
+---
+// What sponsors.agnteng.com shows at a partner's page until the right password is entered
+// (apps/site/sponsors.mjs, docs/adr/0029). The form posts back to the page's own address.
+// The server shows the [data-wrong] line after a wrong password.
+import Shell from '../../layouts/Shell.astro';
+import Animation from '@agnteng/brand/components/Animation.tsx';
+import Input from '@agnteng/brand/components/Input.astro';
+import Button from '@agnteng/brand/components/Button.astro';
+import SubHeading from '../../components/SubHeading.astro';
+---
+<Shell noindex title="Partner proposal | Agentic Engineering" description="A private proposal from Agentic Engineering." class="bg-electric-blue text-white">
+  <main id="main" class="relative isolate flex min-h-dvh items-center overflow-hidden">
+    <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
+      <Animation client:load animation="aurora" color="#3A4DFF" edge="#B5A6FF" bg="#1E2BE6" cell={8} gap={1} density={0.4} motion={20} fade="left" shape="square" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+    </div>
+    <div class="mx-auto w-full max-w-md px-4 py-16">
+      <img src="/assets/logo/ae-mark-white.svg" width="187" height="160" alt="Agentic Engineering" class="h-10 w-auto" />
+      <div class="mt-10 rounded-2xl bg-white p-6 text-panel-navy shadow-[0_32px_64px_-24px_rgb(5_7_30/0.6)] sm:p-8">
+        <SubHeading as="h1">A proposal for you</SubHeading>
+        <p class="mt-2 text-panel-navy/75">Enter the password you were sent with the link.</p>
+        <p data-wrong hidden role="alert" class="mt-5 rounded-[10px] bg-error/[0.08] px-4 py-3 font-semibold text-error">That password isn’t right. Try again.</p>
+        <form method="post" class="mt-6">
+          <Input type="password" name="password" label="Password" autocomplete="current-password" required autofocus />
+          <Button type="submit" class="mt-6 w-full">Open the proposal</Button>
+        </form>
+      </div>
+    </div>
+  </main>
+</Shell>

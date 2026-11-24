@@ -7,7 +7,9 @@ write-ups and the video pipeline live in
 event data from here.
 
 What must not be public (Luma numbers, attendee and supporter lists, sponsor
-terms) lives in the private workspace repository. Video and audio live
+terms) lives in the private workspace repository. Partner proposals are the
+exception: their source is here, and only the page is behind a password
+(`docs/adr/0029`). Video and audio live
 in no repository.
 
 This repository is public. Credentials live in `.env` (ignored) or come from a
@@ -23,10 +25,10 @@ git config core.hooksPath .githooks   # needs: brew install gitleaks
 
 | Path | What |
 |---|---|
-| `apps/branding/` | [branding.agnteng.com](https://branding.agnteng.com) (Astro): brand guidelines, playground, website mockups, the `slides/<city>-<date>` decks, `sponsorship`, `api/audience.json` (live Luma numbers for tonight's deck), and `api/sponsor` and `api/speak`, which pass agnteng.com's sponsor and talk forms on by webhook (`docs/adr/0027`, `0028`). Its secrets resolve from 1Password when it starts (`.env.schema`, `start.sh`). Also builds [sponsors.agnteng.com](https://sponsors.agnteng.com). |
+| `apps/branding/` | [branding.agnteng.com](https://branding.agnteng.com) (Astro): brand guidelines, playground, website mockups, the `slides/<city>-<date>` decks, `sponsorship`, `api/audience.json` (live Luma numbers for tonight's deck), and `api/sponsor` and `api/speak`, which pass agnteng.com's sponsor and talk forms on by webhook (`docs/adr/0027`, `0028`). Its secrets resolve from 1Password when it starts (`.env.schema`, `start.sh`). |
 | `apps/branding/src/components/slides/` | The deck engine and primitives; `slides/meetup/` holds the slides every meetup deck shares, `slides-<date>/` one meetup's own. |
 | `apps/branding/src/lib/luma.ts` | Server-only Luma client. Import it only from `.astro` frontmatter or `src/pages/api/`, so `LUMA_API_KEY` stays out of the browser bundle. |
-| `apps/site/` | [agnteng.com](https://agnteng.com) (Astro, static): the next event, every talk with its video and transcript, the speakers, past events with their Q&A, the newsletter's latest posts, `/sponsor` for companies and `/speak` to apply for a talk. |
+| `apps/site/` | [agnteng.com](https://agnteng.com) (Astro, static): the next event, every talk with its video and transcript, the speakers, past events with their Q&A, the newsletter's latest posts, `/sponsor` for companies and `/speak` to apply for a talk. Also builds the partner proposals in `src/pages/partners/`, which only [sponsors.agnteng.com](https://sponsors.agnteng.com) serves, each behind its password (`sponsors.mjs`, `docs/adr/0029`). |
 | `apps/site/src/companies/` | The logos of the companies community members work at, in one colour; `apps/site/src/lib/companies.ts` lists them with their sizes (`docs/adr/0025`). |
 | `packages/brand/` | The brand, shared by both apps as raw source: tokens (`styles.css`), components, the pixel icons and the dither (`Animation`, `DuotoneField`). The brand's logos and the photos stay in `apps/branding/public/`, which the site serves too. |
 | `content/<date>/event.json` | One event's identity: city, venue, Luma ids, speakers. The decks import it as `@content/<date>/event.json`; production reads it for the write-ups. |
@@ -58,6 +60,8 @@ mise install            # node, pnpm, python, gitleaks
 mise run install        # dependencies, from the repository root
 mise run dev            # branding site on 127.0.0.1:4321
 mise run dev:site       # agnteng.com on 127.0.0.1:4330
+# a partner proposal as sponsors.agnteng.com serves it, on 127.0.0.1:4340/<partner>:
+pnpm --filter site build && PORT=4340 PARTNER_TRIBE_PASSWORD=pick-one node apps/site/sponsors.mjs
 mise run fitness        # the repository checks CI runs
 mise tasks              # everything else
 ```
@@ -75,7 +79,8 @@ the app with `pnpm --filter branding exec varlock run -- astro dev`.
 
 Dokploy services build from `main`, with the repository root as build
 context: `branding` (`apps/branding/Dockerfile`, a node server), `sponsors`
-(`apps/branding/Dockerfile.sponsors`, nginx serving only the sponsor deck) and
+(`apps/branding/Dockerfile.sponsors`, a node server for the partner proposals; each
+partner's password is its `PARTNER_<PARTNER>_PASSWORD` variable) and
 `site` (`apps/site/Dockerfile`, nginx serving agnteng.com; the service and its
 domain are not set up yet). The site reads the
 newsletter feed at build time, so a new Substack post appears on the next deploy.

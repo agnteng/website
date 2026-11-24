@@ -11,13 +11,11 @@ const { onHero = false } = Astro.props;
 const starts = nextEvent && (nextEvent.luma?.startAt ?? `${nextEvent.date}T23:59:00Z`);
 const luma = links.luma;
 const here = Astro.url.pathname.replace(/\/$/, '');
-// Sponsor: the site's sponsor page when it has one, else the sponsor deck.
-const sponsorPage = Object.keys(import.meta.glob('../pages/sponsor.astro')).length > 0;
 const sections = [
   { label: 'Talks', href: '/talks' },
   { label: 'Speakers', href: '/speakers' },
   { label: 'Events', href: '/events' },
-  { label: 'Sponsor', href: sponsorPage ? '/sponsor' : links.sponsors },
+  { label: 'Sponsor', href: '/sponsor' },
 ];
 const speak = { label: 'Apply to speak', href: '/speak' };
 ---

@@ -12,16 +12,9 @@ import EnquiryForm from '../components/EnquiryForm.astro';
 import CompanyLogos from '../components/CompanyLogos.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
-import { formsOrigin, galleryPhoto, hostLine, TINTS } from '../lib/data';
+import { community, formsOrigin, galleryPhoto, hostLine, TINTS } from '../lib/data';
 import { organization } from '../lib/schema';
 
-// The organizers' figures. The sponsor deck (apps/branding/src/components/slides-sponsor/
-// content.ts) has its own, older ones: when these change, move both onto one module.
-const community = {
-  members: 1000,
-  foundersAndDevelopers: 80, // 44% founders and 36% developers, the sponsor deck's mix
-  attendees: 70, // at an average monthly event
-};
 // The three figures, each a block in one of the brand's three meetup colours; a few of
 // the cells where a block breaks up take the next block's colour.
 const figures = [
@@ -49,7 +42,7 @@ const photo = galleryPhoto('2026-08-26', '04.jpg');
       </div>
 
       <div class="rise md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:2">
-        <EnquiryForm action={`${formsOrigin}/api/sponsor`} heading="Sponsor an event" intro="Leave your details and we’ll get back to you by email." fields={fields} submit="Get in touch" notSent="That didn’t send. Email partners@agnteng.com instead." />
+        <EnquiryForm action={`${formsOrigin}/api/sponsor`} heading="Sponsor an event" intro="Leave your details and we’ll get back to you by email." fields={fields} submit="Get in touch" />
       </div>
     </div>
 
