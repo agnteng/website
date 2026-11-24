@@ -80,8 +80,8 @@ const visibility: Row[] = [
     body: 'A partner credit in the description of every talk video from the six meetups.',
   },
 ];
-// The talk the YouTube mockup shows.
-const ytTalk = talks.find((t) => t.event.date === '2026-11-11' && still(t))!;
+// The talk the YouTube mockup shows: Harley Alexander's, from PostHog.
+const ytTalk = talks.find((t) => t.person.name === 'Harley Alexander' && still(t))!;
 
 const price = { full: 6000, deal: 4500, meetups: 6, single: 1000 };
 // The Stripe payment link for the six meetups; the button shows once it is set.
