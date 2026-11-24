@@ -108,7 +108,9 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
   <Tone />
 
   <!-- The proposal's nav: both logos, and the four parts of the page. -->
-  <header class="pointer-events-none sticky top-3 z-50 mx-auto max-w-7xl px-4 text-white md:top-4 md:px-8">
+  <!-- h-14 is the height the hero's under-nav runs up by; the bar may be taller (two rows on a
+       phone) and overflows onto the hero rather than pushing it down. -->
+  <header class="pointer-events-none sticky top-3 z-50 mx-auto h-14 max-w-7xl px-4 text-white md:top-4 md:px-8">
     <div class="pointer-events-auto flex min-h-14 flex-wrap items-center justify-between gap-x-6 gap-y-1 rounded-[28px] border border-white/10 bg-deep-navy/90 py-2 pl-5 pr-2 shadow-[0_12px_32px_-12px_rgb(5_7_30/0.35)] backdrop-blur-xl">
       <div class="flex h-10 items-center gap-3">
         <img src="/assets/logo/ae-mark-white.svg" width="187" height="160" alt="Agentic Engineering" class="h-6 w-auto" />
