@@ -1,7 +1,7 @@
 ---
 // What sponsors.agnteng.com shows at a partner's page until the right password is entered
 // (apps/site/sponsors.mjs, docs/adr/0029). The form posts back to the page's own address.
-// The server shows the [data-wrong] line after a wrong password.
+// The server shows [data-wrong] after a wrong password and [data-limit] after too many.
 import Shell from '../../layouts/Shell.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Input from '@agnteng/brand/components/Input.astro';
@@ -19,6 +19,7 @@ import SubHeading from '../../components/SubHeading.astro';
         <SubHeading as="h1">A proposal for you</SubHeading>
         <p class="mt-2 text-panel-navy/75">Enter the password you were sent with the link.</p>
         <p data-wrong hidden role="alert" class="mt-5 rounded-[10px] bg-error/[0.08] px-4 py-3 font-semibold text-error">That password isn’t right. Try again.</p>
+        <p data-limit hidden role="alert" class="mt-5 rounded-[10px] bg-error/[0.08] px-4 py-3 font-semibold text-error">Too many tries. Wait a few minutes, then try again.</p>
         <form method="post" class="mt-6">
           <Input type="password" name="password" label="Password" autocomplete="current-password" required autofocus />
           <Button type="submit" class="mt-6 w-full">Open the proposal</Button>

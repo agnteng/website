@@ -1,6 +1,6 @@
 # 0024. A merge to `main` deploys the sites; a deploy is done when the live check passes
 
-- Status: Accepted
+- Status: Accepted; "the sponsors host serves only the deck" superseded by 0029
 - Date: 2026-11-17
 - Supersedes: workspace ADR 0005 (deploys triggered by hand), which bound only this repository
 

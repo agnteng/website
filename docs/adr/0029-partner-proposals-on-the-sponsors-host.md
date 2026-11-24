@@ -2,7 +2,9 @@
 
 - Status: Accepted
 - Date: 2026-11-24
-- Refines: 0015, 0024
+- Supersedes: 0015 and 0024 on the sponsors host (it no longer serves the sponsor deck); 0019's
+  names for a proposal's images
+- Follows: workspace ADR 0026 (a proposal's source is public)
 
 ## Context
 Sponsors used to get one public deck at sponsors.agnteng.com. Now a company we
@@ -34,10 +36,10 @@ Dockerfile path, `apps/branding/Dockerfile.sponsors`, which now builds the site.
 - A proposal's text, prices and mockups are in this public repository. The
   password keeps the page from being found and read in passing, not the
   source: anything that must stay secret does not go in a proposal.
-- The mockup images are served by agnteng.com too, under hashed names nothing
-  links to.
-- A new proposal is a page and a variable on the sponsors service. When there
-  are several, the common parts can become components.
+- A proposal's images keep their bare, hashed names rather than names saying
+  what they show (0019): agnteng.com serves them too, and a name would put the
+  partner's name on the indexed host. Nothing there links to them.
+- A new proposal is a page and a variable on the sponsors service.
 - `mise run fitness` checks that partner pages are `noindex` and that
   agnteng.com refuses them; `fitness:live` checks the redirect, the password
   form and the 404s.

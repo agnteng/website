@@ -1,13 +1,6 @@
-# sponsors.agnteng.com: partner proposals, each behind its own password (docs/adr/0029).
-#
-# The pages are agnteng.com's (apps/site/src/pages/partners/), built with the rest of the
-# site, so a proposal has the site's components, photos and fonts. agnteng.com refuses
-# /partners/ (apps/site/nginx.conf); here apps/site/sponsors.mjs serves them, one per
-# path, once the partner's password is entered. Each partner's password is the service's
-# PARTNER_<PARTNER>_PASSWORD variable, read when the server starts.
-#
-# The file stays here because the sponsors service's build points at this path.
-# Build context: the repository root.
+# sponsors.agnteng.com: builds apps/site and runs apps/site/sponsors.mjs over it
+# (docs/adr/0029). It stays in apps/branding because the sponsors service's build
+# points here. Build context: the repository root.
 FROM node:22-alpine AS build
 WORKDIR /repo
 RUN corepack enable
@@ -19,7 +12,6 @@ RUN pnpm install --frozen-lockfile --filter site...
 COPY . .
 RUN pnpm --filter site build
 
-# The server has no dependencies: node and the build.
 FROM node:22-alpine
 WORKDIR /app
 COPY --from=build /repo/apps/site/sponsors.mjs ./
