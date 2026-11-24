@@ -83,9 +83,23 @@ const visibility: Row[] = [
 // The talk the YouTube mockup shows: Harley Alexander's, from PostHog.
 const ytTalk = talks.find((t) => t.person.name === 'Harley Alexander' && still(t))!;
 
-const price = { full: 6000, deal: 4500, meetups: 6, single: 1000 };
-// Stripe's payment link for the six meetups: $4,500, with an invoice.
-const stripeLink = 'https://buy.stripe.com/28E7sL8zw4TY70w1dz9k400';
+// The six meetups, on the last Wednesday of each month. Only the first is set.
+const dates = [
+  { date: '2027-01-27', n: 6, confirmed: true },
+  { date: '2027-02-24', n: 7 },
+  { date: '2027-03-31', n: 8 },
+  { date: '2027-04-28', n: 9 },
+  { date: '2027-05-26', n: 10 },
+  { date: '2027-06-30', n: 11 },
+].map((d) => {
+  const day = new Date(`${d.date}T12:00:00Z`);
+  const part = (o: Intl.DateTimeFormatOptions) => day.toLocaleDateString('en-GB', { ...o, timeZone: 'UTC' });
+  return { ...d, weekday: part({ weekday: 'short' }), day: part({ day: 'numeric' }), month: part({ month: 'short', year: 'numeric' }) };
+});
+
+const price = { full: 6000, deal: 4800, meetups: 6, single: 1000 };
+// Stripe's payment link for the six meetups: $4,800, with an invoice.
+const stripeLink = 'https://buy.stripe.com/cNi28rcPMbimfx22hD9k401';
 const usd = (n: number) => `$${n.toLocaleString('en')}`;
 ---
 <Shell noindex title="Agentic Engineering × Tribe AI" description="A partnership proposal for Tribe AI: six Agentic Engineering meetups in Lisbon, from 27 January 2027." class="bg-soft-white text-panel-navy">
@@ -199,7 +213,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
 
         <!-- Candidates: a picture of what Tribe receives, without anyone's details. -->
         <div id="candidates" class="mt-12 grid items-center gap-8 md:mt-16 md:grid-cols-12 md:gap-12">
-          <div class="md:order-2 md:col-span-7">
+          <div class="md:col-[7/span_6] md:row-start-1 lg:col-[7/span_5]">
             <div class="relative isolate overflow-hidden rounded-2xl bg-electric-blue p-5 text-white md:p-8" aria-hidden="true">
               <div class="dither-stage absolute inset-0 -z-10">
                 <Artifacts client:visible color="#05071E" edge="#B5A6FF" seed={2027} cell={12} animate artifacts={[{ at: 'bottom-right', solid: 0.05, reach: 0.4 }]} />
@@ -229,7 +243,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
               </div>
             </div>
           </div>
-          <div class="md:order-1 md:col-span-5">
+          <div class="md:col-[1/span_6] md:row-start-1 lg:col-[1/span_5]">
             <SubHeading>Candidates</SubHeading>
             <ul class="mt-6 space-y-3 text-lg leading-relaxed text-panel-navy/80">
               {candidates.map((it) => <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.6em] size-2 shrink-0 bg-electric-blue"></span>{it}</li>)}
@@ -237,17 +251,19 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
           </div>
         </div>
 
-        <h3 class="mt-24 border-t border-panel-navy/[0.08] pt-16 font-sans text-2xl font-extrabold leading-tight tracking-tight md:mt-32 md:pt-24 md:text-4xl">Brand visibility</h3>
-        <ol class="mt-12 space-y-16 md:mt-16 md:space-y-24">
+        <h3 class="mt-20 border-t border-panel-navy/[0.08] pt-14 font-sans text-2xl font-extrabold leading-tight tracking-tight md:mt-24 md:pt-16 md:text-4xl">Brand visibility</h3>
+        <!-- Picture and text alternate sides; each takes five of the twelve columns on wide screens.
+             Column and span are set together (col-[start/span_n]), so no breakpoint undoes the other. -->
+        <ol class="mt-10 space-y-14 md:mt-12 md:space-y-16">
           {visibility.map((r, i) => (
             <li id={r.id} class="grid items-center gap-8 md:grid-cols-12 md:gap-12">
-              <div class:list={['md:col-span-7', i % 2 === 1 && 'md:order-2']}>
+              <div class={i % 2 === 1 ? 'md:col-[7/span_6] md:row-start-1 lg:col-[7/span_5]' : 'md:col-[1/span_6] md:row-start-1 lg:col-[1/span_5]'}>
                 {r.shot
                   ? <div class="overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgb(5_7_30/0.06),0_12px_40px_-12px_rgb(5_7_30/0.25)] ring-1 ring-panel-navy/10">
                       <div class="flex h-8 items-center gap-1.5 border-b border-panel-navy/10 bg-[#F6F7FB] px-3" aria-hidden="true">
                         <span class="size-2.5 rounded-full bg-panel-navy/15"></span><span class="size-2.5 rounded-full bg-panel-navy/15"></span><span class="size-2.5 rounded-full bg-panel-navy/15"></span>
                       </div>
-                      <Image src={r.shot} alt={r.alt} widths={[640, 960, 1280, 1600]} sizes="(min-width: 768px) 58vw, 100vw" loading="lazy" class="block h-auto w-full" />
+                      <Image src={r.shot} alt={r.alt} widths={[640, 960, 1280, 1600]} sizes="(min-width: 768px) 45vw, 100vw" loading="lazy" class="block h-auto w-full" />
                     </div>
                   : r.youtube
                   ? <div class="overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgb(5_7_30/0.06),0_12px_40px_-12px_rgb(5_7_30/0.25)] ring-1 ring-panel-navy/10">
@@ -257,7 +273,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
                       <!-- A talk's page on YouTube, drawn here: the video, its title and the description's partner credit. -->
                       <div class="p-4 md:p-6" role="img" aria-label={r.alt}>
                         <div class="relative aspect-video overflow-hidden rounded-xl bg-deep-navy">
-                          <Image src={still(ytTalk)!} alt="" widths={[640, 960, 1280]} sizes="(min-width: 768px) 55vw, 100vw" loading="lazy" class="size-full object-cover" />
+                          <Image src={still(ytTalk)!} alt="" widths={[640, 960, 1280]} sizes="(min-width: 768px) 45vw, 100vw" loading="lazy" class="size-full object-cover" />
                         </div>
                         <p class="mt-4 text-lg font-bold leading-snug text-[#0F0F0F]">{ytTalk.title}</p>
                         <div class="mt-3 flex items-center gap-3">
@@ -271,13 +287,31 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
                       </div>
                     </div>
                   : <div class="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                      <Image src={r.photo!} alt={r.alt} widths={[640, 960, 1280]} sizes="(min-width: 768px) 58vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover" />
+                      <Image src={r.photo!} alt={r.alt} widths={[640, 960, 1280]} sizes="(min-width: 768px) 45vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover" />
                     </div>}
               </div>
-              <div class:list={['md:col-span-5', i % 2 === 1 && 'md:order-1']}>
+              <div class={i % 2 === 1 ? 'md:col-[1/span_6] md:row-start-1 lg:col-[1/span_5]' : 'md:col-[7/span_6] md:row-start-1 lg:col-[7/span_5]'}>
                 <SubHeading>{r.title}</SubHeading>
                 <p class="mt-4 text-lg leading-relaxed text-panel-navy/80">{r.body}</p>
               </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <!-- The six dates: only January is set. -->
+    <section id="dates" class="scroll-mt-24 border-t border-panel-navy/[0.08]">
+      <div class="mx-auto max-w-7xl px-4 py-14 md:px-8 md:py-20">
+        <SubHeading as="h2">Dates</SubHeading>
+        <p class="mt-3 text-panel-navy/70">The last Wednesday of each month, in Lisbon. January is confirmed; the rest are tentative.</p>
+        <ol class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {dates.map((d) => (
+            <li class:list={['rounded-2xl p-4 md:p-5', d.confirmed ? 'bg-electric-blue text-white' : 'border border-panel-navy/10 bg-white text-panel-navy']}>
+              <p class:list={['text-sm font-semibold', d.confirmed ? 'text-white/80' : 'text-panel-navy/60']}>{d.weekday}</p>
+              <p class="mt-1 text-4xl font-extrabold leading-none tracking-tight">{d.day}</p>
+              <p class="mt-1 font-semibold">{d.month}</p>
+              <p class:list={['mt-4 text-sm', d.confirmed ? 'text-white/80' : 'text-panel-navy/60']}>Lisbon #{d.n} · {d.confirmed ? 'Confirmed' : 'Tentative'}</p>
             </li>
           ))}
         </ol>
@@ -304,7 +338,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
           <div class="border-t border-panel-navy/10 bg-[#F6F7FB] p-6 md:border-l md:border-t-0 md:p-10">
             <p class="text-sm font-bold text-panel-navy/60">At every meetup</p>
             <ul class="mt-5 space-y-3.5 text-panel-navy/85">
-              {['Registrants before, a shortlist of candidates after', 'Branding, merch and an intro slide at the meetup', 'A banner on Luma and in every newsletter', 'Logo on agnteng.com, credit on YouTube', 'The only recruiting partner'].map((l) => (
+              {['Registrants before, a shortlist of candidates after', 'Branding, merch and an intro slide at the meetup', 'A banner on Luma and in every newsletter', 'Logo on agnteng.com, credit on YouTube'].map((l) => (
                 <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.55em] size-2 shrink-0 bg-electric-blue"></span>{l}</li>
               ))}
             </ul>
