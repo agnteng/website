@@ -5,15 +5,16 @@
 import Marquee from '@agnteng/brand/components/Marquee.astro';
 import { companies } from '../lib/companies';
 import { nameType } from '../lib/type';
-interface Props { class?: string }
-const { class: cls } = Astro.props;
+// `large`: bigger logos and label, for a page where the strip is a section of its own.
+interface Props { class?: string; large?: boolean }
+const { class: cls, large = false } = Astro.props;
 ---
 <div class={cls}>
   <div class="relative overflow-x-clip">
     <div class="pointer-events-none absolute inset-0 z-10 mx-auto flex max-w-7xl px-4 motion-reduce:static motion-reduce:mb-6 md:px-8 md:motion-reduce:mb-8">
       <div class="veil relative flex items-center pr-4 [--fade:3.5rem] md:pr-8 md:[--fade:8rem]">
         <span class="haze"><span></span><span></span><span></span></span>
-        <p class:list={[nameType, 'relative z-20 max-w-[7.5rem] text-panel-navy motion-reduce:max-w-none sm:max-w-none']}>Community members from</p>
+        <p class:list={[nameType, 'relative z-20 max-w-[7.5rem] text-panel-navy motion-reduce:max-w-none sm:max-w-none', large && 'md:text-xl']}>Community members from</p>
       </div>
     </div>
     <svg aria-hidden="true" class="absolute size-0 overflow-hidden">
@@ -24,7 +25,7 @@ const { class: cls } = Astro.props;
       <ul role="list" class="flex items-center gap-x-10 pr-10 motion-reduce:mx-auto motion-reduce:w-full motion-reduce:max-w-7xl motion-reduce:flex-wrap motion-reduce:gap-y-6 motion-reduce:px-4 md:gap-x-20 md:pr-20 md:motion-reduce:gap-y-8 md:motion-reduce:px-8">
         {companies.map((c) => (
           <li class="flex shrink-0 items-center">
-            <svg role="img" aria-label={c.name} viewBox={c.viewBox} class="h-[calc(var(--size)*2rem)] w-auto fill-current opacity-60 md:h-[calc(var(--size)*3rem)]" style={`--size: ${c.size}; aspect-ratio: ${c.width} / 100`}>
+            <svg role="img" aria-label={c.name} viewBox={c.viewBox} class:list={['w-auto fill-current opacity-60', large ? 'h-[calc(var(--size)*2.5rem)] md:h-[calc(var(--size)*4rem)]' : 'h-[calc(var(--size)*2rem)] md:h-[calc(var(--size)*3rem)]']} style={`--size: ${c.size}; aspect-ratio: ${c.width} / 100`}>
               <use href={`#company-${c.id}`} />
             </svg>
           </li>
