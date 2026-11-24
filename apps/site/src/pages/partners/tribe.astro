@@ -114,15 +114,25 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
           <p class="rise mt-7 max-w-[42ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Partner with Agentic Engineering for six monthly meetups: a presence in Lisbon’s AI community, a direct line to the forward deployed engineers you want to hire, and a stage to share what Tribe has learned.</p>
         </div>
       </div>
-      <!-- 65% wide: its solid cells cover the first quarter, so the photo breaks up at the centre. -->
-      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[65%]" aria-hidden="true">
-        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 65vw, 100vw" loading="eager" class="absolute inset-0 size-full scale-105 object-cover object-[55%_45%] [filter:url(#blue-tone)_blur(5px)]" />
-        <HeroCells seed={20270127} />
-        <!-- Who the proposal is for, on the photo, clear of the cells that cover its left quarter. -->
-        <div class="absolute inset-0 z-3 flex flex-col items-center justify-center gap-4 md:left-[30%]">
-          <p class="text-sm font-bold text-white/85">A proposal for</p>
-          <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="" class="h-11 w-auto drop-shadow-[0_4px_24px_rgb(5_7_30/0.45)] md:h-12 lg:h-16" />
+      <!-- The photo breaks up at the centre in a thin band of cells (a thinner HeroCells): 56%
+           wide, its first tenth solid. -->
+      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[56%]" aria-hidden="true">
+        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 56vw, 100vw" loading="eager" class="absolute inset-0 size-full scale-105 object-cover object-[55%_45%] [filter:url(#blue-tone)_blur(5px)]" />
+        <div class="absolute inset-0 z-2 max-md:hidden">
+          <Artifacts client:load color="#1E2BE6" edge="#B5A6FF" seed={20270127} cell={10} animate artifacts={[{ at: 'left', solid: 0.1, reach: 0.3, wave: 0.03, waveLength: 0.6 }]} />
         </div>
+        <div class="absolute inset-0 z-2 md:hidden">
+          <Artifacts client:load color="#1E2BE6" edge="#B5A6FF" seed={20270127} cell={10} animate artifacts={[{ at: 'top', solid: 0.08, reach: 0.3, wave: 0.05, waveLength: 0.7 }]} />
+        </div>
+        <div class="absolute inset-0 z-3 flex flex-col items-center justify-center gap-4 md:hidden">
+          <p class="text-sm font-bold text-white/85">A proposal for</p>
+          <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="" class="h-12 w-auto drop-shadow-[0_4px_24px_rgb(5_7_30/0.45)]" />
+        </div>
+      </div>
+      <!-- Who the proposal is for, on the photo, aligned with the nav's and the page's right edge. -->
+      <div class="pointer-events-none absolute inset-0 z-10 mx-auto flex max-w-7xl flex-col items-end justify-center gap-4 px-4 max-md:hidden md:px-8" aria-hidden="true">
+        <p class="text-base font-bold text-white/85">A proposal for</p>
+        <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="" class="h-16 w-auto drop-shadow-[0_4px_24px_rgb(5_7_30/0.45)] lg:h-24" />
       </div>
     </section>
 
