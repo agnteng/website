@@ -12,13 +12,20 @@ import CommunityFigures from '../../components/CommunityFigures.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
-import { galleryPhoto, TINTS, toSpeak } from '../../lib/data';
+import SocialIcons from '@agnteng/brand/components/SocialIcons.astro';
+import { galleryPhoto, links, TINTS, toSpeak } from '../../lib/data';
 import tribeLogoWhite from '../../partners/tribe/logo-white.svg';
 import lumaShot from '../../partners/tribe/luma.jpg';
 import recapShot from '../../partners/tribe/recap.jpg';
 import eventShot from '../../partners/tribe/event.jpg';
 
 const site = 'https://agnteng.com';
+const channels = [
+  { label: 'agnteng.com', href: site },
+  { label: 'Substack', href: links.substack, icon: 'substack' as const },
+  { label: 'Luma', href: links.luma, icon: 'luma' as const },
+  { label: 'YouTube', href: links.youtube, icon: 'youtube' as const },
+];
 const tabs = [
   { id: 'who', label: 'Who we are' },
   { id: 'tribe', label: 'Tribe' },
@@ -124,6 +131,14 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
           <p class="text-xl font-semibold leading-snug md:text-2xl">Agentic Engineering is for people building software, infrastructure and companies with agentic workflows.</p>
           <p class="text-panel-navy/75">We have run meetups in Lisbon since May 2026, each with three talks, then open questions and drinks. {toSpeak} Past speakers work at Nokia, Coinbase, PostHog and Delivery Hero.</p>
           <p class="text-panel-navy/75">Every meetup gets a recap by email and on Substack, and every talk goes on YouTube and <a href={site} class="font-semibold text-panel-navy underline underline-offset-4">agnteng.com</a> with its transcript.</p>
+          <ul class="flex flex-wrap gap-3 pt-2">
+            {channels.map((c) => (
+              <li><a href={c.href} target="_blank" rel="noreferrer" class="inline-flex items-center gap-2.5 rounded-full border-[1.5px] border-panel-navy/15 px-4 py-2.5 text-base font-semibold text-panel-navy transition-colors hover:border-electric-blue hover:text-electric-blue">
+                {c.icon ? <SocialIcons name={c.icon} size={18} /> : <img src="/assets/logo/ae-mark.svg" width="187" height="160" alt="" class="h-4 w-auto" />}
+                {c.label}
+              </a></li>
+            ))}
+          </ul>
         </div>
       </div>
       <CommunityFigures class="mx-auto mt-12 max-w-7xl px-4 md:mt-16 md:px-8" />
