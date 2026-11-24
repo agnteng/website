@@ -17,6 +17,7 @@ const { class: cls, large = false } = Astro.props;
         <p class:list={[nameType, 'relative z-20 max-w-[7.5rem] text-panel-navy motion-reduce:max-w-none sm:max-w-none', large && 'md:text-xl']}>Community members from</p>
       </div>
     </div>
+    {large && <div aria-hidden="true" class="fade-out pointer-events-none absolute inset-y-0 right-0 z-10 w-16 md:w-40"></div>}
     <svg aria-hidden="true" class="absolute size-0 overflow-hidden">
       {companies.map((c) => <symbol id={`company-${c.id}`} viewBox={c.viewBox} set:html={c.paths} />)}
     </svg>
@@ -52,6 +53,12 @@ const { class: cls, large = false } = Astro.props;
       rgb(255 255 255 / 0.3) calc(100% - var(--fade) * 0.3),
       rgb(255 255 255 / 0.08) calc(100% - var(--fade) * 0.1),
       transparent);
+  }
+  /* With `large`: the strip blurs and fades out on the right as it came in on the left. */
+  .fade-out {
+    background: linear-gradient(to left, var(--color-white), rgb(255 255 255 / 0.7) 40%, transparent);
+    backdrop-filter: blur(3px);
+    mask-image: linear-gradient(to left, black 30%, transparent);
   }
   .haze {
     position: absolute;
