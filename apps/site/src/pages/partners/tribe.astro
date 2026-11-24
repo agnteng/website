@@ -85,12 +85,12 @@ const ytTalk = talks.find((t) => t.person.name === 'Harley Alexander' && still(t
 
 // The six meetups, on the last Wednesday of each month. Only the first is set.
 const dates = [
-  { date: '2027-01-27', n: 6, confirmed: true },
-  { date: '2027-02-24', n: 7 },
-  { date: '2027-03-31', n: 8 },
-  { date: '2027-04-28', n: 9 },
-  { date: '2027-05-26', n: 10 },
-  { date: '2027-06-30', n: 11 },
+  { date: '2027-01-27', confirmed: true },
+  { date: '2027-02-24' },
+  { date: '2027-03-31' },
+  { date: '2027-04-28' },
+  { date: '2027-05-26' },
+  { date: '2027-06-30' },
 ].map((d) => {
   const day = new Date(`${d.date}T12:00:00Z`);
   const part = (o: Intl.DateTimeFormatOptions) => day.toLocaleDateString('en-GB', { ...o, timeZone: 'UTC' });
@@ -213,7 +213,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
 
         <!-- Candidates: a picture of what Tribe receives, without anyone's details. -->
         <div id="candidates" class="mt-12 grid items-center gap-8 md:mt-16 md:grid-cols-12 md:gap-12">
-          <div class="md:col-[7/span_6] md:row-start-1 lg:col-[7/span_5]">
+          <div class="md:col-[6/span_7] md:row-start-1">
             <div class="relative isolate overflow-hidden rounded-2xl bg-electric-blue p-5 text-white md:p-8" aria-hidden="true">
               <div class="dither-stage absolute inset-0 -z-10">
                 <Artifacts client:visible color="#05071E" edge="#B5A6FF" seed={2027} cell={12} animate artifacts={[{ at: 'bottom-right', solid: 0.05, reach: 0.4 }]} />
@@ -235,15 +235,17 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
                         <span class="block h-2.5 w-28 rounded-full bg-panel-navy/15"></span>
                         <span class="mt-2 block text-sm font-semibold">{role} <span class="font-normal text-panel-navy/60">· {work}</span></span>
                       </span>
-                      <span class="hidden shrink-0 rounded-full bg-[#EEF1FF] px-3 py-1 text-xs font-semibold text-electric-blue sm:inline">{tag}</span>
+                      <span class="flex shrink-0 items-center gap-2.5 text-panel-navy/45">
+                        <SocialIcons name="github" size={15} /><SocialIcons name="linkedin" size={15} /><SocialIcons name="x" size={14} />
+                      </span>
+                      <span class="hidden shrink-0 rounded-full bg-[#EEF1FF] px-3 py-1 text-xs font-semibold text-electric-blue lg:inline">{tag}</span>
                     </li>
                   ))}
                 </ul>
-                <div class="mt-3 flex gap-2 text-xs text-panel-navy/60"><span>GitHub</span><span>·</span><span>LinkedIn</span><span>·</span><span>X</span></div>
               </div>
             </div>
           </div>
-          <div class="md:col-[1/span_6] md:row-start-1 lg:col-[1/span_5]">
+          <div class="md:col-[1/span_5] md:row-start-1">
             <SubHeading>Candidates</SubHeading>
             <ul class="mt-6 space-y-3 text-lg leading-relaxed text-panel-navy/80">
               {candidates.map((it) => <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.6em] size-2 shrink-0 bg-electric-blue"></span>{it}</li>)}
@@ -252,12 +254,13 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
         </div>
 
         <h3 class="mt-20 border-t border-panel-navy/[0.08] pt-14 font-sans text-2xl font-extrabold leading-tight tracking-tight md:mt-24 md:pt-16 md:text-4xl">Brand visibility</h3>
-        <!-- Picture and text alternate sides; each takes five of the twelve columns on wide screens.
-             Column and span are set together (col-[start/span_n]), so no breakpoint undoes the other. -->
+        <!-- Picture and text alternate sides. On wide screens the picture takes five of the twelve
+             columns and the text the seven beside it. Column and span are set together
+             (col-[start/span_n]), so no breakpoint undoes the other. -->
         <ol class="mt-10 space-y-14 md:mt-12 md:space-y-16">
           {visibility.map((r, i) => (
-            <li id={r.id} class="grid items-center gap-8 md:grid-cols-12 md:gap-12">
-              <div class={i % 2 === 1 ? 'md:col-[7/span_6] md:row-start-1 lg:col-[7/span_5]' : 'md:col-[1/span_6] md:row-start-1 lg:col-[1/span_5]'}>
+            <li id={r.id} class="grid items-center gap-8 md:grid-cols-12 md:gap-12 lg:gap-x-10">
+              <div class={i % 2 === 1 ? 'md:col-[7/span_6] md:row-start-1 lg:col-[8/span_5]' : 'md:col-[1/span_6] md:row-start-1 lg:col-[1/span_5]'}>
                 {r.shot
                   ? <div class="overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgb(5_7_30/0.06),0_12px_40px_-12px_rgb(5_7_30/0.25)] ring-1 ring-panel-navy/10">
                       <div class="flex h-8 items-center gap-1.5 border-b border-panel-navy/10 bg-[#F6F7FB] px-3" aria-hidden="true">
@@ -290,7 +293,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
                       <Image src={r.photo!} alt={r.alt} widths={[640, 960, 1280]} sizes="(min-width: 768px) 45vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover" />
                     </div>}
               </div>
-              <div class={i % 2 === 1 ? 'md:col-[1/span_6] md:row-start-1 lg:col-[1/span_5]' : 'md:col-[7/span_6] md:row-start-1 lg:col-[7/span_5]'}>
+              <div class={i % 2 === 1 ? 'md:col-[1/span_6] md:row-start-1 lg:col-[1/span_7]' : 'md:col-[7/span_6] md:row-start-1 lg:col-[6/span_7]'}>
                 <SubHeading>{r.title}</SubHeading>
                 <p class="mt-4 text-lg leading-relaxed text-panel-navy/80">{r.body}</p>
               </div>
@@ -304,17 +307,23 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
     <section id="dates" class="scroll-mt-24 border-t border-panel-navy/[0.08]">
       <div class="mx-auto max-w-7xl px-4 py-14 md:px-8 md:py-20">
         <SubHeading as="h2">Dates</SubHeading>
-        <p class="mt-3 text-panel-navy/70">The last Wednesday of each month, in Lisbon. January is confirmed; the rest are tentative.</p>
-        <ol class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {dates.map((d) => (
-            <li class:list={['rounded-2xl p-4 md:p-5', d.confirmed ? 'bg-electric-blue text-white' : 'border border-panel-navy/10 bg-white text-panel-navy']}>
-              <p class:list={['text-sm font-semibold', d.confirmed ? 'text-white/80' : 'text-panel-navy/60']}>{d.weekday}</p>
-              <p class="mt-1 text-4xl font-extrabold leading-none tracking-tight">{d.day}</p>
-              <p class="mt-1 font-semibold">{d.month}</p>
-              <p class:list={['mt-4 text-sm', d.confirmed ? 'text-white/80' : 'text-panel-navy/60']}>Lisbon #{d.n} · {d.confirmed ? 'Confirmed' : 'Tentative'}</p>
-            </li>
+        <p class="mt-3 text-panel-navy/70">The last Wednesday of each month, in Lisbon.</p>
+        <div class="mt-8 grid gap-6 lg:grid-cols-6 lg:gap-3">
+          {[dates.filter((d) => d.confirmed), dates.filter((d) => !d.confirmed)].map((group, g) => (
+            <div class:list={[g === 1 && 'lg:col-span-5']}>
+              <p class:list={['rounded-full px-3 py-1.5 text-center text-sm font-bold', g === 0 ? 'bg-electric-blue/10 text-electric-blue' : 'bg-panel-navy/[0.06] text-panel-navy/60']}>{g === 0 ? 'Confirmed' : 'Tentative'}</p>
+              <ol class:list={['mt-3 grid gap-3', g === 0 ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5']}>
+                {group.map((d) => (
+                  <li class:list={['rounded-2xl p-4 md:p-5', d.confirmed ? 'bg-electric-blue text-white' : 'border border-panel-navy/10 bg-white text-panel-navy']}>
+                    <p class:list={['text-sm font-semibold', d.confirmed ? 'text-white/80' : 'text-panel-navy/60']}>{d.weekday}</p>
+                    <p class="mt-1 text-4xl font-extrabold leading-none tracking-tight">{d.day}</p>
+                    <p class="mt-1 font-semibold">{d.month}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
           ))}
-        </ol>
+        </div>
       </div>
     </section>
 
