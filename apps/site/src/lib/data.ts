@@ -68,8 +68,6 @@ export const links = {
   luma: 'https://luma.com/agnteng',
   youtube: 'https://www.youtube.com/@agnteng',
   substack: 'https://agnteng.substack.com',
-  partners: 'mailto:partners@agnteng.com',
-  sponsors: 'https://sponsors.agnteng.com',
 };
 
 // The deck may shorten a speaker's name ("Andy Nik" for "Andy Nikulin",
@@ -224,6 +222,14 @@ export const dayDate = (d: string) => fmt(d, { weekday: 'short', day: 'numeric',
 export const pitch = 'A monthly meetup where people show what they’ve shipped with agents: ten-minute talks, then open questions.';
 export const pitchIn = (city: string) => `${pitch} In ${city}, in English.`;
 export const toSpeak = 'Talks are ten minutes, on real work, for a technical audience: never a product pitch.';
+// The organizers' figures, on the sponsor page and in partner proposals. The sponsor deck
+// (apps/branding/src/components/slides-sponsor/content.ts) has its own, older ones: when
+// these change, move both onto one module.
+export const community = {
+  members: 1000,
+  foundersAndDevelopers: 80, // 44% founders and 36% developers, the sponsor deck's mix
+  attendees: 70, // at an average monthly event
+};
 // How the sponsor and speak pages begin (docs/adr/0023).
 export const hostLine = 'Agentic Engineering hosts events in Lisbon and other European cities.';
 

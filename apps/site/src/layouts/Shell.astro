@@ -7,8 +7,10 @@ import manrope from '@fontsource-variable/manrope/files/manrope-latin-wght-norma
 // then production's photos.py optimize, into apps/branding/public/assets/photos/. Raise `v` below
 // when it is redrawn: the CDN and other sites keep a picture by its address.
 // `schema` is the page's schema.org nodes (src/lib/schema.ts); empty ones are skipped.
-interface Props { title: string; description?: string; image?: string; schema?: unknown[]; class?: string }
-const { title, description = 'A monthly meetup in Lisbon for founders and engineers building with AI agents. Ten-minute talks, then open questions. Watch every talk and read its transcript.', image = '/assets/photos/share.jpg?v=2', schema = [], class: cls } = Astro.props;
+// `noindex`: a page served somewhere other than agnteng.com (a partner's proposal), with no
+// canonical address and nothing for search engines or link previews.
+interface Props { title: string; description?: string; image?: string; schema?: unknown[]; class?: string; noindex?: boolean }
+const { noindex = false, title, description = 'A monthly meetup in Lisbon for founders and engineers building with AI agents. Ten-minute talks, then open questions. Watch every talk and read its transcript.', image = '/assets/photos/share.jpg?v=2', schema = [], class: cls } = Astro.props;
 const graph = schema.filter(Boolean);
 // No trailing slash, matching internal links and sitemap.xml.
 const canonical = new URL(Astro.url.pathname.replace(/(.)\/$/, '$1'), Astro.site).href;
@@ -21,14 +23,18 @@ const shareImage = new URL(image, Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    <meta property="og:site_name" content="Agentic Engineering" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={shareImage} />
-    <meta name="twitter:card" content="summary_large_image" />
+    {noindex
+      ? <meta name="robots" content="noindex, nofollow" />
+      : <>
+          <link rel="canonical" href={canonical} />
+          <meta property="og:site_name" content="Agentic Engineering" />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={description} />
+          <meta property="og:url" content={canonical} />
+          <meta property="og:image" content={shareImage} />
+          <meta name="twitter:card" content="summary_large_image" />
+        </>}
     <!-- "<" is escaped so no text in a node can close the script. -->
     {graph.length > 0 && <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replaceAll('<', '\\u003c')} />}
     <!-- No <noscript> in here: with one, the build loses the end of the head and puts the

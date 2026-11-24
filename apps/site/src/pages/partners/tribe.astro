@@ -1,0 +1,300 @@
+---
+// Tribe AI's proposal, served only at sponsors.agnteng.com/tribe (docs/adr/0029).
+import { Image } from 'astro:assets';
+import Shell from '../../layouts/Shell.astro';
+import HeroCells from '../../components/HeroCells.astro';
+import Tone from '../../components/Tone.astro';
+import PageTitle from '../../components/PageTitle.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import SubHeading from '../../components/SubHeading.astro';
+import CompanyLogos from '../../components/CompanyLogos.astro';
+import CommunityFigures from '../../components/CommunityFigures.astro';
+import Animation from '@agnteng/brand/components/Animation.tsx';
+import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
+import Button from '@agnteng/brand/components/Button.astro';
+import { galleryPhoto, TINTS, toSpeak } from '../../lib/data';
+import tribeLogoWhite from '../../partners/tribe/logo-white.svg';
+import lumaShot from '../../partners/tribe/luma.jpg';
+import recapShot from '../../partners/tribe/recap.jpg';
+import eventShot from '../../partners/tribe/event.jpg';
+
+const site = 'https://agnteng.com';
+const tabs = [
+  { id: 'who', label: 'Who we are' },
+  { id: 'tribe', label: 'Tribe' },
+  { id: 'included', label: 'What’s included' },
+  { id: 'pricing', label: 'Pricing' },
+];
+
+const hero = galleryPhoto('2026-11-11', '14.jpg');
+const tribeFacts = [
+  'Tribe puts forward deployed engineers inside large companies to build, ship and run AI systems in production.',
+  'Each engagement runs in three stages: Map the problems worth solving, Build until it ships, and Activate the teams that use it.',
+  'They work with Anthropic, OpenAI, Google Cloud, AWS and Azure, and have offices in New York, San Francisco and Lisbon.',
+];
+const goals = [
+  { title: 'A presence in Lisbon', body: 'Tribe’s Lisbon team wants to be known among the city’s developers, engineers and founders. Agentic Engineering brings them together every month, and its recaps and talk videos reach the rest of the community.' },
+  { title: 'Forward deployed engineers', body: 'The Lisbon team recruits forward deployed engineers. The people at our meetups build with agents in production, and a meetup is where Tribe can meet them in person.' },
+];
+const tribePhoto = galleryPhoto('2026-11-11', '04.jpg');
+
+// What's included: each row is a picture of it beside the list.
+type Row = { id: string; title: string; items: string[]; shot?: ImageMetadata; photo?: ReturnType<typeof galleryPhoto>; alt: string };
+const rows: Row[] = [
+  {
+    id: 'meetup', title: 'At every meetup', photo: galleryPhoto('2026-11-11', '01.jpg'),
+    alt: 'The title slide of Agentic Engineering Lisbon #5 on the projector, with the partners’ logos',
+    items: [
+      'Tribe’s branding at the venue and on the title slide.',
+      'Merch and printed material for attendees.',
+      'A slide introducing Tribe at the opening, presented by someone from Tribe or by us, with how to reach your team.',
+    ],
+  },
+  {
+    id: 'luma', title: 'On Luma', shot: lumaShot,
+    alt: 'The Luma page for Agentic Engineering Lisbon on 27 January 2027, with an “In partnership with Tribe AI” banner under its first line',
+    items: [
+      'An “In partnership with Tribe AI” banner on each meetup’s Luma page, under its first line.',
+      'Everyone who registers sees it.',
+    ],
+  },
+  {
+    id: 'recap', title: 'In the recap', shot: recapShot,
+    alt: 'The Lisbon #5 recap on Substack, with the Tribe AI banner and a “Tribe AI is hiring” block after the introduction',
+    items: [
+      'The banner in each meetup’s recap, sent by email and published on Substack.',
+      'A “Tribe AI is hiring” block in every recap, with your open roles and a link to apply.',
+    ],
+  },
+  {
+    id: 'web', title: 'On agnteng.com and YouTube', shot: eventShot,
+    alt: 'The Lisbon #6 page on agnteng.com, with “In partnership with Tribe AI” and Tribe’s logo under the date',
+    items: [
+      'Tribe’s logo on each meetup’s page on agnteng.com.',
+      'A partner credit in the description of every talk video from the six meetups.',
+    ],
+  },
+];
+const candidates = [
+  'A question on the registration form for people who want to hear from recruiters.',
+  'Before each meetup, the list of who registered, so you can reach out, or ask us to.',
+  'After each meetup, a shortlist of the strongest candidates for your roles. We go through every participant’s GitHub, LinkedIn and X.',
+  'At the end, a report across the six meetups.',
+];
+
+const price = { full: 6000, deal: 4500, meetups: 6, single: 1000 };
+const usd = (n: number) => `$${n.toLocaleString('en')}`;
+---
+<Shell noindex title="Agentic Engineering × Tribe AI" description="A partnership proposal for Tribe AI: six Agentic Engineering meetups in Lisbon, from 27 January 2027." class="bg-soft-white text-panel-navy">
+  <Tone />
+
+  <!-- The proposal's nav: both logos, and the four parts of the page. -->
+  <header data-sticky-nav class="group pointer-events-none sticky top-3 z-50 mx-auto max-w-7xl px-4 text-white md:top-4 md:px-8">
+    <div class="pointer-events-auto flex min-h-14 flex-wrap items-center justify-between gap-x-6 gap-y-1 rounded-[28px] border border-white/20 bg-white/12 py-2 pl-5 pr-2 shadow-[0_12px_32px_-12px_rgb(5_7_30/0.35)] backdrop-blur-xl transition-colors duration-300 group-data-[scrolled]:border-white/10 group-data-[scrolled]:bg-deep-navy/85 [@media(scripting:none)]:bg-deep-navy/85">
+      <div class="flex h-10 items-center gap-3">
+        <img src="/assets/logo/ae-mark-white.svg" width="187" height="160" alt="Agentic Engineering" class="h-6 w-auto" />
+        <span aria-hidden="true" class="text-base font-semibold text-white/60">×</span>
+        <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="Tribe AI" class="h-[18px] w-auto" />
+      </div>
+      <nav aria-label="Proposal" class="-mx-1 flex max-w-full overflow-x-auto [scrollbar-width:none]">
+        {tabs.map((t) => (
+          <a href={`#${t.id}`} data-tab={t.id} class="shrink-0 whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-semibold sm:px-3.5 sm:text-sm text-white/80 transition-colors hover:text-white aria-[current=true]:bg-white aria-[current=true]:text-electric-blue">{t.label}</a>
+        ))}
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="under-nav relative isolate overflow-hidden bg-electric-blue text-white">
+      <div class="relative z-10 mx-auto max-w-7xl px-4 pt-14 md:px-8 md:pt-20">
+        <p class="rise text-sm font-bold text-white/80" style="--i:0">Partnership proposal</p>
+        <PageTitle rise class="mt-5 max-w-[18ch]" style="--i:1">Six Lisbon meetups, in partnership with Tribe AI.</PageTitle>
+        <p class="rise mt-7 max-w-[52ch] text-lg font-medium leading-relaxed text-white/90" style="--i:2">One Agentic Engineering meetup a month, from 27 January to June 2027, with Tribe as its partner: in front of the developers, engineers and founders who build with AI in Lisbon, and with a direct line to the ones you want to hire.</p>
+      </div>
+      <div class="dither-stage relative mt-10 h-64 w-full overflow-hidden md:mt-4 md:h-80 lg:h-[26rem]" aria-hidden="true">
+        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="100vw" loading="eager" class="absolute inset-0 size-full object-cover object-[50%_45%] [filter:url(#blue-tone)]" />
+        <HeroCells seed={20270127} at="top" />
+      </div>
+    </section>
+
+    <!-- Who we are -->
+    <section id="who" data-part class="scroll-mt-24">
+      <div class="mx-auto grid max-w-7xl gap-10 px-4 pt-16 md:grid-cols-12 md:gap-8 md:px-8 md:pt-24">
+        <SectionHeading class="md:col-span-5">Who we are</SectionHeading>
+        <div class="space-y-5 text-lg leading-relaxed md:col-span-7">
+          <p class="text-xl font-semibold leading-snug md:text-2xl">Agentic Engineering is for people building software, infrastructure and companies with agentic workflows.</p>
+          <p class="text-panel-navy/75">We have run meetups in Lisbon since May 2026, each with three talks, then open questions and drinks. {toSpeak} Past speakers work at Nokia, Coinbase, PostHog and Delivery Hero.</p>
+          <p class="text-panel-navy/75">Every meetup gets a recap by email and on Substack, and every talk goes on YouTube and <a href={site} class="font-semibold text-panel-navy underline underline-offset-4">agnteng.com</a> with its transcript.</p>
+        </div>
+      </div>
+      <CommunityFigures class="mx-auto mt-12 max-w-7xl px-4 md:mt-16 md:px-8" />
+      <CompanyLogos class="py-12 md:py-16" />
+    </section>
+
+    <!-- Tribe -->
+    <section id="tribe" data-part class="relative isolate scroll-mt-24 overflow-hidden bg-deep-navy text-soft-white">
+      <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
+        <Animation client:visible animation="aurora" color="#1E2BE6" edge="#B5A6FF" bg="#05071E" cell={6} gap={1} density={0.34} motion={20} fade="left" shape="square" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.35 }} />
+      </div>
+      <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-12 md:gap-8 md:px-8 md:py-24">
+        <div class="md:col-span-5">
+          <h2 class="sr-only">Tribe AI</h2>
+          <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="Tribe AI" class="h-9 w-auto md:h-11" />
+          <blockquote class="mt-8 text-2xl font-extrabold leading-snug tracking-tight md:text-3xl">“Tribe AI helps the largest companies in the world become AI companies.”</blockquote>
+        </div>
+        <div class="md:col-span-7">
+          <ul class="space-y-4 text-lg leading-relaxed text-soft-white/80">
+            {tribeFacts.map((f) => <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.6em] size-2 shrink-0 bg-periwinkle"></span>{f}</li>)}
+          </ul>
+        </div>
+
+        <div class="mt-4 md:col-span-12 md:mt-10">
+          <SubHeading as="h3" class="text-white">Why Agentic Engineering</SubHeading>
+          <div class="mt-6 grid gap-4 md:grid-cols-12 md:gap-6">
+            {goals.map((g) => (
+              <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm md:col-span-4 lg:p-8">
+                <p class="text-sm font-bold text-periwinkle">Tribe’s goal</p>
+                <h4 class="mt-3 text-xl font-extrabold">{g.title}</h4>
+                <p class="mt-3 leading-relaxed text-soft-white/75">{g.body}</p>
+              </div>
+            ))}
+            <figure class="relative min-h-56 overflow-hidden rounded-2xl md:col-span-4">
+              <Image src={tribePhoto.img} alt={tribePhoto.alt} widths={[480, 800]} sizes="(min-width: 768px) 33vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover [filter:url(#blue-tone)]" />
+            </figure>
+          </div>
+          <p class="mt-8 max-w-[60ch] text-lg leading-relaxed text-soft-white/85">We’d like Tribe’s team at every meetup, and we’d welcome a talk from a Tribe engineer. <a href={`${site}/speak`} class="font-semibold text-white underline underline-offset-4">Apply to speak</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- What's included -->
+    <section id="included" data-part class="scroll-mt-24">
+      <div class="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
+        <SectionHeading>What’s included</SectionHeading>
+        <p class="mt-5 max-w-[52ch] text-lg leading-relaxed text-panel-navy/75">At each of the six meetups. Tribe is the only recruiting partner at all six.</p>
+
+        <ol class="mt-12 space-y-16 md:mt-16 md:space-y-24">
+          {rows.map((r, i) => (
+            <li id={r.id} class="grid items-center gap-8 md:grid-cols-12 md:gap-12">
+              <div class:list={['md:col-span-7', i % 2 === 1 && 'md:order-2']}>
+                {r.shot
+                  ? <div class="overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgb(5_7_30/0.06),0_12px_40px_-12px_rgb(5_7_30/0.25)] ring-1 ring-panel-navy/10">
+                      <div class="flex h-8 items-center gap-1.5 border-b border-panel-navy/10 bg-[#F6F7FB] px-3" aria-hidden="true">
+                        <span class="size-2.5 rounded-full bg-panel-navy/15"></span><span class="size-2.5 rounded-full bg-panel-navy/15"></span><span class="size-2.5 rounded-full bg-panel-navy/15"></span>
+                      </div>
+                      <Image src={r.shot} alt={r.alt} widths={[640, 960, 1280, 1600]} sizes="(min-width: 768px) 58vw, 100vw" loading="lazy" class="block h-auto w-full" />
+                    </div>
+                  : <div class="relative aspect-[4/3] overflow-hidden rounded-2xl">
+                      <Image src={r.photo!.img} alt={r.alt} widths={[640, 960, 1280]} sizes="(min-width: 768px) 58vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover" />
+                    </div>}
+              </div>
+              <div class:list={['md:col-span-5', i % 2 === 1 && 'md:order-1']}>
+                <p class="text-sm font-bold text-electric-blue">{String(i + 1).padStart(2, '0')}</p>
+                <SubHeading class="mt-3">{r.title}</SubHeading>
+                <ul class="mt-6 space-y-3 text-lg leading-relaxed text-panel-navy/80">
+                  {r.items.map((it) => <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.6em] size-2 shrink-0 bg-electric-blue"></span>{it}</li>)}
+                </ul>
+              </div>
+            </li>
+          ))}
+
+          <!-- Candidates: a picture of what Tribe receives, without anyone's details. -->
+          <li id="candidates" class="grid items-center gap-8 md:grid-cols-12 md:gap-12">
+            <div class="md:order-2 md:col-span-7">
+              <div class="relative isolate overflow-hidden rounded-2xl bg-electric-blue p-5 text-white md:p-8" aria-hidden="true">
+                <div class="dither-stage absolute inset-0 -z-10">
+                  <Artifacts client:visible color="#05071E" edge="#B5A6FF" seed={2027} cell={12} animate artifacts={[{ at: 'bottom-right', solid: 0.05, reach: 0.4 }]} />
+                </div>
+                <div class="rounded-xl bg-white p-5 text-panel-navy shadow-[0_12px_40px_-12px_rgb(5_7_30/0.45)] md:p-6">
+                  <div class="flex items-baseline justify-between gap-4">
+                    <p class="text-lg font-extrabold">Shortlist for Tribe AI</p>
+                    <p class="text-sm text-panel-navy/60">Lisbon #6 · 27 Jan 2027</p>
+                  </div>
+                  <ul class="mt-5 divide-y divide-panel-navy/10">
+                    {[
+                      ['Senior engineer', 'Agents in production', 'Open to recruiters'],
+                      ['Founding engineer', 'Python, LLM tooling', 'Open to recruiters'],
+                      ['ML engineer', 'Evals, RAG', 'Open to recruiters'],
+                    ].map(([role, work, tag], k) => (
+                      <li class="flex items-center gap-4 py-3.5">
+                        <span class="size-9 shrink-0 rounded-full" style={`background:${TINTS[k]}`}></span>
+                        <span class="min-w-0 flex-1">
+                          <span class="block h-2.5 w-28 rounded-full bg-panel-navy/15"></span>
+                          <span class="mt-2 block text-sm font-semibold">{role} <span class="font-normal text-panel-navy/60">· {work}</span></span>
+                        </span>
+                        <span class="hidden shrink-0 rounded-full bg-[#EEF1FF] px-3 py-1 text-xs font-semibold text-electric-blue sm:inline">{tag}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div class="mt-3 flex gap-2 text-xs text-panel-navy/60"><span>GitHub</span><span>·</span><span>LinkedIn</span><span>·</span><span>X</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="md:order-1 md:col-span-5">
+              <p class="text-sm font-bold text-electric-blue">{String(rows.length + 1).padStart(2, '0')}</p>
+              <SubHeading class="mt-3">Candidates</SubHeading>
+              <ul class="mt-6 space-y-3 text-lg leading-relaxed text-panel-navy/80">
+                {candidates.map((it) => <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.6em] size-2 shrink-0 bg-electric-blue"></span>{it}</li>)}
+              </ul>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" data-part class="relative isolate scroll-mt-24 overflow-hidden bg-electric-blue text-white">
+      <div class="dither-stage absolute inset-0 -z-10" aria-hidden="true">
+        <Artifacts client:visible color="#05071E" edge="#B5A6FF" seed={4500} cell={10} animate artifacts={[{ at: 'bottom', solid: 0.02, reach: 0.2, wave: 0.03, waveLength: 0.5 }]} />
+      </div>
+      <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-12 md:items-center md:gap-8 md:px-8 md:py-24">
+        <div class="md:col-span-6">
+          <SectionHeading>Pricing</SectionHeading>
+          <p class="mt-6 max-w-[44ch] text-lg leading-relaxed text-white/90">A single meetup as partner is {usd(price.single)}. All six, from 27 January to June 2027, are {usd(price.deal)}.</p>
+        </div>
+        <div class="md:col-span-6 lg:col-span-5 lg:col-start-8">
+          <div class="rounded-2xl bg-white p-6 text-panel-navy shadow-[0_24px_60px_-20px_rgb(5_7_30/0.6)] md:p-8">
+            <p class="text-sm font-bold text-electric-blue">Six meetups · Lisbon</p>
+            <p class="mt-5 flex items-baseline gap-4">
+              <span class="font-sans text-6xl font-extrabold tracking-tight md:text-7xl">{usd(price.deal)}</span>
+              <s class="text-2xl font-bold text-panel-navy/40"><span class="sr-only">instead of </span>{usd(price.full)}</s>
+            </p>
+            <p class="mt-3 font-semibold">Paid upfront. {usd(price.deal / price.meetups)} a meetup instead of {usd(price.single)}.</p>
+            <ul class="mt-6 space-y-2.5 border-t border-panel-navy/10 pt-6 text-panel-navy/80">
+              {['Branding, merch and an intro slide at every meetup', 'Banner on Luma and in every recap', 'Logo on agnteng.com, credit on YouTube', 'Registrants before, shortlist after, every meetup', 'The only recruiting partner'].map((l) => (
+                <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.55em] size-2 shrink-0 bg-electric-blue"></span>{l}</li>
+              ))}
+            </ul>
+            <Button href={`${site}/sponsor`} class="mt-8 w-full">Get in touch</Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-deep-navy">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-4 py-10 md:px-8">
+      <a href={site} class="flex items-center gap-2.5">
+        <img src="/assets/logo/ae-mark-white.svg" width="187" height="160" alt="" class="h-7 w-auto" />
+        <img src="/assets/logo/ae-wordmark-line-white.svg" width="692" height="75" alt="Agentic Engineering" class="h-[18px] w-auto" />
+      </a>
+      <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="Tribe AI" class="h-6 w-auto opacity-80" />
+    </div>
+  </footer>
+
+  <script>
+    // The nav turns navy once the page moves, and marks the part of the page in view.
+    const header = document.querySelector('[data-sticky-nav]');
+    const onScroll = () => header?.toggleAttribute('data-scrolled', scrollY > 8);
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-tab]')];
+    const seen = new Map<string, number>();
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) seen.set(e.target.id, e.intersectionRatio);
+      const best = [...seen].sort((a, b) => b[1] - a[1])[0];
+      for (const a of links) a.setAttribute('aria-current', String(!!best && best[1] > 0 && a.dataset.tab === best[0]));
+    }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1], rootMargin: '-30% 0px -40% 0px' });
+    document.querySelectorAll('[data-part]').forEach((s) => io.observe(s));
+  </script>
+</Shell>

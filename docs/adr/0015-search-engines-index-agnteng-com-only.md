@@ -1,6 +1,6 @@
 # 0015. Search engines index agnteng.com only
 
-- Status: Accepted
+- Status: Accepted; the sponsors host superseded by 0029
 - Date: 2026-11-16
 
 ## Context

@@ -411,6 +411,20 @@ def check_speakers() -> None:
             fail("speakers", f"BEST_KNOWN names {name}, and no speaker's title in event.json ends with it")
 
 
+# ── partner proposals are for their partner only (docs/adr/0029) ──
+
+def check_partners() -> None:
+    site = ROOT / "apps" / "site"
+    for f in sorted((site / "src" / "pages" / "partners").glob("*.astro")):
+        if not re.search(r"<Shell\b[^>]*\bnoindex\b", f.read_text()):
+            fail("partners", f"{f.relative_to(ROOT)}: a partner page needs <Shell noindex>")
+    if not re.search(r"location \^~ /partners/ \{ return 404; \}", (site / "nginx.conf").read_text()):
+        fail("partners", "apps/site/nginx.conf: agnteng.com must refuse /partners/; only the sponsors host serves them")
+    sitemap = (site / "src" / "pages" / "sitemap.xml.ts").read_text()
+    if "/partners" in sitemap:
+        fail("partners", "sitemap.xml.ts lists a partner page")
+
+
 # ── the nav sticks: SiteNav is never inside a section (it floats over the page) ──
 
 def check_nav() -> None:
@@ -577,12 +591,21 @@ def check_live() -> None:
             code = 0
         if code != 400:
             fail("live", f"api/{form} answered agnteng.com's form with {code}, not 400: the form can't reach it")
-    if get(f"{s}/")[0] != 200:
-        fail("live", f"{s}/ is not serving the sponsor deck")
-    if get(f"{s}/brand-guidelines/")[0] != 404:
-        fail("live", f"{s} serves more than the sponsor deck")
+    # The sponsors host: partner proposals behind a password, nothing else (docs/adr/0029).
+    code, to = unfollowed(f"{s}/")
+    if code != 301 or to.rstrip("/") != "https://agnteng.com":
+        fail("live", f"{s}/ answered {code} {to}: it should redirect to agnteng.com")
+    code, body = get(f"{s}/tribe")
+    if code != 200 or b'name="password"' not in body:
+        fail("live", f"{s}/tribe answered {code} without its password form")
+    elif b'name="robots" content="noindex' not in body:
+        fail("live", f"{s}/tribe can be indexed: it has no noindex")
+    if get(f"{s}/brand-guidelines")[0] != 404:
+        fail("live", f"{s} serves more than partner proposals")
+    if get("https://agnteng.com/partners/tribe")[0] != 404:
+        fail("live", "agnteng.com/partners/tribe answers: proposals belong to the sponsors host only")
     # Only agnteng.com is for search engines (docs/adr/0015).
-    for page in (f"{b}/", f"{b}/website-mockups/", f"{s}/"):
+    for page in (f"{b}/", f"{b}/website-mockups/"):
         if b'name="robots" content="noindex"' not in get(page)[1]:
             fail("live", f"{page} can be indexed: it has no noindex")
     check_live_site()
@@ -657,7 +680,7 @@ def main() -> None:
                   ("dither", check_dither), ("telegram", check_telegram),
                   ("venue", check_venue), ("register", check_register),
                   ("companies", check_companies), ("speakers", check_speakers),
-                  ("nav", check_nav)]
+                  ("nav", check_nav), ("partners", check_partners)]
     for name, fn in checks:
         before = len(FAILURES)
         fn()

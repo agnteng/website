@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "branding.agnteng.com and sponsors.agnteng.com: brand guidelines, meetup decks, the sponsor deck.",
+  "description": "branding.agnteng.com: brand guidelines, meetup decks, the sponsor deck, the site's form endpoints.",
   "scripts": {
     "dev": "astro dev --host 127.0.0.1 --port 4321",
     "build": "astro build",

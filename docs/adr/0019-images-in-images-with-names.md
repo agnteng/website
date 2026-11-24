@@ -1,6 +1,6 @@
 # 0019. Images are published in `/images/` under names that say what they show
 
-- Status: Accepted; folder superseded by 0021
+- Status: Accepted; folder superseded by 0021; partner proposals' images excepted by 0029
 - Date: 2026-11-16
 
 ## Context
