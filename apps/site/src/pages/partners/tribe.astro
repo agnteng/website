@@ -84,8 +84,8 @@ const visibility: Row[] = [
 const ytTalk = talks.find((t) => t.person.name === 'Harley Alexander' && still(t))!;
 
 const price = { full: 6000, deal: 4500, meetups: 6, single: 1000 };
-// The Stripe payment link for the six meetups; the button shows once it is set.
-const stripeLink = '';
+// Stripe's payment link for the six meetups: $4,500, with an invoice.
+const stripeLink = 'https://buy.stripe.com/28E7sL8zw4TY70w1dz9k400';
 const usd = (n: number) => `$${n.toLocaleString('en')}`;
 ---
 <Shell noindex title="Agentic Engineering × Tribe AI" description="A partnership proposal for Tribe AI: six Agentic Engineering meetups in Lisbon, from 27 January 2027." class="bg-soft-white text-panel-navy">
@@ -299,10 +299,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
               <s class="text-2xl font-bold text-panel-navy/40"><span class="sr-only">instead of </span>{usd(price.full)}</s>
             </p>
             <p class="mt-3 font-semibold">Paid upfront. {usd(price.deal / price.meetups)} a meetup instead of {usd(price.single)}.</p>
-            <div class="mt-8 flex flex-col gap-3">
-              {stripeLink && <Button href={stripeLink} target="_blank" class="w-full">Pay with Stripe</Button>}
-              <Button href={`${site}/sponsor`} variant={stripeLink ? 'outline' : 'primary'} class="w-full">Get in touch</Button>
-            </div>
+            <Button href={stripeLink} target="_blank" class="mt-8 w-full">Pay with Stripe</Button>
           </div>
           <div class="border-t border-panel-navy/10 bg-[#F6F7FB] p-6 md:border-l md:border-t-0 md:p-10">
             <p class="text-sm font-bold text-panel-navy/60">At every meetup</p>
