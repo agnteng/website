@@ -18,6 +18,7 @@ import tribeLogoWhite from '../../partners/tribe/logo-white.svg';
 import lumaShot from '../../partners/tribe/luma.jpg';
 import recapShot from '../../partners/tribe/recap.jpg';
 import eventShot from '../../partners/tribe/event.jpg';
+import meetupPhoto from '../../partners/tribe/meetup.jpg';
 
 const site = 'https://agnteng.com';
 const channels = [
@@ -49,11 +50,12 @@ const candidates = [
   'After each meetup, a shortlist of the strongest candidates for your roles. We go through every participant’s GitHub, LinkedIn and X.',
   'At the end, a report across the six meetups.',
 ];
-type Row = { id: string; title: string; body: string; shot?: ImageMetadata; photo?: ReturnType<typeof galleryPhoto>; youtube?: boolean; alt: string };
+// `shot` is a page, shown in a browser frame; `photo` is a picture of the meetup itself.
+type Row = { id: string; title: string; body: string; shot?: ImageMetadata; photo?: ImageMetadata; youtube?: boolean; alt: string };
 const visibility: Row[] = [
   {
-    id: 'meetup', title: 'At the meetup', photo: galleryPhoto('2026-11-11', '01.jpg'),
-    alt: 'The title slide of Agentic Engineering Lisbon #5 on the projector, with the partners’ logos',
+    id: 'meetup', title: 'At the meetup', photo: meetupPhoto,
+    alt: 'The Agentic Engineering Lisbon title slide on the projector, with Tribe AI’s logo under the name',
     body: 'Tribe’s branding at the venue and on the title slide, merch and printed material for attendees, and a slide introducing Tribe at the opening, presented by your team or by us.',
   },
   {
@@ -263,7 +265,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
                       </div>
                     </div>
                   : <div class="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                      <Image src={r.photo!.img} alt={r.alt} widths={[640, 960, 1280]} sizes="(min-width: 768px) 58vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover" />
+                      <Image src={r.photo!} alt={r.alt} widths={[640, 960, 1280]} sizes="(min-width: 768px) 58vw, 100vw" loading="lazy" class="absolute inset-0 size-full object-cover" />
                     </div>}
               </div>
               <div class:list={['md:col-span-5', i % 2 === 1 && 'md:order-1']}>
