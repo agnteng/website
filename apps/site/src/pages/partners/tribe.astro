@@ -117,10 +117,11 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
           <p class="rise mt-7 max-w-[42ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Six monthly meetups from 27 January. Put Tribe in front of the engineers building with AI in Lisbon, and meet the ones you want to hire.</p>
         </div>
       </div>
-      <!-- The photo breaks up in a thin band of cells (a thinner HeroCells), its first tenth
-           solid, left of centre: the cells may run behind the title. -->
-      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[70%]" aria-hidden="true">
-        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 70vw, 100vw" loading="eager" class="absolute inset-0 size-full scale-105 object-cover object-[55%_45%] [filter:url(#blue-tone)_blur(5px)]" />
+      <!-- The photo breaks up in a thin band of cells (a thinner HeroCells): solid for its first
+           tenth, ragged to 0.3, so the band's middle is at 1 - 0.8 × its width. The widths put
+           that midway between the title's end and Tribe's logo at each breakpoint. -->
+      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[62%] lg:w-[56%] xl:w-[59%]" aria-hidden="true">
+        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 65vw, 100vw" loading="eager" class="absolute inset-0 size-full scale-105 object-cover object-[55%_45%] [filter:url(#blue-tone)_blur(5px)]" />
         <div class="absolute inset-0 z-2 max-md:hidden">
           <Artifacts client:load color="#1E2BE6" edge="#B5A6FF" seed={20270127} cell={10} animate artifacts={[{ at: 'left', solid: 0.1, reach: 0.3, wave: 0.03, waveLength: 0.6 }]} />
         </div>
@@ -142,8 +143,8 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
     <!-- Who we are -->
     <section id="who" data-part class="scroll-mt-24 bg-white">
       <div class="mx-auto grid max-w-7xl gap-10 px-4 pt-16 md:grid-cols-12 md:gap-8 md:px-8 md:pt-24">
-        <SectionHeading class="md:col-span-5">Who we are</SectionHeading>
-        <div class="space-y-5 text-lg leading-relaxed md:col-span-7">
+        <SectionHeading class="md:col-span-4">Who we are</SectionHeading>
+        <div class="max-w-3xl space-y-5 text-lg leading-relaxed md:col-span-8">
           <p class="text-xl font-semibold leading-snug md:text-2xl">Agentic Engineering is for people building software, infrastructure and companies with agentic workflows.</p>
           <p class="text-panel-navy/75">We have run meetups in Lisbon since May 2026, each with three talks, then open questions and drinks. {toSpeak}</p>
           <p class="text-panel-navy/75">Every meetup gets a recap by email and on Substack, and every talk goes on YouTube and <a href={site} class="font-semibold text-panel-navy underline underline-offset-4">agnteng.com</a> with its transcript.</p>
