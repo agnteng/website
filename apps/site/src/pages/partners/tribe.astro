@@ -313,7 +313,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
         <div class="mt-8 grid gap-6 lg:grid-cols-6 lg:gap-3">
           {[dates.filter((d) => d.confirmed), dates.filter((d) => !d.confirmed)].map((group, g) => (
             <div class:list={[g === 1 && 'lg:col-span-5']}>
-              <p class:list={['rounded-full px-3 py-1.5 text-center text-sm font-bold', g === 0 ? 'bg-electric-blue/10 text-electric-blue' : 'bg-panel-navy/[0.06] text-panel-navy/60']}>{g === 0 ? 'Confirmed' : 'Tentative'}</p>
+              <p class:list={['rounded-full px-3 py-1.5 text-center text-sm font-bold', g === 0 ? 'bg-electric-blue/10 text-electric-blue' : 'bg-panel-navy/[0.06] text-panel-navy/60']}>{g === 0 ? 'Confirmed' : 'Tentative dates'}</p>
               <ol class:list={['mt-3 grid gap-3', g === 0 ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5']}>
                 {group.map((d) => (
                   <li class:list={['rounded-2xl p-4 md:p-5', d.confirmed ? 'bg-electric-blue text-white' : 'border border-panel-navy/10 bg-white text-panel-navy']}>
