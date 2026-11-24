@@ -6,8 +6,8 @@ import SiteNav from '../components/SiteNav.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageTitle from '../components/PageTitle.astro';
 import EnquiryForm from '../components/EnquiryForm.astro';
-import SpeakerPhoto from '../components/SpeakerPhoto.astro';
-import { companyOf, formsOrigin, hostLine, talks, toSpeak } from '../lib/data';
+import PastTalks from '../components/PastTalks.astro';
+import { formsOrigin, hostLine, toSpeak } from '../lib/data';
 import { organization } from '../lib/schema';
 
 const rules = [
@@ -23,9 +23,6 @@ const fields = [
   { id: 'profile', label: 'GitHub or LinkedIn', autocomplete: 'url', inputmode: 'url' as const, autocapitalize: 'off' as const, placeholder: 'github.com/you', 'data-match': '^(https?://)?([\\w-]+\\.)?(github\\.com|linkedin\\.com)/\\S+$', error: 'Enter a link to your GitHub or LinkedIn, like github.com/you.' },
   { id: 'talk', label: 'Your talk', rows: 5, minlength: 30, maxlength: 3000, hint: 'What will you show, and what will people learn? A technical talk on real work, not a product pitch.', error: 'Describe your talk in a few sentences.' },
 ];
-// Talks by speakers from these companies, in this order, two by two (the organizers' pick).
-const COMPANIES = ['Nokia', 'Coinbase', 'PostHog', 'Delivery Hero'];
-const shown = COMPANIES.flatMap((c) => talks.find((t) => t.person.photo && companyOf(t.person.title) === c) ?? []);
 ---
 <Shell title="Apply to speak | Agentic Engineering" description={`Apply to speak at Agentic Engineering in Lisbon or another European city. ${toSpeak}`} schema={[organization]} class="bg-soft-white text-panel-navy">
   <SiteNav onHero />
@@ -38,20 +35,7 @@ const shown = COMPANIES.flatMap((c) => talks.find((t) => t.person.photo && compa
           {rules.map((r) => <li class="flex gap-3"><span aria-hidden="true" class="mt-[0.6em] size-2 shrink-0 bg-periwinkle"></span>{r}</li>)}
         </ul>
         <h2 class="rise mt-12 font-sans text-lg font-bold text-white" style="--i:3">Past talks</h2>
-        <!-- Each talk is its speaker's tile beside the title, or above it where the cell is narrow. -->
-        <ul class="rise mt-4 grid grid-cols-2 gap-3" style="--i:3">
-          {shown.map((t, i) => (
-            <li class="@container">
-              <a href={`/talks/${t.id}`} class="flex h-full flex-col gap-3 rounded-xl bg-white/[0.08] p-2 transition-colors hover:bg-white/[0.16] focus-visible:outline-white @[15rem]:flex-row @[15rem]:items-center @[15rem]:pr-3">
-                <SpeakerPhoto src={t.person.photo!} index={i} class="w-full shrink-0 rounded-lg @[15rem]:w-20" />
-                <span class="min-w-0 px-1 pb-1 @[15rem]:p-0">
-                  <span class="line-clamp-4 text-[15px] font-bold leading-snug text-white">{t.title}</span>
-                  <span class="mt-1 block text-sm text-white/85">{t.person.name}, {companyOf(t.person.title)}</span>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <PastTalks class="rise mt-4 grid-cols-2" style="--i:3" />
       </div>
       <div class="rise md:col-span-6 lg:col-span-5 lg:col-start-8" style="--i:4">
         <EnquiryForm action={`${formsOrigin}/api/speak`} heading="Apply to speak" intro="Tell us who you are and what you’d show. We’ll get back to you by email." fields={fields} submit="Apply to speak" />

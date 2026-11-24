@@ -1,0 +1,25 @@
+---
+// Four past talks, each its speaker's tile beside the title, or above it where the cell is
+// narrow: on /speak (on its blue hero) and in partner proposals (on white, linking to
+// agnteng.com, since they are served elsewhere). The talks are `pastTalks` in lib/data.ts.
+import SpeakerPhoto from './SpeakerPhoto.astro';
+import { companyOf, pastTalks } from '../lib/data';
+interface Props { tone?: 'blue' | 'light'; base?: string; class?: string; style?: string }
+const { tone = 'blue', base = '', class: cls, style } = Astro.props;
+const look = tone === 'blue'
+  ? { card: 'bg-white/[0.08] hover:bg-white/[0.16] focus-visible:outline-white', title: 'text-white', name: 'text-white/85' }
+  : { card: 'bg-panel-navy/[0.04] hover:bg-panel-navy/[0.08] focus-visible:outline-electric-blue', title: 'text-panel-navy', name: 'text-panel-navy/70' };
+---
+<ul class:list={['grid gap-3', cls]} style={style}>
+  {pastTalks.map((t, i) => (
+    <li class="@container">
+      <a href={`${base}/talks/${t.id}`} class:list={['flex h-full flex-col gap-3 rounded-xl p-2 transition-colors @[15rem]:flex-row @[15rem]:items-center @[15rem]:pr-3', look.card]}>
+        <SpeakerPhoto src={t.person.photo!} index={i} class="w-full shrink-0 rounded-lg @[15rem]:w-20" />
+        <span class="min-w-0 px-1 pb-1 @[15rem]:p-0">
+          <span class:list={['line-clamp-4 text-[15px] font-bold leading-snug', look.title]}>{t.title}</span>
+          <span class:list={['mt-1 block text-sm', look.name]}>{t.person.name}, {companyOf(t.person.title)}</span>
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>

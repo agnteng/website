@@ -9,6 +9,7 @@ import SectionHeading from '../../components/SectionHeading.astro';
 import SubHeading from '../../components/SubHeading.astro';
 import CompanyLogos from '../../components/CompanyLogos.astro';
 import CommunityFigures from '../../components/CommunityFigures.astro';
+import PastTalks from '../../components/PastTalks.astro';
 import Animation from '@agnteng/brand/components/Animation.tsx';
 import Artifacts from '@agnteng/brand/components/Artifacts.tsx';
 import Button from '@agnteng/brand/components/Button.astro';
@@ -157,6 +158,10 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
         </div>
       </div>
       <CommunityFigures class="mx-auto mt-12 max-w-7xl px-4 md:mt-16 md:px-8" />
+      <div class="mx-auto mt-12 max-w-7xl px-4 md:mt-16 md:px-8">
+        <SubHeading>Past speakers</SubHeading>
+        <PastTalks tone="light" base={site} class="mt-6 grid-cols-2 lg:grid-cols-4" />
+      </div>
       <CompanyLogos large class="py-14 md:py-20" />
     </section>
 

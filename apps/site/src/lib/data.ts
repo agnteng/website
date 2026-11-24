@@ -206,6 +206,11 @@ export const still = (t: Talk): ImageMetadata | undefined =>
 export const thumbnail = (t: Talk) =>
   still(t)?.src ?? (t.video ? `https://i.ytimg.com/vi/${t.video.youtubeId}/maxresdefault.jpg` : undefined);
 
+// Talks by speakers from these companies, in this order (the organizers' pick): on /speak
+// and in partner proposals (components/PastTalks.astro).
+const PAST_TALK_COMPANIES = ['Nokia', 'Coinbase', 'PostHog', 'Delivery Hero'];
+export const pastTalks = PAST_TALK_COMPANIES.flatMap((c) => talks.find((t) => t.person.photo && companyOf(t.person.title) === c) ?? []);
+
 export const watchAt = (t: Talk, seconds: number) =>
   t.video ? `https://www.youtube.com/watch?v=${t.video.youtubeId}&t=${seconds}s` : undefined;
 
