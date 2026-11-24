@@ -113,14 +113,14 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
     <section class="under-nav relative isolate overflow-hidden bg-electric-blue text-white">
       <div class="relative z-10 mx-auto grid max-w-7xl px-4 md:grid-cols-12 md:px-8">
         <div class="pt-14 pb-12 md:col-span-6 md:pt-24 md:pb-28 lg:pt-28 lg:pb-36">
-          <PageTitle rise style="--i:0">Meet the engineers building with AI in Lisbon.</PageTitle>
-          <p class="rise mt-7 max-w-[42ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Partner with Agentic Engineering for six monthly meetups: a presence in Lisbon’s AI community, a direct line to the forward deployed engineers you want to hire, and a stage to share what Tribe has learned.</p>
+          <PageTitle rise style="--i:0"><span class="lg:whitespace-nowrap">Connect with Lisbon’s</span> AI engineering community.</PageTitle>
+          <p class="rise mt-7 max-w-[42ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Partner with Agentic Engineering to build brand recognition, and a direct line to the candidates you want to hire.</p>
         </div>
       </div>
-      <!-- The photo breaks up at the centre in a thin band of cells (a thinner HeroCells): 56%
-           wide, its first tenth solid. -->
-      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[56%]" aria-hidden="true">
-        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 56vw, 100vw" loading="eager" class="absolute inset-0 size-full scale-105 object-cover object-[55%_45%] [filter:url(#blue-tone)_blur(5px)]" />
+      <!-- The photo breaks up in a thin band of cells (a thinner HeroCells), its first tenth
+           solid, just clear of the title's three lines on large screens. -->
+      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[40%] lg:w-[46%] xl:w-[48%]" aria-hidden="true">
+        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 48vw, 100vw" loading="eager" class="absolute inset-0 size-full scale-105 object-cover object-[55%_45%] [filter:url(#blue-tone)_blur(5px)]" />
         <div class="absolute inset-0 z-2 max-md:hidden">
           <Artifacts client:load color="#1E2BE6" edge="#B5A6FF" seed={20270127} cell={10} animate artifacts={[{ at: 'left', solid: 0.1, reach: 0.3, wave: 0.03, waveLength: 0.6 }]} />
         </div>
@@ -135,7 +135,7 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
       <!-- Who the proposal is for, on the photo, aligned with the nav's and the page's right edge. -->
       <div class="pointer-events-none absolute inset-0 z-10 mx-auto flex max-w-7xl flex-col items-end justify-center gap-4 px-4 max-md:hidden md:px-8" aria-hidden="true">
         <p class="text-base font-bold text-white/85">A proposal for</p>
-        <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="" class="h-16 w-auto drop-shadow-[0_4px_24px_rgb(5_7_30/0.45)] lg:h-24" />
+        <img src={tribeLogoWhite.src} width={tribeLogoWhite.width} height={tribeLogoWhite.height} alt="" class="h-16 w-auto drop-shadow-[0_4px_24px_rgb(5_7_30/0.45)] xl:h-24" />
       </div>
     </section>
 
