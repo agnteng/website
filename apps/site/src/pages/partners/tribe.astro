@@ -55,7 +55,7 @@ const rows: Row[] = [
   },
   {
     id: 'luma', title: 'On Luma', shot: lumaShot,
-    alt: 'The Luma page for Agentic Engineering Lisbon on 27 January 2027, with an “In partnership with Tribe AI” banner under its first line',
+    alt: 'The Luma page for Agentic Engineering Lisbon #6 on 27 January 2027, with an “In partnership with Tribe AI” banner under its first line',
     items: [
       'An “In partnership with Tribe AI” banner on each meetup’s Luma page, under its first line.',
       'Everyone who registers sees it.',
@@ -63,7 +63,7 @@ const rows: Row[] = [
   },
   {
     id: 'recap', title: 'In the recap', shot: recapShot,
-    alt: 'The Lisbon #5 recap on Substack, with the Tribe AI banner and a “Tribe AI is hiring” block after the introduction',
+    alt: 'The Lisbon #6 recap on Substack, with the Tribe AI banner and a “Tribe AI is hiring” block after the introduction',
     items: [
       'The banner in each meetup’s recap, sent by email and published on Substack.',
       'A “Tribe AI is hiring” block in every recap, with your open roles and a link to apply.',
@@ -71,7 +71,7 @@ const rows: Row[] = [
   },
   {
     id: 'web', title: 'On agnteng.com and YouTube', shot: eventShot,
-    alt: 'The Lisbon #5 page on agnteng.com, with “In partnership with Tribe AI” and Tribe’s logo under its buttons',
+    alt: 'The Lisbon #6 page on agnteng.com, with “In partnership with Tribe AI” and Tribe’s logo under its buttons',
     items: [
       'Tribe’s logo on each meetup’s page on agnteng.com.',
       'A partner credit in the description of every talk video from the six meetups.',
@@ -117,8 +117,9 @@ const usd = (n: number) => `$${n.toLocaleString('en')}`;
           <p class="rise mt-7 max-w-[42ch] text-lg font-medium leading-relaxed text-white/90" style="--i:1">Partner with Agentic Engineering for six monthly meetups: a presence in Lisbon’s AI community, a direct line to the forward deployed engineers you want to hire, and a stage to share what Tribe has learned.</p>
         </div>
       </div>
-      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-1/2" aria-hidden="true">
-        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 50vw, 100vw" loading="eager" class="absolute inset-0 size-full object-cover object-[55%_45%] [filter:url(#blue-tone)]" />
+      <!-- 65% wide: its solid cells cover the first quarter, so the photo breaks up at the centre. -->
+      <div class="dither-stage relative h-72 overflow-hidden md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[65%]" aria-hidden="true">
+        <Image src={hero.img} alt="" widths={[640, 960, 1280, 1600]} quality={60} sizes="(min-width: 768px) 65vw, 100vw" loading="eager" class="absolute inset-0 size-full object-cover object-[55%_45%] [filter:url(#blue-tone)]" />
         <HeroCells seed={20270127} />
       </div>
     </section>
